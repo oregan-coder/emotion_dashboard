@@ -3,3 +3,6 @@ pandas
 numpy
 requests
 akshare
+baostock
+matplotlib
+pywencai
