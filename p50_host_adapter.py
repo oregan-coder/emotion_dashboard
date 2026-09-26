@@ -104,7 +104,7 @@ def host_engine_adapter(store, original, context):
             f.attrs.update(ev)
     breadth = frames.get('market_breadth_raw', [])
     if breadth:
-        from market_breadth_legu import raw_from_frame
+        from collection.market_breadth_legu import raw_from_frame
         started = batch.get('generated_at') or datetime.now().isoformat()
         market_breadth_raw = raw_from_frame(pd.DataFrame(breadth),
                                             started_at=started, captured_at=started)
@@ -113,7 +113,7 @@ def host_engine_adapter(store, original, context):
                               'status': 'HISTORICAL_NATIVE_BREADTH_NOT_SUPPORTED',
                               'request_calls': 0, 'full_market_fallback_used': False}
 
-    from data_fetcher import DashboardData
+    from collection.data_fetcher import DashboardData
     data = DashboardData(
         date=batch['trade_date'], previous_date=batch['previous_date'],
         market=market, limit_up=limit_up, previous_limit_up=previous_limit_up,

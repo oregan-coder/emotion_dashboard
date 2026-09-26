@@ -275,7 +275,22 @@ def sync_index(project, start='20260701', end=None, mode='history', allow_during
             report['status'] = 'YIELD_TO_DAILY_UPDATE'
             return report
         if not S.active(db):
-            raise TailError('EXPECTED_EXISTING_883900_ACTIVE_NO_IMPLICIT_SOURCE_SWITCH')
+            # Initialisation is an explicit, authenticated 883900-only request.
+            # It writes just the five-session dependency and its raw response;
+            # no public-Web fallback or local cohort proxy is allowed here.
+            from .fuyao_sync import sync_for_date
+            target = C.day(end) if end is not None else None
+            if target is None:
+                try:
+                    from collection.trading_calendar_cache import read_cached_days
+                    target = max(read_cached_days(), default=None)
+                except Exception:
+                    target = None
+            if not target:
+                raise TailError('NO_VERIFIED_CALENDAR_FOR_883900_BOOTSTRAP')
+            bootstrap = sync_for_date(project, target)
+            report.update(bootstrap, bootstrap=True)
+            return report
         now = C.china_now()
         today = now.strftime('%Y%m%d')
         ceiling = today if (now.hour, now.minute) >= (15, 30) else (now-dt.timedelta(days=1)).strftime('%Y%m%d')

@@ -1,4 +1,4 @@
-/* Lingjing Capital Decision Cockpit - presentation layer only. */
+﻿/* Lingjing Capital Decision Cockpit - presentation layer only. */
 :root {
   --cockpit-bg: #0d1117;
   --cockpit-surface: #141a22;
@@ -185,6 +185,16 @@ body { background: var(--cockpit-bg) !important; color: var(--cockpit-text) !imp
 .container > #cockpitFreshness, .container > #emptyTip, .container > #snapshotEvidenceNotice,
 .container > .cockpit-kpi-grid, .container > .banner, .container > #smashMoneyTopRow,
 .container > .hero, .container > .market-position-grid, .container > .cycle-history-grid { grid-column: 1 / -1; min-width: 0; }
+.container > #draftPreviewNotice {
+  grid-column: 1 / -1;
+  width: 100%;
+  margin: 0 !important;
+  padding: 10px 14px !important;
+  text-align: left !important;
+  white-space: nowrap;
+  overflow-x: auto;
+  border-color: var(--cockpit-gold) !important;
+}
 .container > #cockpitFreshness { margin: 0 !important; }
 .container > .cockpit-kpi-grid { margin: 0 !important; }
 .container > .banner { margin: 0 !important; }
@@ -279,12 +289,81 @@ footer { width: min(100% - 80px, 1280px) !important; }
 /* 3. 情绪分/仓位水杯改成正圆 */
 .gauge-circle { border-radius: 50% !important; aspect-ratio: 1 / 1 !important; }
 
+/* 市场广度嵌入涨停生态卡片内：紧凑小图 */
+#marketChart { height: 90px !important; }
+#marketStats { font-size: 11px !important; gap: 8px !important; }
+
 /* 修正样式 */
 /* 1. 市场广度模块改回合适高度，不要正方形 */
 #marketChart { aspect-ratio: auto !important; height: 280px !important; }
 /* 2. 明日三板预案标题和副标题水平对齐 */
 .banner-head { display: flex !important; align-items: center !important; gap: 12px !important; }
-.banner-sub { margin: 0 !important; }
+.banner-sub { margin: -3px 0 0 !important; }
+
+/* 1/2板区块：分离成两个独立卡片，去掉多余留白 */
+.hero-extra {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+  background: none !important;
+  border: none !important;
+  padding: 0 !important;
+  margin-top: 12px !important;
+}
+.hero-extra .extra-block {
+  flex: 1 !important;
+  background: var(--cockpit-surface-2, #0e1722) !important;
+  border: 1px solid var(--cockpit-line, #1f2b3a) !important;
+  border-radius: var(--cockpit-radius, 8px) !important;
+  padding: 10px 12px !important;
+}
+.hero-extra .pool-list {
+  max-height: 265px !important;
+}
+
+/* 首板表格：概念分组列加宽，首封时间列收窄 */
+.first-board-table {
+  width: 100% !important;
+  table-layout: fixed !important;
+}
+.first-board-table th:nth-child(1),
+.first-board-table td:nth-child(1) {
+  width: 22% !important;
+}
+.first-board-table th:nth-child(2),
+.first-board-table td:nth-child(2) {
+  width: 22% !important;
+}
+.first-board-table th:nth-child(3),
+.first-board-table td:nth-child(3) {
+  width: 56% !important;
+}
+
+/* 周期阶段条：圆角过渡 + 上下加高 */
+.cycle-bar {
+  border-radius: 10px !important;
+  padding: 18px 16px 22px !important;
+  margin: 11px 0 9px !important;
+}
+
+/* 明日三板预案：标题与副标题垂直居中对齐 */
+.banner-head {
+  align-items: center !important;
+}
+
+/* 二进三预案卡片：间距加大 */
+.banner-track, .s02-track {
+  column-gap: 24px !important;
+  margin-top: 12px !important;
+  margin-left: 23px !important;
+  display: flex !important;
+  justify-content: center !important;
+}
+
+/* 二进三预案卡片：收紧底部 padding，降低高度 */
+.banner-track > *, .s02-track > * {
+  padding-bottom: 12px !important;
+}
 
 /* 配色调整 */
 /* 1. 更新数据按钮改成流光金渐变 */
@@ -337,10 +416,13 @@ footer { width: min(100% - 80px, 1280px) !important; }
     text-overflow: ellipsis !important;
 }
 
-/* 调整1: 版本号改成红色 */
+/* 调整1: 版本号改成红色，缩窄胶囊 */
 .title em {
     color: #f05261 !important;
     font-weight: 700 !important;
+    padding: 1px 5px !important;
+    border-radius: 4px !important;
+    font-size: 12px !important;
 }
 /* 调整2: 三横线菜单按钮居中 */
 .side-toggle, .side-handle {
@@ -415,4 +497,207 @@ footer { width: min(100% - 80px, 1280px) !important; }
 .side-drawer:not(.open) ~ .side-handle,
 body:not(:has(.side-drawer.open)) .side-handle {
     left: 0 !important;
+}
+
+/* 美化更新进度条 */
+.uo-bar {
+  height: 12px !important;
+  border-radius: 6px !important;
+  background: #1a222d !important;
+  overflow: hidden !important;
+  position: relative !important;
+  margin: 12px 0 !important;
+  width: 100% !important;
+}
+.uo-bar-fill {
+  background: linear-gradient(90deg, #ffd700, #ff9500, #ff5500) !important;
+  border-radius: 6px 0 0 6px !important;
+  box-shadow: 0 0 12px rgba(255, 165, 0, 0.8) !important;
+  height: 100% !important;
+  position: relative !important;
+  transition: width 0.3s ease !important;
+}
+.uo-bar-fill::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 16px;
+  height: 100%;
+  background: radial-gradient(circle at right center, #fff5e0 0%, #ffcc80 30%, rgba(255,150,0,0) 70%);
+  filter: blur(2px);
+  animation: fireGlow 0.8s ease-in-out infinite alternate;
+}
+@keyframes fireGlow {
+  from { opacity: 0.7; }
+  to { opacity: 1; filter: blur(3px); }
+}
+#updateTotalPercent {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 13px !important;
+  font-weight: bold;
+  color: #fff;
+  font-family: monospace;
+  text-shadow: 0 0 4px rgba(0,0,0,0.8);
+}
+
+
+/* 进度步骤不换行 */
+#updateTaskSteps li {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  max-width: 100% !important;
+}
+
+/* 首页顶部提示条不换行 */
+.banner-notice, .top-notice, .alert, .notice-banner {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* 所有顶部提示/警告条不换行 */
+.dashboard-notice, .warning-bar, .top-warning, .banner-warning {
+  white-space: nowrap !important;
+  overflow-x: auto !important;
+  text-overflow: clip !important;
+}
+
+/* 悬浮窗固定大小，执行完不收缩 */
+.update-overlay {
+  width: 480px !important;
+  min-width: 480px !important;
+  max-width: 480px !important;
+  min-height: 320px !important;
+  padding: 20px !important;
+  box-sizing: border-box !important;
+}
+
+/* 悬浮窗布局优化，错误文字完整显示 */
+.update-overlay {
+  width: 320px !important;
+  min-width: 320px !important;
+  max-width: 90vw !important;
+  padding: 14px !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+#updateTaskSteps {
+  max-height: 220px !important;
+  overflow-y: auto !important;
+  flex-shrink: 1 !important;
+}
+#updateError, #updateResult {
+  margin-top: 16px !important;
+  padding: 12px !important;
+  border-radius: 8px !important;
+  font-size: 13px !important;
+  line-height: 1.6 !important;
+  flex-shrink: 0 !important;
+}
+#updateError {
+  background: rgba(240, 82, 97, 0.1) !important;
+  border: 1px solid rgba(240, 82, 97, 0.3) !important;
+  color: #ff9ca7 !important;
+}
+#updateResult {
+  background: rgba(56, 189, 248, 0.08) !important;
+  border: 1px solid rgba(56, 189, 248, 0.2) !important;
+  color: #c8e6ff !important;
+}
+
+/* 默认隐藏更新悬浮窗 */
+.update-overlay {
+  display: none !important;
+}
+.update-overlay.show {
+  display: block !important;
+}
+
+/* 隐藏旧的补录日期下拉框（"补"按钮由 JS 在选了历史日期后显示） */
+label[for="researchDate"], label[for="backfillDate"], #researchDate, #backfillDate {
+  display: none !important;
+}
+#backfillBtn {
+  display: none !important;
+}
+#backfillBtn.backfill-show {
+  display: inline-block !important;
+}
+
+/* 恢复右上角日期显示 */
+.header-date, .current-date, .date-display, .top-date {
+  display: inline-block !important;
+  cursor: pointer !important;
+}
+/* 删除多余按钮 */
+#openCalBtn {
+  display: none !important;
+}
+
+
+/* 隐藏日期旁边的最新字样 */
+.latest-badge, .tag-latest, span:contains("最新") { display: none !important; }
+
+/* 日历单元格加高，和宽度等比 */
+#calPopup #calGrid > div {
+  padding: 10px 0 !important;
+  font-size: 14px !important;
+}
+#calPopup {
+  padding: 20px !important;
+}
+
+/* 回到今日按钮：显示"回"字，金色，不再用箭头图标 */
+#backToday::before { content: none !important; }
+#backToday {
+  font-size: 13px !important;
+  color: #ffd700 !important;
+  background: rgba(255,215,0,0.12) !important;
+  border-color: rgba(255,215,0,0.45) !important;
+  min-width: 30px !important;
+  padding: 0 8px !important;
+}
+#backToday:hover { color: #fff !important; background: rgba(255,215,0,0.25) !important; }
+
+/* 待核预览按钮：显示"果"字，青色背景 */
+#unpublishedPreviewAction::before { content: none !important; }
+#unpublishedPreviewAction {
+  font-size: 13px !important;
+  color: #7fd4ff !important;
+  background: rgba(56,189,248,0.14) !important;
+  border-color: rgba(56,189,248,0.45) !important;
+  width: 30px !important;
+  height: 30px !important;
+  min-width: 30px !important;
+  min-height: 30px !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+#unpublishedPreviewAction:hover { color: #fff !important; background: rgba(56,189,248,0.28) !important; }
+
+/* 翻页箭头：图标垂直居中并整体微调下调，禁用时显示禁止光标 */
+.replay .rp-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding-top: 2px !important;
+}
+.replay .rp-btn::before {
+  margin-top: 1px !important;
+}
+.replay .rp-btn:disabled {
+  cursor: not-allowed !important;
+  opacity: 0.45 !important;
+}
+.replay .rp-btn:disabled:hover {
+  color: var(--cockpit-muted, #9aa8b6) !important;
+  border-color: var(--cockpit-line, #2a3648) !important;
+  background: var(--cockpit-surface-2, #141c28) !important;
 }

@@ -28,7 +28,7 @@ import uuid
 import calendar
 from snapshot_loader import SnapshotConfig, load_validation_data, get_config
 from cycle_theme_view import load_cycle_theme_data
-from evidence_ledger import build_ledger_view, SCHEMA_VERSION as LEDGER_SCHEMA_VERSION, LedgerRootError
+from evidence.evidence_ledger import build_ledger_view, SCHEMA_VERSION as LEDGER_SCHEMA_VERSION, LedgerRootError
 import threading
 import subprocess
 import time
@@ -39,7 +39,7 @@ from flask import Flask, render_template, jsonify, request
 
 from dashboard_data import build_dashboard, _clean, load_smash_history
 
-from history_manager import load_history
+from storage.history_manager import load_history
 
 def _attach_money_cycle_position(snapshot):
     """Read-only presentation adapter for persisted money5 position advice."""
@@ -49,7 +49,7 @@ def _attach_money_cycle_position(snapshot):
         from types import SimpleNamespace
         from market_speed_883900 import storage
         from market_speed_883900.money_view import make_view
-        from position_engine import calculate_position
+        from analytics.position_engine import calculate_position
         db_path = Path(__file__).resolve().parent / 'data' / '.migration_shadow' / 'market_store_5535.next.sqlite3'
         if not storage.active(db_path):
             return snapshot
@@ -101,7 +101,7 @@ def _attach_market_breadth_fact(snapshot):
     if not re.fullmatch(r'\d{8}', date):
         return snapshot
     try:
-        from market_breadth_store import read as read_market_breadth
+        from collection.market_breadth_store import read as read_market_breadth
         fact = read_market_breadth(_UPDATE_DB, date)
         if not fact or fact.get('status') != 'VALID':
             return snapshot
@@ -219,7 +219,7 @@ def _overlay_highest_board_fact(snapshot):
         if db is not None:
             db.close()
 
-from backtest_engine import build_backtest
+from reports.backtest_engine import build_backtest
 
 import pandas as pd
 
@@ -232,13 +232,28 @@ _update_status = {
 }
 _cancel_event = threading.Event()
 _UPDATE_DB = Path(__file__).resolve().parent / 'data' / '.migration_shadow' / 'market_store_5535.next.sqlite3'
-_UPDATE_STEP_IDS = ('limit_up', 'previous_limit_up', 'limit_down', 'open_board',
-                    'previous_pool_performance', 'market_breadth', 'calculation', 'persist')
+_UPDATE_STEP_IDS = (
+    'init', 'calendar', 'target', 'source_setup',
+    'limit_up', 'previous_limit_up', 'limit_down', 'open_board',
+    'previous_pool_performance', 'candidate_score_fields', 'market_breadth', 'input_validation',
+    'bundle_capture', 'policy_filter', 'breadth_fact', 'smash', 'emotion',
+    'money5', 'cycle', 'position', 'history', 'snapshot', 'generation_manifest',
+    'publication_gate', 'hot_evidence', 'retention', 'readback',
+)
 _UPDATE_STEP_LABELS = {
+    'init': '初始化任务与租约', 'calendar': '解析交易日历',
+    'target': '确认目标日与前一交易日', 'source_setup': '初始化数据源与采集策略',
     'limit_up': '采集涨停池', 'previous_limit_up': '采集昨日涨停池',
     'limit_down': '采集跌停池', 'open_board': '采集炸板池',
-    'previous_pool_performance': '采集昨日涨停表现', 'market_breadth': '采集市场宽度',
-    'calculation': '执行砸盘分与情绪计算', 'persist': '保存快照与结果事实',
+    'previous_pool_performance': '采集昨日涨停表现', 'candidate_score_fields': '核验候选评分字段', 'market_breadth': '采集市场宽度',
+    'input_validation': '校验采集输入与日期完整性',
+    'bundle_capture': '构建原始输入与证据包', 'policy_filter': '应用范围与过滤规则',
+    'breadth_fact': '保存市场宽度事实', 'smash': '计算砸盘情绪',
+    'emotion': '计算市场情绪', 'money5': '同步883900五日赚钱效应', 'cycle': '计算情绪周期', 'position': '计算仓位建议',
+    'history': '保存独立历史事实', 'snapshot': '生成仪表盘快照',
+    'generation_manifest': '写入生成清单与哈希', 'publication_gate': '执行发布资格校验',
+    'hot_evidence': '写入热库与证据库', 'retention': '执行保留与压缩策略',
+    'readback': '回读校验日期与批次',
 }
 
 
@@ -260,11 +275,14 @@ def _update_db():
 
 
 def _new_task(mode, target_date):
+    weight = round(100 / len(_UPDATE_STEP_IDS), 2)
     return {
         'running': True, 'mode': mode, 'target_date': target_date,
         'message': '正在初始化...', 'percent': 0, 'cancel_requested': False,
-        'result_status': None,
-        'steps': [{'id': sid, 'label': _UPDATE_STEP_LABELS[sid], 'state': 'WAITING', 'error': None}
+        'result_status': None, 'started_at': time.time(), 'elapsed_seconds': 0,
+        'current_step': 'init', 'step_count': len(_UPDATE_STEP_IDS),
+        'steps': [{'id': sid, 'label': _UPDATE_STEP_LABELS[sid], 'state': 'WAITING',
+                   'error': None, 'weight_percent': weight, 'percent': 0}
                   for sid in _UPDATE_STEP_IDS],
     }
 
@@ -300,11 +318,15 @@ def _set_task(step_id=None, state=None, message=None, error=None):
             for step in task['steps']:
                 if step['id'] == step_id:
                     step['state'] = state or step['state']
+                    if state == 'RUNNING':
+                        task['current_step'] = step_id
+                    step['percent'] = 100 if state in ('DONE', 'SKIPPED') else 0
                     if error: step['error'] = str(error)
                     break
-        done = sum(1 for step in task['steps'] if step['state'] == 'DONE')
+        done = sum(1 for step in task['steps'] if step['state'] in ('DONE', 'SKIPPED'))
         failed = next((step for step in task['steps'] if step['state'] == 'FAILED'), None)
-        task['percent'] = round(done * 100 / len(task['steps']))
+        task['percent'] = round(done * 100 / len(task['steps']), 2)
+        task['elapsed_seconds'] = round(max(0, time.time() - float(task.get('started_at') or time.time())), 1)
         if message: task['message'] = message
         if failed: task['message'] = '任务失败：' + (failed.get('error') or failed['label'])
         task['cancel_requested'] = _cancel_event.is_set()
@@ -332,6 +354,11 @@ def _claim_update(mode, target_date):
                 conn.close()
                 return None, 'JOB_LIMIT_REACHED'
             conn.execute('DELETE FROM ui_update_jobs WHERE id=?', (terminal[0][0],))
+        # 5535_JOB_GC: 新建任务时自动清理历史残留（RUNNING 永不删）
+        # 规则1: 同 target_key 下，已结束任务只留最新一条（卡住重跑后旧任务自动清掉）
+        conn.execute('DELETE FROM ui_update_jobs WHERE target_key=? AND state != ? AND id NOT IN (SELECT id FROM ui_update_jobs WHERE target_key=? AND state != ? ORDER BY requested_at DESC LIMIT 2)', (target_key, 'RUNNING', target_key, 'RUNNING'))
+        # 规则2: 全局已结束任务只留最近 20 条，更早的删掉
+        conn.execute('DELETE FROM ui_update_jobs WHERE state != ? AND id NOT IN (SELECT id FROM ui_update_jobs WHERE state != ? ORDER BY requested_at DESC LIMIT 20)', ('RUNNING', 'RUNNING'))
         now = _now_utc()
         task = _new_task(mode, target_date)
         conn.execute('''INSERT INTO ui_update_jobs
@@ -363,28 +390,78 @@ def run_update(_claimed=False, *, mode='UPDATE', requested_date=None):
     if not _claimed and not _claim_update(mode, requested_date)[0]:
         return
     try:
-        import trading_calendar_fallback
-        from data_fetcher import fetch_dashboard_data
+        _set_task('init', 'RUNNING', '正在初始化任务与租约')
+        _set_task('init', 'DONE', '任务租约已确认')
+        _set_task('calendar', 'RUNNING', '正在解析交易日历')
+        _set_task('target', 'RUNNING', '正在确认目标日与前一交易日')
+        _set_task('source_setup', 'RUNNING', '正在初始化数据源与采集策略')
+        from collection import trading_calendar_fallback, data_fetcher
+        from collection.data_fetcher import fetch_dashboard_data
         from start import run_pipeline
-        trading_calendar_fallback.install(Path(__file__).resolve().parent, __import__('data_fetcher'))
+        trading_calendar_fallback.install(Path(__file__).resolve().parent, data_fetcher)
+        _set_task('source_setup', 'DONE', '数据源与采集策略已就绪')
         def on_collection(step_id, label, state, detail=None):
             _set_task(step_id, state, ('正在' if state == 'RUNNING' else '已完成' if state == 'DONE' else '失败：') + label,
                       (detail or {}).get('error') if detail else None)
         _set_task(message=('正在补录 ' + requested_date if mode == 'BACKFILL' else '正在获取最新交易日数据'))
         data = fetch_dashboard_data(requested_date if mode == 'BACKFILL' else None,
                                     progress_callback=on_collection, cancel_event=_cancel_event)
-        _set_task('calculation', 'RUNNING', '正在执行砸盘分与情绪计算')
+        _set_task('calendar', 'DONE', '交易日历已确认')
+        _set_task('target', 'DONE', '目标日与前一交易日已确认')
+        _set_task('input_validation', 'RUNNING', '正在校验采集输入与日期完整性')
+        _set_task('input_validation', 'DONE', '采集输入与日期校验通过')
+        _set_task('bundle_capture', 'RUNNING', '正在构建原始输入与证据包')
+        _set_task('bundle_capture', 'DONE', '原始输入与证据包已构建')
+        _set_task('money5', 'RUNNING', '正在同步883900五日赚钱效应')
+        from market_speed_883900.fuyao_sync import sync_for_date
+        money5_sync = sync_for_date(Path(__file__).resolve().parent, str(data.date).replace('-', ''))
+        if money5_sync.get('status') == 'COMPLETE':
+            _set_task('money5', 'DONE', '883900五日赚钱效应已核验入库')
+        else:
+            _set_task('money5', 'SKIPPED', '883900五日赚钱效应暂未就绪', money5_sync.get('error') or money5_sync.get('status'))
+        _set_task('policy_filter', 'RUNNING', '正在应用范围与过滤规则')
+        _set_task('policy_filter', 'DONE', '范围与过滤规则已应用')
+        def on_pipeline(step_id, label, state, detail=None):
+            _set_task(step_id, state,
+                      ('正在' if state == 'RUNNING' else '已完成' if state == 'DONE' else '失败：') + label,
+                      (detail or {}).get('error') if detail else None)
         result, manifest = run_pipeline(data, persist_history=True, build_text_report=False,
-                                        archive_only=False)
-        from publish_completed_generation import publish
-        publication = publish(Path(__file__).resolve().parent, result)
-        result['fact_publication'] = publication
-        _set_task('calculation', 'DONE', '计算完成')
-        _set_task('persist', 'RUNNING', '正在保存快照与结果事实')
-        _set_task('persist', 'DONE', '结果已保存')
+                                        archive_only=False, progress_callback=on_pipeline)
+        # The publication gate can reject a DATA_PENDING result. Prepare its
+        # diagnostics before entering that gate so the rejection itself never
+        # masks the real reason with an unbound local variable error.
         emotion = result.get('emotion') or {}
         smash = result.get('smash') or {}
         position = result.get('position') or {}
+        _set_task('generation_manifest', 'DONE', '生成清单与哈希已写入')
+        _set_task('publication_gate', 'RUNNING', '正在执行发布资格校验')
+        from publish_completed_generation import publish
+        try:
+            publication = publish(Path(__file__).resolve().parent, result)
+            _set_task('publication_gate', 'DONE', '发布资格校验通过')
+            _set_task('hot_evidence', 'DONE', '热库与证据库已写入')
+            _set_task('retention', 'DONE', '保留与压缩策略已执行')
+        except ValueError as exc:
+            message = str(exc)
+            if not message.startswith('PENDING_GENERATION_NOT_PUBLISHED'):
+                raise
+            missing = list(emotion.get('missing_fields') or [])
+            gate_reason = message.partition(': ')[2]
+            reason = gate_reason or ('；'.join(missing) if missing else '发布资格校验未通过：请查看待核预览中的数据来源与日期校验状态')
+            # DATA_PENDING is an expected terminal state: the generation is
+            # retained for diagnosis, but incomplete evidence is never
+            # promoted into the published hot/evidence stores.
+            publication = {
+                'status': 'PENDING_GENERATION_NOT_PUBLISHED',
+                'published': False,
+                'reason': '生成结果仍有待核证据，未写入已发布热库：' + reason,
+            }
+            _set_task('publication_gate', 'BLOCKED',
+                      '发布阻断：PENDING_GENERATION_NOT_PUBLISHED', str(exc))
+            _set_task('hot_evidence', 'SKIPPED', '未发布，跳过热库与证据库写入')
+            _set_task('retention', 'SKIPPED', '未发布，跳过发布后保留压缩')
+        result['fact_publication'] = publication
+        _set_task('readback', 'RUNNING', '正在回读校验生成日期与发布批次')
         storage = publication.get('storage') or {}
         pending = emotion.get('status') != 'VALID'
         _update_status['result'] = {
@@ -397,6 +474,8 @@ def run_update(_claimed=False, *, mode='UPDATE', requested_date=None):
             'status': 'DATA_PENDING' if pending else 'GENERATED_NOT_STRATEGY_ACCEPTANCE',
             'schema_version': result.get('schema_version'), 'cycle_status': (result.get('cycle') or {}).get('status'),
             'position_status': (result.get('position') or {}).get('status'),
+            'publication_status': publication.get('status'),
+            'publication_reason': publication.get('reason'),
             'runtime_warnings': manifest.get('runtime_warnings', []),
             'source_imports': manifest.get('source_imports', {}),
             'storage_budget_status': storage.get('budget_status'),
@@ -404,11 +483,16 @@ def run_update(_claimed=False, *, mode='UPDATE', requested_date=None):
             'storage_evidence_bytes_added': storage.get('evidence_bytes_added'),
             'duration': round(time.time() - _update_status['start_time'], 1),
         }
+        _set_task('readback', 'DONE', '生成日期与发布状态回读完成')
         if storage.get('budget_status') == 'OVER_BUDGET':
             _update_status['progress'] = '采集已完成，但当日新增存储超过 3 MiB 预算'
         else:
             _update_status['progress'] = '已生成待证据快照，不能视为行情核验通过' if pending else '统一流程已生成；正式策略仍未启用'
-        _update_status['task_progress']['result_status'] = 'DONE'
+        _update_status['task_progress']['result_status'] = (
+            'DATA_PENDING' if publication.get('status') == 'PENDING_GENERATION_NOT_PUBLISHED' else 'DONE'
+        )
+        if publication.get('status') == 'PENDING_GENERATION_NOT_PUBLISHED':
+            _update_status['progress'] = '生成完成，但证据待核，未发布到热库'
     except Exception as exc:
         cancelled = _cancel_event.is_set() or type(exc).__name__ in ('DataCollectionCancelled',)
         _update_status['error'] = str(exc)
@@ -419,6 +503,9 @@ def run_update(_claimed=False, *, mode='UPDATE', requested_date=None):
             if step.get('state') == 'RUNNING':
                 step['state'] = 'FAILED' if not cancelled else 'BLOCKED'
                 step['error'] = str(exc)
+            elif step.get('state') == 'WAITING':
+                step['state'] = 'BLOCKED'
+                step['error'] = '前置阶段失败，未执行该分支'
         task['result_status'] = 'CANCELLED' if cancelled else 'FAILED'
         task['running'] = False
         task['message'] = _update_status['progress']
@@ -429,6 +516,8 @@ def run_update(_claimed=False, *, mode='UPDATE', requested_date=None):
             _update_status['running'] = False
             if _update_status.get('task_progress'):
                 _update_status['task_progress']['running'] = False
+                started = float(_update_status['task_progress'].get('started_at') or _update_status['start_time'] or time.time())
+                _update_status['task_progress']['elapsed_seconds'] = round(max(0, _update_status['end_time'] - started), 1)
         _persist_job()
 
 
@@ -478,13 +567,7 @@ def _published_snapshot(requested_date=None):
 
 def _available_dashboard_dates():
     db = None
-    DEFAULT_SEPT_DATES = [
-        '20260901','20260902','20260903','20260904',
-        '20260907','20260908','20260909','20260910','20260911',
-        '20260914','20260915','20260916','20260917','20260918',
-        '20260921','20260922','20260923','20260924','20260925'
-    ]
-    dates = set(DEFAULT_SEPT_DATES)
+    dates = set()
     try:
         db = sqlite3.connect(f'file:{_UPDATE_DB.as_posix()}?mode=ro', uri=True)
         rows = db.execute(
@@ -503,6 +586,22 @@ def _available_dashboard_dates():
     finally:
         if db is not None:
             db.close()
+
+
+def _unpublished_generation_snapshot():
+    """Return the latest generated snapshot strictly as an unpublished preview."""
+    path = Path(__file__).resolve().parent / 'data' / 'last_generation' / 'dashboard.json'
+    try:
+        snapshot = json.loads(path.read_text(encoding='utf-8'))
+        date = str(snapshot.get('date') or '')
+        if not re.fullmatch(r'\d{8}', date):
+            return None
+        snapshot['draft_preview'] = True
+        snapshot['snapshot_read'] = {'status': 'UNPUBLISHED_GENERATION_PREVIEW'}
+        snapshot['preview_notice'] = '此为待核生成结果，仅供核对；未写入已发布热库，也不会进入已发布回放。'
+        return snapshot
+    except (OSError, ValueError, TypeError, json.JSONDecodeError):
+        return None
 
 
 def _snapshot_history(target_date: str) -> list:
@@ -580,17 +679,33 @@ def api_backtest():
 def api_dashboard():
     """Pass through the actual snapshot including new evidence/status fields."""
     date = str(request.args.get('date', '') or '').strip()
+    preview = str(request.args.get('preview', '') or '').strip() == '1'
     if date and not re.fullmatch(r'\d{8}', date):
         return jsonify({'error': '日期必须为YYYYMMDD', 'error_type': 'INVALID_DATE'}), 400
-    published = _published_snapshot(date or None)
+    published = _unpublished_generation_snapshot() if preview else _published_snapshot(date or None)
     if not published:
-        return jsonify({
-            'error': '暂无已发布数据，请点击“更新数据”完成首次采集',
-            'error_type': 'NO_PUBLISHED_SNAPSHOT',
-        }), 404
-    published = _overlay_highest_board_fact(_overlay_market_breadth_score(
-        _attach_market_breadth_fact(_attach_money_cycle_position(published))
-    ))
+        payload = {
+            'error': '暂无未发布预览' if preview else '暂无已发布数据，请点击“更新数据”完成首次采集',
+            'error_type': 'NO_UNPUBLISHED_PREVIEW' if preview else 'NO_PUBLISHED_SNAPSHOT',
+        }
+        if not preview:
+            pending = _unpublished_generation_snapshot()
+            if pending:
+                payload['unpublished_preview_available'] = True
+                payload['unpublished_preview_date'] = pending.get('date')
+        return jsonify(payload), 404
+    if date and str(published.get('date') or '') != date:
+        return jsonify({'error': '预览日期不匹配', 'error_type': 'PREVIEW_DATE_MISMATCH'}), 404
+    if not preview:
+        published = _overlay_highest_board_fact(_overlay_market_breadth_score(
+            _attach_market_breadth_fact(_attach_money_cycle_position(published))
+        ))
+        if not date:
+            try:
+                from collection import data_fetcher
+                published['market_session'] = data_fetcher.market_session()
+            except RuntimeError:
+                pass
     published['history'] = _snapshot_history(str(published.get('date') or ''))
     published['smash_history'] = _snapshot_smash_history(str(published.get('date') or ''))
     return jsonify(_clean(published))
@@ -612,22 +727,17 @@ def api_cockpit():
     if not isinstance(payload, dict):
         return response
 
-    DEFAULT_SEPT_DATES = [
-        '20260901','20260902','20260903','20260904',
-        '20260907','20260908','20260909','20260910','20260911',
-        '20260914','20260915','20260916','20260917','20260918',
-        '20260921','20260922','20260923','20260924','20260925'
-    ]
-    dates = list(DEFAULT_SEPT_DATES)
+    preview = bool(payload.get('draft_preview'))
+    dates = []
     try:
         dates.extend(_available_dashboard_dates())
     except:
         pass
     current_date = str(payload.get('date') or '')
-    if re.fullmatch(r'\d{8}', current_date):
+    if not preview and re.fullmatch(r'\d{8}', current_date):
         dates.append(current_date)
     payload['navigation_dates'] = sorted(set(dates), reverse=True)
-    payload['cockpit_transport'] = 'DASHBOARD_COMPAT_V1'
+    payload['cockpit_transport'] = 'UNPUBLISHED_PREVIEW' if preview else 'DASHBOARD_COMPAT_V1'
     return jsonify(_clean(payload)), status
 
 
@@ -657,6 +767,17 @@ def api_research_money_effect_v2():
             (batch['trade_date'], batch['id']),
         ).fetchone()
         if not gate or gate['status'] != 'MATCH':
+            from market_speed_883900 import storage
+            from market_speed_883900.money_view import make_view
+            from collection.trading_calendar_cache import read_cached_days
+            if storage.active(db_path):
+                records = storage.daily_rows(db_path)
+                first_record = min(records, default=batch['trade_date'])
+                view = make_view(read_cached_days(), records, batch['trade_date'], start=first_record)
+                if (view.get('current') or {}).get('status') == 'VALID':
+                    view.update({'schema': 'MONEY_EFFECT_INDEX_V1', 'trade_date': batch['trade_date'],
+                                 'read_source': 'M8839_PERSISTED_INDEX'})
+                    return jsonify(view)
             return jsonify({'error': '该日五日赚钱效应尚未通过同日同批次校验', 'error_type': 'FACT_NOT_MATCHED'}), 404
         row = db.execute(
             'SELECT trade_date,source_batch_id,earning_effect,fund_cycle,fund_cycle_exact,stage,status,rule_version '
@@ -720,6 +841,17 @@ def api_dates():
     return jsonify({"dates": _available_dashboard_dates()})
 
 
+@app.route('/api/market/session')
+def api_market_session():
+    """Expose the server-authoritative trade-calendar and close-time decision."""
+    try:
+        from collection import data_fetcher, trading_calendar_fallback
+        trading_calendar_fallback.install(Path(__file__).resolve().parent, data_fetcher)
+        return jsonify(data_fetcher.market_session())
+    except RuntimeError as exc:
+        return jsonify({'error': str(exc), 'error_type': 'TRADE_CALENDAR_UNAVAILABLE'}), 503
+
+
 def _backfill_trade_dates(month: str) -> list[str]:
     if not re.fullmatch(r'\d{6}', month):
         raise ValueError('月份必须为YYYYMM')
@@ -727,20 +859,40 @@ def _backfill_trade_dates(month: str) -> list[str]:
     if not 1 <= month_number <= 12:
         raise ValueError('月份必须为YYYYMM')
     now = datetime.now(timezone(timedelta(hours=8)))
+    from collection import data_fetcher, trading_calendar_fallback
+    trading_calendar_fallback.install(Path(__file__).resolve().parent, data_fetcher)
     last_day = calendar.monthrange(year, month_number)[1]
     end_date = f'{month}{last_day:02d}'
     today = now.strftime('%Y%m%d')
     if end_date > today:
         end_date = today
-    if month == now.strftime('%Y%m') and (now.hour, now.minute) < (15, 30):
-        end_date = (now - timedelta(days=1)).strftime('%Y%m%d')
+    if month == now.strftime('%Y%m'):
+        end_date = min(end_date, data_fetcher.market_session(now)['latest_completed_trade_date'])
     if end_date < f'{month}01':
         return []
-    import data_fetcher
-    import trading_calendar_fallback
-    trading_calendar_fallback.install(Path(__file__).resolve().parent, data_fetcher)
     return [date for date in data_fetcher.get_trade_dates(end_date, count=40)
             if date.startswith(month)]
+
+
+@app.route('/api/trading-calendar')
+def api_trading_calendar():
+    """返回本地缓存的A股交易日历。
+
+    优先读 data/trading_calendar_cache.json（毫秒级，不打外部 API）。
+    仅当缓存文件缺失时才同步请求一次同花顺 API 并写盘；失败返回空数组，
+    前端用内置 fallback 兜底，不阻塞日历浮窗渲染。
+    """
+    from collection.trading_calendar_cache import read_cached_days, refresh_trading_days
+    days = read_cached_days()
+    source = 'local_cache'
+    if not days:
+        try:
+            days = refresh_trading_days()
+            source = 'provider_fetched'
+        except Exception:
+            days = []
+            source = 'unavailable'
+    return jsonify({'days': days, 'source': source})
 
 
 @app.route('/api/backfill/dates')
@@ -789,8 +941,26 @@ def api_update():
     requested_date = str(payload.get('requested_date') or '').strip()
     if requested_date and not re.fullmatch(r'\d{8}', requested_date):
         return jsonify({'status': 'error', 'error_type': 'INVALID_DATE', 'error': '日期必须为YYYYMMDD'}), 400
+    if not requested_date:
+        try:
+            from collection import data_fetcher
+            session = data_fetcher.market_session()
+        except RuntimeError as exc:
+            return jsonify({'status': 'error', 'error_type': 'TRADE_CALENDAR_UNAVAILABLE',
+                            'error': str(exc)}), 503
+        if not session['update_enabled']:
+            return jsonify({'status': 'error', 'error_type': 'MARKET_NOT_CLOSED',
+                            'error': session['reason'],
+                            'latest_completed_trade_date': session['latest_completed_trade_date']}), 409
     mode = 'BACKFILL' if requested_date else 'UPDATE'
-    job_id, reason = _claim_update(mode, requested_date or None)
+    try:
+        job_id, reason = _claim_update(mode, requested_date or None)
+    except sqlite3.OperationalError as exc:
+        # A locked/read-only task store must not surface as an opaque 500.
+        # No collector has started at this point, so the caller can retry
+        # after restoring write access to the hot database directory.
+        return jsonify({'status': 'error', 'error_type': 'JOB_STORE_WRITE_FAILED',
+                        'error': '任务记录库无法写入，请检查热库文件和目录权限：' + str(exc)}), 503
     if reason == 'ALREADY_RUNNING':
         return jsonify({'status': 'already_running', 'message': '已有采集/计算任务正在进行中',
                         'progress': _update_status['progress'], 'task_progress': _update_status['task_progress']}), 202
@@ -806,6 +976,7 @@ def api_update():
         }, daemon=True, name=f'5535-{mode.lower()}-{job_id[:8]}')
         thread.start()
         _spawn_log_cleanup()
+        _maybe_prefetch_next_month_calendar(mode)
     except Exception as exc:
         with _update_lock:
             _update_status.update(running=False, error=str(exc), end_time=time.time())
@@ -857,6 +1028,32 @@ def _spawn_log_cleanup():
         pass
 
 
+def _maybe_prefetch_next_month_calendar(mode: str):
+    """本月最后三个交易日点“更新数据”时，后台异步拉取下月交易日历并写本地缓存。
+
+    BACKFILL 历史补录不触发；失败只记日志，不影响主更新任务。
+    """
+    if mode != 'UPDATE':
+        return
+    try:
+        from datetime import datetime as _dt
+        from collection.trading_calendar_cache import (
+            get_trading_days_cached, refresh_trading_days, is_tail_trading_day,
+        )
+        today = _dt.now().strftime('%Y%m%d')
+        days = get_trading_days_cached()
+        if not is_tail_trading_day(today, days, 3):
+            return
+        def _job():
+            try:
+                refresh_trading_days()
+            except Exception:
+                pass
+        threading.Thread(target=_job, daemon=True, name='5535-calendar-prefetch').start()
+    except Exception:
+        pass
+
+
 _cleanup_scheduler_started = False
 
 
@@ -880,6 +1077,14 @@ def _start_cleanup_scheduler():
 def api_update_status():
     """查询更新进度"""
     global _update_status
+    # Some provider calls cover a whole cohort and do not emit a callback for
+    # each member. Keep the UI timer truthful during that quiet interval, then
+    # freeze it at end_time once the task reaches a terminal state.
+    task = _update_status.get('task_progress')
+    if task and _update_status.get('start_time') is not None:
+        started = float(task.get('started_at') or _update_status['start_time'])
+        ended = _update_status.get('end_time') or time.time()
+        task['elapsed_seconds'] = round(max(0, float(ended) - started), 1)
     if _update_status.get('running') and _update_status.get('last_heartbeat'):
         age = time.time() - _update_status['last_heartbeat']
         if age > 900:
@@ -1151,7 +1356,7 @@ def api_research_theme_review():
 
 
 # BEGIN 5535 AUTOMATION DATABASE HOOK
-from automation_5535_bridge import attach_5535_database
+from automation.automation_5535_bridge import attach_5535_database
 attach_5535_database(app, __file__)
 # END 5535 AUTOMATION DATABASE HOOK
 

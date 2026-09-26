@@ -7,7 +7,7 @@
 - s02b_revisions：保留 head 指向的 + 最近 7 天；其余删除（s02b_revisions_fact 同步）
 - 不备份（自动清理场景；手动清理走 cleanup_logs.py 带备份）
 - 尝试 VACUUM；若采集正在写库导致锁冲突则跳过，下次再 VACUUM
-- 全程日志写 F 盘 tools/cleanup_log.txt，不向终端抛错
+- 全程日志写项目 logs/cleanup_auto.log，不向终端抛错
 
 用法（由 web_app 以 subprocess 异步启动）：
   F:\\Python3.13\\python.exe -S tools\\cleanup_auto.py
@@ -16,7 +16,7 @@ import sqlite3, pathlib, time, datetime, traceback, sys
 
 HOT = pathlib.Path(r'F:\PythonProject\emotion_dashboard\data\.migration_shadow\market_store_5535.next.sqlite3')
 EV = pathlib.Path(r'F:\PythonProject\emotion_dashboard\data\.migration_shadow\evidence_5535.next.sqlite3')
-LOG = pathlib.Path(r'F:\PythonProject\emotion_dashboard\tools\cleanup_log.txt')
+LOG = pathlib.Path(r'F:\PythonProject\emotion_dashboard\logs\cleanup_auto.log')
 S02A_DAYS = 3      # s02a 保留天数
 S02B_DAYS = 7      # s02b 保留天数（head 永远保留）
 VACUUM_TIMEOUT_S = 30  # VACUUM 锁等待上限，超过跳过
@@ -26,6 +26,7 @@ UI_JOB_KEEP_DAYS = 7
 def log(msg):
     line = f'[{datetime.datetime.now():%Y-%m-%d %H:%M:%S}] {msg}'
     try:
+        LOG.parent.mkdir(parents=True, exist_ok=True)
         with open(LOG, 'a', encoding='utf-8') as f:
             f.write(line + '\n')
     except Exception:

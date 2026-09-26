@@ -6,7 +6,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from storage_retention import begin_capture, complete_capture, retain_latest_two
+from storage.storage_retention import _tables, begin_capture, complete_capture, retain_latest_two
 
 
 def test_same_day_keeps_two_newest_batches_and_reclaims_old_evidence(tmp_path):
@@ -83,3 +83,11 @@ def test_capture_ledger_records_new_compressed_evidence(tmp_path):
         assert conn.execute(
             "SELECT budget_status FROM storage_ledger WHERE batch_id='B1'"
         ).fetchone()[0] == "WARN"
+
+
+def test_tables_excludes_metric_views():
+    with sqlite3.connect(":memory:") as conn:
+        conn.execute("CREATE TABLE metrics_fact(batch_id TEXT)")
+        conn.execute("CREATE VIEW metrics AS SELECT batch_id FROM metrics_fact")
+        conn.execute("CREATE VIEW v_metrics AS SELECT batch_id FROM metrics_fact")
+        assert _tables(conn) == ["metrics_fact"]

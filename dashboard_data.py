@@ -10,8 +10,8 @@ import json
 from pathlib import Path
 import pandas as pd
 from config import SMASH_HISTORY_FILE
-from history_manager import load_history
-from input_contracts import clean_json
+from storage.history_manager import load_history
+from core.input_contracts import clean_json
 
 DASHBOARD_FILE = Path(__file__).parent / 'data' / 'dashboard.json'
 

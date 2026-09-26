@@ -1,20 +1,3 @@
-
-// 立刻绑定playDate点击事件
-(function() {
-  function bindPlayDate() {
-    var playDate = document.getElementById('playDate');
-    if (!playDate) {
-      setTimeout(bindPlayDate, 100);
-      return;
-    }
-    playDate.addEventListener('mousedown', function(e) {
-      e.preventDefault();
-      e.stopPropagation();
-      showCalendarPopup();
-    }, true);
-  }
-  bindPlayDate();
-})();
 /* 5535 COCKPIT FAST 910 V1: combined bootstrap, honest ready timer, no entrance animation. */
 /* P50: allowlisted Chinese view formatting. Original machine fields remain in API diagnostics. */
 (function(root){
@@ -207,8 +190,13 @@
   // ============================================================
 
   function renderMarket(market) {
-    // 不暴露后端 source/scope（含表名/视图名），统一不显示
     var note = '';
+    if (market.source === 'LEGULEGU' && market.scope === 'PROVIDER_NATIVE') {
+      note = '来源：乐咕 · 原生口径（未按本地ST/新股60日重算）' +
+        (market.as_of ? ' · 统计时间 ' + String(market.as_of) : '');
+    } else if (market.source || market.scope) {
+      note = '归档来源：' + String(market.source || '未标注') + ' · ' + String(market.scope || '原记录口径');
+    }
     var label = $('marketSourceNote');
     if (!label && $('marketStats')) {
       label = document.createElement('div'); label.id = 'marketSourceNote';
@@ -226,21 +214,21 @@
       return;
     }
     var data = [
-      { value: Number(market.up) || 0, name: '上涨', itemStyle: { color: '#d4a853' } },
-      { value: Number(market.down) || 0, name: '下跌', itemStyle: { color: '#5b8def' } },
-      { value: Number(market.flat) || 0, name: '平盘', itemStyle: { color: '#8b8c89' } }
+      { value: Number(market.up) || 0, name: '上涨', itemStyle: { color: C.up } },
+      { value: Number(market.down) || 0, name: '下跌', itemStyle: { color: C.down } },
+      { value: Number(market.flat) || 0, name: '平盘', itemStyle: { color: C.gray } }
     ].filter(function (d) { return d.value > 0; });
 
     chart.setOption({
       tooltip: { trigger: 'item', formatter: '{b}: {c} 家 ({d}%)' },
-      legend: { bottom: 0, icon: 'circle', textStyle: { color: C.muted, fontSize: 11 } },
+      legend: { bottom: 0, icon: 'circle', textStyle: { color: C.muted, fontSize: 12 } },
       series: [{
         type: 'pie',
-        radius: ['34%', '54%'],
-        center: ['50%', '44%'],
-        itemStyle: { borderColor: '#0f1620', borderWidth: 2 },
-        label: { show: true, formatter: '{b}\n{c}', color: C.text, fontSize: 11, lineHeight: 14 },
-        labelLine: { length: 6, length2: 4, lineStyle: { color: C.line } },
+        radius: ['52%', '76%'],
+        center: ['50%', '42%'],
+        itemStyle: { borderColor: C.panel, borderWidth: 2 },
+        label: { show: true, formatter: '{b}\n{c}', color: C.text, fontSize: 12, lineHeight: 16 },
+        labelLine: { length: 8, length2: 6, lineStyle: { color: C.line } },
         data: data
       }]
     });
@@ -697,13 +685,10 @@
       });
     }
 
-    var trendStats = $('trendStats');
-    if (trendStats) {
-      trendStats.innerHTML =
-        '情绪周期：<b class="gold">' + (cycle.emotion_cycle || '--') + '</b>' +
-        '　空间周期：<b>' + (cycle.height_cycle || '--') + '</b>' +
-        '　趋势：<b class="gold">' + (cycle.trend || '--') + '</b>';
-    }
+    $('trendStats').innerHTML =
+      '情绪周期：<b class="gold">' + (cycle.emotion_cycle || '--') + '</b>' +
+      '　空间周期：<b>' + (cycle.height_cycle || '--') + '</b>' +
+      '　趋势：<b class="gold">' + (cycle.trend || '--') + '</b>';
   }
 
   // ============================================================
@@ -807,14 +792,12 @@
     panel.setAttribute('data-history-count',String(rows.length));
     function show(x){return hasNumericValue(x)?Number(x).toFixed(2)+'%':'数据不足';}
     function humanSource(x){return x==='THS_883900_INDEX_DAILY_PCT'?'同花顺883900昨日涨停指数日涨幅':sourceLabel(x||'');}
-    var moneyFundStage = $('moneyFundStage');
-    if (moneyFundStage) moneyFundStage.textContent=model.complete?(current.stage||'资金周期已生成'):'数据不足';
+    $('moneyFundStage').textContent=model.complete?(current.stage||'资金周期已生成'):'数据不足';
     var statusText='数据截至 '+fmtDate(model.asof||model.target)+'　赚钱效应 '+show(moneyPanelDailyReady(current)?current.earning_effect:null)+'　资金周期 '+show(model.complete?current.fund_cycle:null);
     statusText+='　历史'+rows.length+'日：日值'+rows.filter(function(r){return hasNumericValue(r.earning_effect);}).length+
       '／周期'+rows.filter(function(r){return hasNumericValue(r.fund_cycle);}).length+'个有效点';
     if(model.fallback)statusText+='　所选 '+fmtDate(model.target)+' 数据尚未完整，显示较早日期参考';
-    var moneyEffectStats = $('moneyEffectStats');
-    if (moneyEffectStats) moneyEffectStats.textContent=statusText;
+    $('moneyEffectStats').textContent=statusText;
     var sourceNote=view.source_label?('来源：'+view.source_label+'；与原本地样本均值分别保存。'):'';
     var notice='';
     if(model.fallback){
@@ -824,11 +807,9 @@
     } else if(current.missing_dates&&current.missing_dates.length){
       notice='当前五日窗口缺少：'+current.missing_dates.map(fmtDate).join('、')+'。';
     } else if(!model.complete)notice='当前日期尚无完整的五交易日数据。';
-    var moneyEffectNote = $('moneyEffectNote');
-    if (moneyEffectNote) moneyEffectNote.textContent=sourceNote+'赚钱效应＝当日昨日涨停表现；资金周期＝T-4 前收盘至 T 收盘的累计涨幅（包含 T-4 当日涨跌）。默认最近30个交易日，拖动可查看全部历史。'+
+    $('moneyEffectNote').textContent=sourceNote+'赚钱效应＝当日昨日涨停表现；资金周期＝T-4 前收盘至 T 收盘的累计涨幅（包含 T-4 当日涨跌）。默认最近30个交易日，拖动可查看全部历史。'+
       notice+'阶段名称仅为指标分档，不自动启用交易或仓位。';
-    var moneyEffectWindow = $('moneyEffectWindow');
-    if (moneyEffectWindow) moneyEffectWindow.innerHTML='<div>窗口截至 '+esc(fmtDate(model.asof||model.target))+(model.fallback?'（历史参考，非所选日值）':'')+'</div>'+
+    $('moneyEffectWindow').innerHTML='<div>窗口截至 '+esc(fmtDate(model.asof||model.target))+(model.fallback?'（历史参考，非所选日值）':'')+'</div>'+
       (current.window_values||[]).map(function(r){return '<div>'+esc(fmtDate(r.date))+'　'+esc(show(r.value))+'　'+humanSource(r.source||r.status||'缺失')+'</div>';}).join('')+
       '<div style="padding-top:6px">≤−2 深度反击；(−2,2] 启动进攻；(2,5] 均衡参与；(5,8] 动能减弱；(8,13] 防御减仓；(13,17] 退潮警戒；>17 脉冲尾声。</div>';
     var chart=initChart('moneyEffectChart');if(!chart)return;
@@ -945,25 +926,20 @@
       (detail.no_sample?'<div>各层已核清但无有效样本，总分按约定为0。</div>':'');
   }
   function renderHeader(d) {
-    var updateTime = $('updateTime');
-    if (updateTime) updateTime.textContent = d.update_time ? ('数据更新 ' + d.update_time) : '数据更新 --';
+    $('updateTime').textContent = d.update_time ? ('数据更新 ' + d.update_time) : '数据更新 --';
   }
 
   function renderTags(cycle, smash, emotion, fundCycle) {
     var stage = emotion.cycle_stage || '待证据';
     var tag = $('cycleStage');
-    if (tag) {
-      tag.textContent = '当日情绪：' + stage;
-      tag.className = 'tag ' + stageClass(stage);
-    }
+    tag.textContent = '当日情绪：' + stage;
+    tag.className = 'tag ' + stageClass(stage);
 
     var hTag = $('heightStage');
     fundCycle=fundCycle||{};
-    if (hTag) {
-      hTag.textContent = '五日周期：'+(fundCycle.status==='VALID'&&fundCycle.stage?fundCycle.stage:'数据不足');
-      hTag.title='T-4 前收盘至 T 收盘的累计涨幅（包含 T-4 当日涨跌）；不自动授权仓位。';
-      hTag.className = 'tag';
-    }
+    hTag.textContent = '五日周期：'+(fundCycle.status==='VALID'&&fundCycle.stage?fundCycle.stage:'数据不足');
+    hTag.title='T-4 前收盘至 T 收盘的累计涨幅（包含 T-4 当日涨跌）；不自动授权仓位。';
+    hTag.className = 'tag';
 
     // 仓位水杯：按五日周期阶段映射
     var pctMap = {'深度反击':90,'启动进攻':80,'均衡参与':70,'动能减弱':50,'防御减仓':30,'退潮警戒':10,'脉冲尾声':1};
@@ -983,12 +959,10 @@
       var host = $('smashHighFeedback');
       if (host && host.parentNode && sTag.parentNode !== host.parentNode) host.parentNode.appendChild(sTag);
     }
-    if (sTag) {
-      sTag.textContent = '砸盘情绪：' + smashDisplayState(smash).display_label;
-      var sCls = /火热|高潮|砸盘|退潮/.test(smash.status || '') ? 'hot'
-        : /试错|修复/.test(smash.status || '') ? 'cold' : '';
-      sTag.className = 'tag ' + sCls;
-    }
+    sTag.textContent = '砸盘情绪：' + smashDisplayState(smash).display_label;
+    var sCls = /火热|高潮|砸盘|退潮/.test(smash.status || '') ? 'hot'
+      : /试错|修复/.test(smash.status || '') ? 'cold' : '';
+    sTag.className = 'tag ' + sCls;
 
     var concl = $('cycleConclusion');
     if (concl) concl.textContent = stage === '--' ? '' : '当前处于「' + stage + '」';
@@ -1029,18 +1003,16 @@
 
   function renderPosition(position) {
     position = position || {};
-    var posSuggest = $('posSuggest');
-    var posRisk = $('posRisk');
     var disabled = /NOT_ENABLED|PAUSED/.test(String(position.status || ''));
     var invalid = /ERROR|INVALID|PENDING|INSUFFICIENT/.test(String(position.status || ''));
     var riskText = typeof position.risk === 'string' ? position.risk.trim() : '';
     if (disabled || invalid || !riskText || !/[★☆]/.test(riskText)) {
-      if (posSuggest) posSuggest.textContent = disabled ? '未启用' : (invalid ? '待证据' : (position.suggest || '待证据'));
-      if (posRisk) posRisk.innerHTML = '<div class="risk-label">操作难度</div><div class="risk-level">' +
+      $('posSuggest').textContent = disabled ? '未启用' : (invalid ? '待证据' : (position.suggest || '待证据'));
+      $('posRisk').innerHTML = '<div class="risk-label">操作难度</div><div class="risk-level">' +
         (disabled ? (position.evidence_pending ? '历史数据待证据；五日判断及其仓位依赖暂停，未生成风险等级' : '五日判断及其仓位依赖暂停，未生成风险等级') : '风险数据待证据，不按低风险处理') + '</div>';
       return;
     }
-    if (posSuggest) posSuggest.textContent = position.suggest || '待证据';
+    $('posSuggest').textContent = position.suggest || '待证据';
 
     // 解析星星数量，生成可视化操作难度组件
     var filled = (riskText.match(/★/g) || []).length;
@@ -1058,17 +1030,15 @@
       starsHtml += '<span class="risk-star' + active + '" title="' + (i + 1) + '星">★</span>';
     }
 
-    if (posRisk) posRisk.innerHTML =
+    $('posRisk').innerHTML =
       '<div class="risk-label">操作难度</div>' +
       '<div class="risk-stars" title="' + levelTip + '">' + starsHtml + '</div>' +
       '<div class="risk-level ' + levelCls + '">' + level + ' · ' + levelTip + '</div>';
   }
 
   function renderStrategy(position, cycle) {
-    var strategyText = $('strategyText');
-    var cycleDesc = $('cycleDesc');
-    if (strategyText) strategyText.textContent = position.strategy || '暂无策略建议';
-    if (cycleDesc) cycleDesc.textContent = cycle.description || '';
+    $('strategyText').textContent = position.strategy || '暂无策略建议';
+    $('cycleDesc').textContent = cycle.description || '';
   }
 
   // ============================================================
@@ -1397,17 +1367,11 @@
 
   if (globalThis.__P50_TEST__) globalThis.__P50_FUNCTIONS__={s02Value:s02Value,issueLabel:issueLabel,sourceLabel:sourceLabel,buildCard:buildS02ResearchCard,buildPopup:buildS02ResearchPopup};
 
-  function renderBanner(list, runtime, scope, marketSession) {
+  function renderBanner(list, runtime, scope) {
     resetBannerDetails();
     var box = $('bannerCandidates');
     if (!box) return;
     s02Toolbar(box, list);
-    if (marketSession && marketSession.update_enabled === false) {
-      box.innerHTML = '<div class="banner-empty"><div style="font-size:15px;font-weight:600;color:#f0b429;margin-bottom:6px;">当前交易日尚未收盘</div><div style="font-size:13px;">二进三预案将在 15:00 收盘后，基于当日完整数据生成。</div></div>';
-      ['bannerPrev', 'bannerNext'].forEach(function (id) { var b = $(id); if (b) { b.disabled = true; b.onclick = null; } });
-      if ($('bannerPage')) $('bannerPage').textContent = '--';
-      return;
-    }
     if (!list || !list.length) {
       var knownEmpty = runtime && runtime.status === 'VALID' && runtime.candidate_set_complete === true;
       var scopeUnknown = scope && scope.unknown_codes && scope.unknown_codes.length;
@@ -1417,12 +1381,13 @@
       return;
     }
 
-    // PARTIAL means optional stock-level fields are incomplete. A complete
-    // candidate set remains usable and must not be mislabeled as unclosed.
-    var candidateSetComplete = runtime && runtime.candidate_set_complete === true;
-    var inputPending = !candidateSetComplete || (runtime && runtime.status === 'DATA_PENDING');
-    if (inputPending) {
-      box.innerHTML = '<div class="banner-empty"><div style="font-size:15px;font-weight:600;color:#f0b429;margin-bottom:6px;">候选数据尚未完整</div><div style="font-size:13px;">收盘证据或候选样本尚未完成核实（状态 ' + String(runtime && runtime.status || '未知') + '），暂不能生成二进三预案。</div></div>';
+    // V5.2.1：当日未收盘/输入未就绪（runtime 非 VALID 或候选集不完整）时，不渲染空壳卡片，直接提示收盘后再试
+    var readyOk = runtime && runtime.status === 'VALID' && runtime.candidate_set_complete === true;
+    if (!readyOk) {
+      var dd = '';
+      try { var mv0 = S02Plan.model(list[0]); var dv0 = (mv0.v && mv0.v.trade_date) || ''; dd = String(dv0).replace(/-/g, ''); } catch (e) { dd = ''; }
+      var dtxt = /^\d{8}$/.test(dd) ? dd.slice(4, 6) + '.' + dd.slice(6, 8) : '今日';
+      box.innerHTML = '<div class="banner-empty"><div style="font-size:15px;font-weight:600;color:#f0b429;margin-bottom:6px;">' + dtxt + ' 未收盘 / 当日数据未就绪</div><div style="font-size:13px;">收盘证据与市场样本尚未核实（状态 ' + String(runtime && runtime.status || '未知') + '），暂不能统计分析，请收盘后再试。</div></div>';
       ['bannerPrev', 'bannerNext'].forEach(function (id2) { var b2 = $(id2); if (b2) { b2.disabled = true; b2.onclick = null; } });
       if ($('bannerPage')) $('bannerPage').textContent = '--';
       return;
@@ -1622,7 +1587,7 @@
     if (!box || !track || !prevBtn || !nextBtn || !pageInfo) return;
     var cards = Array.prototype.slice.call(track.querySelectorAll('.bc-card'));
     var initialWidth = cards[0] ? cards[0].getBoundingClientRect().width : 300;
-    var preferredWidth = initialWidth > 0 ? Math.min(280, initialWidth) : 270;
+    var preferredWidth = initialWidth > 0 ? Math.min(340, initialWidth) : 300;
     var disposed = false, frame = 0, observer = null;
     var count = cards.length; // The DOM is produced from the original list, never synthesize rows.
     var page = 0, per = 1, pages = Math.max(1, count), origin = 0;
@@ -1660,7 +1625,7 @@
       var step = cards.length > 1 ? cards[1].offsetLeft - cards[0].offsetLeft : realWidth + gap;
       if (!(step > 0)) step = realWidth + gap;
       per = Math.max(1, Math.floor((available + Math.max(0, step-realWidth) + .1) / step));
-      per = Math.min(Math.max(1, count), per, 4);
+      per = Math.min(Math.max(1, count), per);
       pages = Math.max(1, Math.ceil(count / per));
       box.dataset.pagerAvailableWidth = available.toFixed(2);
       box.dataset.pagerCardWidth = realWidth.toFixed(2);
@@ -1750,65 +1715,12 @@
     var poolFailed = (d.optional_component_errors || []).some(function (e) { return e.module === 'pool_analyzer' && e.status === 'ERROR'; });
     renderSecondPool(pool.second_board, !poolFailed && Array.isArray(pool.second_board));
     renderFirstPool(pool.first_board, !poolFailed && Array.isArray(pool.first_board));
-    renderBanner(pool.tomorrow, d.three_board_runtime, d.input_evidence && d.input_evidence.scope, d.market_session);
+    renderBanner(pool.tomorrow, d.three_board_runtime, d.input_evidence && d.input_evidence.scope);
   }
 
   // ============================================================
   // 龙头监控
   // ============================================================
-
-  function leaderFallbackFromEvidence(d) {
-    var leader = d && d.leader;
-    if (leader && !Array.isArray(leader) && leader.highest && leader.highest.name) return leader;
-    var evidence = d && d.input_evidence && d.input_evidence.highest_board;
-    var records = evidence && evidence.scope && evidence.scope.records;
-    if (!evidence || evidence.status !== 'VALID' || evidence.value == null || !Array.isArray(records)) return leader || {};
-
-    var stocks = records.map(function (record) {
-      var board = Number(record && record.board);
-      var name = String((record && record.name) || '').trim();
-      if (!Number.isFinite(board) || board < 1 || !name) return null;
-      var sealAmount = Number(record.seal_amount);
-      var turnover = Number(record.turnover);
-      return {
-        code: String(record.code || ''),
-        name: name,
-        board: board,
-        first_time: record.seal_time || record.first_seal_time || '--',
-        last_time: record.last_seal_time || '--',
-        seal_amount: Number.isFinite(sealAmount) ? (sealAmount >= 1e8 ? (sealAmount / 1e8).toFixed(2) + '亿' : (sealAmount / 1e4).toFixed(0) + '万') : '--',
-        open_count: Number.isFinite(Number(record.open_count)) ? Number(record.open_count) : 0,
-        industry: record.industry || '--',
-        turnover: Number.isFinite(turnover) ? turnover.toFixed(2) + '%' : '--',
-        status: '封板'
-      };
-    }).filter(function (stock) { return stock !== null; });
-    if (!stocks.length) return leader || {};
-
-    var highestBoard = Number(evidence.value);
-    var leaders = stocks.filter(function (stock) { return stock.board === highestBoard; });
-    if (!leaders.length) {
-      highestBoard = Math.max.apply(null, stocks.map(function (stock) { return stock.board; }));
-      leaders = stocks.filter(function (stock) { return stock.board === highestBoard; });
-    }
-    leaders.sort(function (left, right) { return String(left.first_time).localeCompare(String(right.first_time)); });
-    var highest = leaders[0];
-    highest.co_leaders = leaders.slice(1).map(function (stock) { return stock.name; });
-    var feedback = d.smash && d.smash.high_feedback ? String(d.smash.high_feedback) : '历史快照未保存完整风险明细';
-    return {
-      status: 'HISTORICAL_SUMMARY',
-      highest: highest,
-      high_boards: stocks.filter(function (stock) { return stock.board >= 3; }).sort(function (left, right) {
-        return right.board - left.board || String(left.first_time).localeCompare(String(right.first_time));
-      }),
-      high_break: [],
-      signals: {
-        status: 'HISTORICAL_SUMMARY',
-        risk_level: '',
-        risk_desc: '已验证最高板 ' + highestBoard + ' 板；高位反馈：' + feedback + '。'
-      }
-    };
-  }
 
   function renderLeader(leader, sourcePending) {
     leader = leader || {};
@@ -1816,7 +1728,6 @@
     var signals = leader.signals || {};
     var highBoards = leader.high_boards || [];
     var highBreak = leader.high_break || [];
-    var historicalSummary = signals.status === 'HISTORICAL_SUMMARY';
 
     // --- 最高板卡片 ---
     var hEl = $('lmHighest');
@@ -1852,13 +1763,13 @@
     // --- 风险信号 ---
     var rEl = $('lmRisk');
     var riskLevel = typeof signals.risk_level === 'string' ? signals.risk_level.trim() : '';
-    var riskKnown = !historicalSummary && !sourcePending && ['高', '中', '低'].indexOf(riskLevel) >= 0 &&
+    var riskKnown = !sourcePending && ['高', '中', '低'].indexOf(riskLevel) >= 0 &&
       !/ERROR|INVALID|PENDING|PAUSED/.test(String(leader.status || signals.status || ''));
     var riskClass = !riskKnown ? '' : (riskLevel === '高' ? 'risk-high' : (riskLevel === '中' ? 'risk-mid' : 'risk-low'));
     rEl.className = 'lm-risk ' + riskClass;
     rEl.innerHTML =
-      '<div class="risk-level">' + (historicalSummary ? '高位反馈' : (riskKnown ? esc(riskLevel) + '风险' : '风险待证据')) + '</div>' +
-      '<div class="risk-desc">' + esc(historicalSummary ? signals.risk_desc : (riskKnown ? (signals.risk_desc || '风险说明未提供') : (sourcePending ? '源日期或完整性未核实，原始梯队不构成当前风险等级' : '没有有效信号，不能判断为低风险'))) + '</div>';
+      '<div class="risk-level">' + (riskKnown ? esc(riskLevel) + '风险' : '风险待证据') + '</div>' +
+      '<div class="risk-desc">' + esc(riskKnown ? (signals.risk_desc || '风险说明未提供') : (sourcePending ? '源日期或完整性未核实，原始梯队不构成当前风险等级' : '没有有效信号，不能判断为低风险')) + '</div>';
 
     // --- 高标股列表（3板及以上） ---
     var hbEl = $('lmHighBoards');
@@ -1966,45 +1877,6 @@
     return provenFields;
   }
 
-  function renderDraftPreviewNotice(d) {
-    var notice = $('draftPreviewNotice');
-    if (!notice) {
-      notice = document.createElement('div');
-      notice.id = 'draftPreviewNotice';
-      notice.className = 'empty';
-      notice.style.cssText = 'margin:12px 0;padding:12px;text-align:left;font-size:13px;line-height:1.6;border-color:var(--gold);color:var(--gold)';
-      var anchor = $('emptyTip');
-      if (anchor && anchor.parentNode) anchor.parentNode.insertBefore(notice, anchor.nextSibling);
-    }
-    var preview = !!(d && d.draft_preview);
-    notice.hidden = !preview;
-    notice.textContent = preview ? (d.preview_notice || '当前为未发布预览，不能作为正式回放或策略依据。') : '';
-  }
-
-  function renderUnpublishedPreviewAction(meta) {
-    var date = meta && meta.unpublished_preview_available ? String(meta.unpublished_preview_date || '') : '';
-    var action = $('unpublishedPreviewAction');
-    if (!date) {
-      if (action) action.hidden = true;
-      return;
-    }
-    if (!action) {
-      action = document.createElement('button');
-      action.type = 'button';
-      action.id = 'unpublishedPreviewAction';
-      action.className = 'rp-btn';
-      action.title = '查看本次采集的待核结果，不会写入已发布回放';
-      var replay = $('replayBox');
-      if (replay && replay.parentNode) replay.parentNode.insertBefore(action, replay.nextSibling);
-    }
-    if (!action) return;
-    action.hidden = false;
-    action.textContent = '核';
-    action.onclick = function () {
-      window.location.assign('/?preview=1&date=' + encodeURIComponent(date));
-    };
-  }
-
   function renderDashboard(d) {
     // Missing sections are unknown, not zero-valued substitutes.
     renderHeader(d);
@@ -2033,10 +1905,10 @@
     renderStrategy(shownPosition, shownCycle);
     renderPool(d.pool, d);
     var leaderMeta = d.input_evidence && d.input_evidence.source_meta && d.input_evidence.source_meta.today;
-    renderLeader(leaderFallbackFromEvidence(d), !!leaderMeta && (leaderMeta.date_verified !== true || leaderMeta.complete !== true));
+    renderLeader(d.leader || {}, !!leaderMeta && (leaderMeta.date_verified !== true || leaderMeta.complete !== true));
   }
 
-        function syncReplayUI(fallbackDate, preview) {
+        function syncReplayUI(fallbackDate) {
     var date = AVAILABLE_DATES[CURRENT_INDEX] || fallbackDate || '';
     var sel = $('playDate');
     if (sel && sel.tagName === 'SELECT') {
@@ -2044,7 +1916,7 @@
       if (!AVAILABLE_DATES.length) {
         var empty = document.createElement('option');
         empty.value = '';
-        empty.textContent = '暂无已发布快照';
+        empty.textContent = '请选择日期';
         sel.appendChild(empty);
         sel.disabled = true;
       } else {
@@ -2057,52 +1929,24 @@
       }
       }
       if (AVAILABLE_DATES.length) sel.value = date || AVAILABLE_DATES[0];
-      // 用户从日历选了一个尚未发布的日期：在下拉框里保留临时 option，避免跳回"今日"
-      var manual = window.__MANUAL_DATE__;
-      if (manual && AVAILABLE_DATES.indexOf(manual) < 0) {
-        var mo = document.createElement('option');
-        mo.value = manual;
-        mo.textContent = '回放 ' + manual.slice(0,4) + '-' + manual.slice(4,6) + '-' + manual.slice(6,8);
-        mo.dataset.temp = '1';
-        sel.appendChild(mo);
-        sel.value = manual;
-      }
     } else if (sel) {
       sel.textContent = date ? fmtDate(date) : '--';
     }
     if (!AVAILABLE_DATES.length) {
-      $('playState').textContent = preview && date ? '待核预览 ' + fmtDate(date) : (date ? '快照日期' : '暂无快照');
-      $('playState').className = preview ? 'rp-state old' : 'rp-state';
+      $('playState').textContent = date ? '快照日期' : '暂无快照';
+      $('playState').className = 'rp-state';
       var bt0 = $('backToday'); if (bt0) bt0.style.display = 'none';
-      var prev0 = $('prevDay'); if (prev0) prev0.disabled = true;
-      var next0 = $('nextDay'); if (next0) next0.disabled = true;
       return;
     }
-    // 左箭头(prev)：已经是最老一天时禁用；右箭头(next)：已经是最新一天时禁用并显示禁止光标
-    var prev = $('prevDay');
-    var next = $('nextDay');
-    var days = window.__TRADING_DAYS__ || [];
-    var cur = currentReplayDate();
-    var di = days.indexOf(cur);
-    var tc = todayCompact();
-    if (prev) prev.disabled = (di === 0) || (di < 0 && CURRENT_INDEX >= AVAILABLE_DATES.length - 1);
-    if (next) {
-      var atEnd = (di >= days.length - 1) || (di >= 0 && days[di+1] > tc);
-      next.disabled = atEnd || (di < 0 && CURRENT_INDEX <= 0);
-    }
     var latest = AVAILABLE_DATES[0] || '';
-    $('playState').textContent = date === latest ? '' : '回放 ' + fmtDate(date);
+    $('playState').textContent = date === latest ? '最新' : '回放 ' + fmtDate(date);
     $('playState').className = 'rp-state' + (date === latest ? ' live' : ' old');
     var bt = $('backToday');
     if (bt) bt.style.display = (date === latest) ? 'none' : 'inline-flex';
   }
 
-  function loadDashboard(date, options) {
-    options = options || {};
-    var query = [];
-    if (date) query.push('date=' + encodeURIComponent(date));
-    if (options.preview) query.push('preview=1');
-    var url = '/api/cockpit' + (query.length ? ('?' + query.join('&')) : '');
+function loadDashboard(date) {
+    var url = '/api/cockpit' + (date ? ('?date=' + encodeURIComponent(date)) : '');
     var requestStarted = performance.now();
     var prefetched = !date && window.__5535_BOOT_FETCH__;
     if (prefetched) window.__5535_BOOT_FETCH__ = null;
@@ -2121,9 +1965,7 @@
             var msg = (body && (body.error || body.code))
               ? ((body.error || '') + (body.code ? ' (' + body.code + ')' : ''))
               : ('HTTP ' + r.status);
-            var error = new Error(msg);
-            error.responsePayload = body;
-            throw error;
+            throw new Error(msg);
           });
         }
         return r.json();
@@ -2152,14 +1994,12 @@
           DISPLAY_COHERENT = false;
           var renderStarted=performance.now();
           renderDashboard(d);
-          renderDraftPreviewNotice(d);
-          renderUnpublishedPreviewAction(null);
           var index = AVAILABLE_DATES.indexOf(date || d.date);
           if (index >= 0) CURRENT_INDEX = index;
           LAST_RENDERED_DATE = d.date;
           LAST_RENDERED_DATA = d;
           DISPLAY_COHERENT = true;
-          syncReplayUI(d.date, !!d.draft_preview);
+          syncReplayUI(d.date);
           if ($('emptyTip')) $('emptyTip').classList.add('hidden');
           document.documentElement.setAttribute('data-dashboard-state', 'RENDERED');
           document.documentElement.setAttribute('data-dashboard-date', String(d.date));
@@ -2192,108 +2032,32 @@
         }
       }, function (err) {
         LOADING = false;
-        renderUnpublishedPreviewAction(err && err.responsePayload);
-        var previewAvailable = err && err.responsePayload && err.responsePayload.unpublished_preview_available;
-        showEmpty(previewAvailable
-          ? '本次采集结果已生成，但证据仍待核验，尚未进入已发布回放。可使用“查看待核预览”核对本次结果。'
-          : '数据请求失败：' + err.message + '。请检查原站 API 与服务状态。',
-          previewAvailable ? '存在待核预览' : '仪表盘请求失败');
-        if (previewAvailable) {
-          var playState = $('playState');
-          if (playState) {
-            playState.textContent = '待核预览可用';
-            playState.className = 'rp-state old';
-          }
-        }
+        showEmpty('数据请求失败：' + err.message + '。请检查原站 API 与服务状态。', '仪表盘请求失败');
         return false;
       });
   }
 
-  function currentReplayDate() {
-    return window.__MANUAL_DATE__ || AVAILABLE_DATES[CURRENT_INDEX] || '';
-  }
-  function todayCompact() {
-    var n = new Date();
-    return '' + n.getFullYear() + String(n.getMonth()+1).padStart(2,'0') + String(n.getDate()).padStart(2,'0');
-  }
-  function loadTradingDaysOnce() {
-    if (window.__TRADING_DAYS_LOADED__) return;
-    window.__TRADING_DAYS_LOADED__ = true;
-    fetch('/api/trading-calendar', {cache: 'no-store'})
-      .then(function(r){return r.json();})
-      .then(function(data){
-        window.__TRADING_DAYS__ = (data.days||[]).map(function(d){return String(d).replace(/-/g,'');}).sort();
-        syncReplayUI();
-      }).catch(function(){});
-  }
-  loadTradingDaysOnce();
-
-  function selectReplayDate(target) {
-    if (!target) return;
-    window.__MANUAL_DATE__ = target;
-    var sel = $('playDate');
-    if (sel) {
-      var opt = sel.querySelector('option[value="' + target + '"]');
-      if (!opt) {
-        opt = document.createElement('option');
-        opt.value = target;
-        opt.textContent = '回放 ' + target.slice(0,4) + '-' + target.slice(4,6) + '-' + target.slice(6,8);
-        opt.dataset.temp = '1';
-        sel.appendChild(opt);
-      }
-      sel.value = target;
-    }
-    loadDashboardByDate(target);
-  }
-
   function goPrev() {
-    if (LOADING) return;
-    var days = window.__TRADING_DAYS__ || [];
-    var cur = currentReplayDate();
-    var i = days.indexOf(cur);
-    if (i > 0) { selectReplayDate(days[i-1]); return; }
-    if (AVAILABLE_DATES.length && CURRENT_INDEX < AVAILABLE_DATES.length - 1) {
-      selectReplayDate(AVAILABLE_DATES[CURRENT_INDEX + 1]);
+    if (!AVAILABLE_DATES.length || LOADING) return;
+    if (CURRENT_INDEX < AVAILABLE_DATES.length - 1) {
+      loadDashboard(AVAILABLE_DATES[CURRENT_INDEX + 1]);
     }
   }
 
   function goNext() {
-    if (LOADING) return;
-    var days = window.__TRADING_DAYS__ || [];
-    var cur = currentReplayDate();
-    var i = days.indexOf(cur);
-    if (i >= 0 && i < days.length - 1) {
-      var nxt = days[i+1];
-      if (nxt <= todayCompact()) { selectReplayDate(nxt); return; }
-    }
-    if (AVAILABLE_DATES.length && CURRENT_INDEX > 0) {
-      selectReplayDate(AVAILABLE_DATES[CURRENT_INDEX - 1]);
+    if (!AVAILABLE_DATES.length || LOADING) return;
+    if (CURRENT_INDEX > 0) {
+      loadDashboard(AVAILABLE_DATES[CURRENT_INDEX - 1]);
     }
   }
-
-  // 暴露给日历浮窗：按指定日期加载仪表盘（未发布日期也能触发请求）
-  window.loadDashboardByDate = function(date) {
-    if (!date) return;
-    if (!LOADING) loadDashboard(date);
-  };
-  window.__getReplayState = function() {
-    return { dates: AVAILABLE_DATES, index: CURRENT_INDEX, loading: LOADING };
-  };
 
   // 883900_CACHE_NOTICE_V1: stale pixels are never declared fresh acceptance.
   var cacheRefreshTimer = null;
   function render883900CacheNotice(d) {
-    var p=(d && d.cockpit_transport && typeof d.cockpit_transport === 'object') ? d.cockpit_transport : {};
-    var state=p.cache_state, n=$('cockpitFreshness');
-    if (cacheRefreshTimer) { clearTimeout(cacheRefreshTimer); cacheRefreshTimer=null; }
-    if (d && d.draft_preview) {
-      if (n) n.style.display='none';
-      document.documentElement.setAttribute('data-cockpit-fresh','false');
-      return;
-    }
+    var p=d.cockpit_transport||{}, state=p.cache_state, n=$('cockpitFreshness');
     if(!n){n=document.createElement('div');n.id='cockpitFreshness';n.setAttribute('role','status');n.style.cssText='font-size:12px;line-height:1.7;padding:8px 12px;border:1px solid var(--line);color:var(--gold);margin:8px 0;';
       var host=document.querySelector('main')||document.body;host.insertBefore(n,host.firstChild);}
-    if (!state) { n.style.display='none'; return; }
+    if(cacheRefreshTimer){clearTimeout(cacheRefreshTimer);cacheRefreshTimer=null;}
     document.documentElement.setAttribute('data-cockpit-fresh',state==='FRESH'?'true':'false');
     if(state==='FRESH'){n.style.display='none';return;}
     n.style.display='block';n.textContent='当前显示 '+fmtDate(d.date)+' 的上次完整版本；新数据视图正在后台生成，生成后自动替换。未将旧值冒充本次更新结果。';
@@ -2305,10 +2069,7 @@
   function main() {
     // The bootstrap contains the SAME database date list and display snapshot.
     // It starts while HTML is parsed; no /dates -> /dashboard serial round trip.
-    var initialQuery = new URLSearchParams(window.location.search);
-    var initialPreview = initialQuery.get('preview') === '1';
-    var initialDate = initialPreview ? String(initialQuery.get('date') || '').replace(/-/g, '') : '';
-    loadDashboard(initialDate, {preview: initialPreview});
+    loadDashboard('');
 
     var prevBtn = $('prevDay');
     var nextBtn = $('nextDay');
@@ -2325,16 +2086,7 @@
     }
     var backToday = $('backToday');
     if (backToday) {
-      backToday.addEventListener('click', function () {
-        var days = window.__TRADING_DAYS__ || [];
-        var tc = todayCompact();
-        var last = '';
-        for (var i = days.length - 1; i >= 0; i--) {
-          if (days[i] <= tc) { last = days[i]; break; }
-        }
-        if (last) selectReplayDate(last);
-        else if (!LOADING) loadDashboard('');
-      });
+      backToday.addEventListener('click', function () { if (!LOADING) loadDashboard(''); });
     }
 
 
@@ -2367,15 +2119,6 @@
         updateTaskSteps.id = 'updateTaskSteps';
         updateTaskSteps.style.cssText = 'margin:10px 0;padding-left:22px;max-height:190px;overflow:auto;font-size:12px;line-height:1.8;color:var(--muted)';
         updateProgress.after(updateTaskSteps);
-      }
-      // 动态创建进度条右侧总百分比
-      var bar = document.querySelector('.uo-bar');
-      if (bar && !document.getElementById('updateTotalPercent')) {
-        var pct = document.createElement('span');
-        pct.id = 'updateTotalPercent';
-        pct.style.cssText = 'position:absolute;right:-50px;top:50%;transform:translateY(-50%);color:#ffd700;font-weight:bold;font-size:14px;font-family:monospace;';
-        pct.textContent = '0%';
-        bar.appendChild(pct);
       }
       if (!updateElapsed) {
         updateElapsed = document.createElement('div');
@@ -2415,9 +2158,9 @@
       if (bar) bar.setAttribute('aria-valuenow', String(percent));
       if (fill) { fill.style.transform = 'none'; fill.style.width = percent + '%'; }
       if (updateElapsed) {
-        // 数字由本地秒表 updateTickTimer 维护；这里只同步"进行中/已停止"后缀
-        var m = (updateElapsed.textContent.match(/^累计耗时：[0-9.]+ 秒/) || [''])[0];
-        if (m) updateElapsed.textContent = m + (task.running ? '（进行中）' : '（已停止）');
+        var seconds = Number(task.elapsed_seconds || 0);
+        updateElapsed.textContent = '累计耗时：' + seconds.toFixed(1) + ' 秒'
+          + (task.running ? '（进行中）' : '（已停止）');
       }
       if (updateTaskSteps) {
         updateTaskSteps.innerHTML = '';
@@ -2427,8 +2170,7 @@
           if (step.state === 'DONE') doneCount++;
         });
         var totalPercent = totalSteps > 0 ? Math.round(doneCount / totalSteps * 100) : 0;
-        var totalEl = document.getElementById('updateTotalPercent');
-        if (totalEl) totalEl.textContent = totalPercent + '%';
+        document.getElementById('updateTotalPercent').textContent = totalPercent + '%';
         (task.steps || []).forEach(function (step) {
           var item = document.createElement('li');
           var icon = step.state === 'DONE' ? '✅' : step.state === 'RUNNING' ? '➡️'
@@ -2562,52 +2304,8 @@
       });
     }
 
-    function showResultModal(innerHtml, r) {
-      var modal = document.getElementById('resultModal');
-      if (!modal) {
-        modal = document.createElement('div');
-        modal.id = 'resultModal';
-        modal.style.cssText = 'position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:100001;'
-          + 'min-width:320px;max-width:380px;background:#141c28;border:1px solid rgba(255,200,100,0.35);border-radius:10px;'
-          + 'padding:16px 18px;box-shadow:0 10px 40px rgba(0,0,0,0.7);color:#e6edf3;font-size:13px;line-height:1.7;';
-        document.body.appendChild(modal);
-      }
-      var extraBtn = '';
-      if (r && r.publication_status === 'PENDING_GENERATION_NOT_PUBLISHED') {
-        extraBtn = '<button type="button" id="resultModalPreview" style="margin-top:10px;margin-right:8px;padding:6px 12px;cursor:pointer;background:transparent;border:1px solid #ffd700;color:#ffd700;border-radius:6px;">查看未发布预览</button>';
-      }
-      modal.innerHTML = '<div style="color:#ffd700;font-weight:bold;margin-bottom:10px;text-align:center;">执行结果</div>'
-        + '<div>' + innerHtml.replace(/↻[\s\S]*$/, '') + '</div>'
-        + '<div style="margin-top:14px;text-align:right;">'
-        + extraBtn
-        + '<button type="button" id="resultModalOk" style="padding:6px 18px;cursor:pointer;background:linear-gradient(90deg,#ffd700,#ff9500);color:#1a1b1c;border:none;border-radius:6px;font-weight:bold;">确认</button>'
-        + '</div>';
-      modal.style.display = 'block';
-      var ok = document.getElementById('resultModalOk');
-      if (ok) ok.onclick = function () {
-        modal.style.display = 'none';
-        if (updateOverlay) updateOverlay.classList.remove('show');
-      };
-      var pv = document.getElementById('resultModalPreview');
-      if (pv) pv.onclick = function () {
-        modal.style.display = 'none';
-        if (updateOverlay) updateOverlay.classList.remove('show');
-        loadDashboard(r.date, {preview: true});
-      };
-    }
-
     function startUpdatePoll() {
       if (updatePollTimer) clearInterval(updatePollTimer);
-      window.updateStartTime = Date.now();
-      if (window.updateTickTimer) clearInterval(window.updateTickTimer);
-      window.updateTickTimer = setInterval(function() {
-        var elapsed = (Date.now() - window.updateStartTime)/1000;
-        var timeEl = document.getElementById('updateTimeUsed');
-        if (timeEl) timeEl.textContent = elapsed.toFixed(1) + ' 秒';
-        // 主显示：累计耗时由本地秒表 100ms 累加，后端卡也不影响
-        var el = document.getElementById('updateElapsed');
-        if (el) el.textContent = '累计耗时：' + elapsed.toFixed(1) + ' 秒（进行中）';
-      }, 100);
       updatePollTimer = setInterval(function () {
         fetch('/api/update/status')
           .then(function (r) { return r.json(); })
@@ -2631,30 +2329,12 @@
               updateTitle.textContent = '更新失败';
               updateBtn.classList.remove('running');
               clearInterval(updatePollTimer);
-              if (window.updateTickTimer) {
-                clearInterval(window.updateTickTimer);
-                window.updateTickTimer = null;
-              }
-              var elapsed = (Date.now() - window.updateStartTime)/1000;
-              var timeEl = document.getElementById('updateTimeUsed');
-              if (timeEl) timeEl.textContent = elapsed.toFixed(1) + ' 秒';
-              var el3 = document.getElementById('updateElapsed');
-              if (el3) el3.textContent = '累计耗时：' + elapsed.toFixed(1) + ' 秒（失败）';
               return;
             }
 
             if (!res.running && res.result) {
               // 更新完成
               clearInterval(updatePollTimer);
-              if (window.updateTickTimer) {
-                clearInterval(window.updateTickTimer);
-                window.updateTickTimer = null;
-              }
-              var elapsed = (Date.now() - window.updateStartTime)/1000;
-              var timeEl = document.getElementById('updateTimeUsed');
-              if (timeEl) timeEl.textContent = elapsed.toFixed(1) + ' 秒';
-              var el4 = document.getElementById('updateElapsed');
-              if (el4) el4.textContent = '累计耗时：' + elapsed.toFixed(1) + ' 秒（完成）';
               updateBtn.classList.remove('running');
               updateTitle.textContent = res.result.publication_status === 'PENDING_GENERATION_NOT_PUBLISHED'
                 ? '生成完成，发布阻断'
@@ -2672,10 +2352,8 @@
                   ? '<div style="margin-top:8px;color:var(--gold);">发布状态：生成完成但证据待核，未写入已发布热库。原因：' + esc(r.publication_reason || '待核输入未满足发布闸门') + '</div>'
                   : '')
                 + '<div style="margin-top:8px;color:var(--gold);cursor:pointer;" onclick="location.reload()">↻ 点击刷新页面查看最新数据</div>';
-              // 结果不再塞在右侧进展弹窗里，改为居中弹窗展示
-              showResultModal(html, r);
-              updateResult.innerHTML = '';
-              updateResult.style.display = 'none';
+              updateResult.innerHTML = html;
+              updateResult.style.display = 'block';
               // Refresh the selected dashboard after a completed backfill so
               // the new position advice replaces the stale "待证据" view.
               // Keep an open research popup untouched; the user closes it
@@ -2708,74 +2386,6 @@
   window.__5535ChartInstances = function(){return charts.slice();};
   main();
 
-  // 页面加载时默认关闭更新悬浮窗
-  window.addEventListener('load', function() {
-    var overlay = document.getElementById('updateOverlay');
-    if (overlay) overlay.classList.remove('show');
-    if (window.updatePollTimer) clearInterval(window.updatePollTimer);
-  });
-  // 查看最新数据按钮
-  window.viewLatestData = function() {
-    var popups = document.querySelectorAll('#resultPopup, #detailPopup, #updateOverlay');
-    popups.forEach(function(p) { p.remove(); });
-    location.reload();
-  };
-  // 弹出居中结果窗口
-  function showResultPopup(text) {
-    var old = document.getElementById('resultPopup');
-    if (old) old.remove();
-    var popup = document.createElement('div');
-    popup.id = 'resultPopup';
-    popup.style.cssText = 'position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);min-width:360px;background:linear-gradient(135deg,#1a2a1f,#16202b);border:1px solid rgba(80,200,120,0.4);border-radius:12px;padding:24px;z-index:99998;box-shadow:0 8px 32px rgba(0,0,0,0.5);';
-    var header = document.createElement('div');
-    header.style.cssText = 'display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;';
-    var title = document.createElement('h3');
-    title.style.cssText = 'margin:0;color:#4ade80;font-size:15px;';
-    title.textContent = '✓ 更新完成';
-    var closeBtn = document.createElement('button');
-    closeBtn.textContent = '× 关闭';
-    closeBtn.style.cssText = 'background:transparent;border:1px solid rgba(255,255,255,0.2);color:#fff;border-radius:6px;padding:3px 10px;cursor:pointer;font-size:12px;';
-    closeBtn.onclick = function() { popup.remove(); };
-    header.appendChild(title);
-    header.appendChild(closeBtn);
-    var body = document.createElement('div');
-    body.style.cssText = 'color:#e0e0e0;font-size:13px;line-height:1.8;white-space:pre-wrap;';
-    body.textContent = text;
-    popup.appendChild(header);
-    popup.appendChild(body);
-    document.body.appendChild(popup);
-    // 5秒后自动关闭
-    setTimeout(function() { if (popup.parentNode) popup.remove(); }, 8000);
-  }
-  // 弹出居中详细诊断窗口
-  function showDetailPopup(text, isError) {
-    var old = document.getElementById('detailPopup');
-    if (old) old.remove();
-    var popup = document.createElement('div');
-    popup.id = 'detailPopup';
-    popup.style.cssText = 'position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:600px;max-width:90vw;max-height:70vh;overflow-y:auto;background:#1a222d;border:1px solid rgba(255,200,100,0.3);border-radius:12px;padding:24px;z-index:99999;box-shadow:0 8px 32px rgba(0,0,0,0.5);';
-    var header = document.createElement('div');
-    header.style.cssText = 'display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;';
-    var title = document.createElement('h3');
-    title.style.cssText = 'margin:0;color:#ffd700;font-size:16px;';
-    title.textContent = isError ? '任务执行详情（异常）' : '任务执行详情';
-    var closeBtn = document.createElement('button');
-    closeBtn.textContent = '× 关闭';
-    closeBtn.style.cssText = 'background:transparent;border:1px solid rgba(255,255,255,0.2);color:#fff;border-radius:6px;padding:4px 12px;cursor:pointer;font-size:13px;';
-    closeBtn.onclick = function() { popup.remove(); };
-    header.appendChild(title);
-    header.appendChild(closeBtn);
-    var body = document.createElement('div');
-    body.style.cssText = 'color:#e0e0e0;font-size:13px;line-height:1.7;white-space:pre-wrap;';
-    body.textContent = text;
-    popup.appendChild(header);
-    popup.appendChild(body);
-    document.body.appendChild(popup);
-    // 点遮罩关闭
-    popup.addEventListener('click', function(e) {
-      if (e.target === popup) popup.remove();
-    });
-  }
   // ===== V5.2.1 块外补丁：删除S02卡片浮层关闭按钮 + 点击浮层外自动关闭 =====
   (function(){
     // 删除 .p50-close 按钮
@@ -2836,403 +2446,3 @@
   })();
 
 })();
-
-
-// ===== 月历组件 =====
-document.addEventListener('DOMContentLoaded', function() {
-  // 找日期选择容器，插入日历
-  var dateSelect = document.getElementById('researchDate');
-  if (!dateSelect) return;
-
-  var calendarDiv = document.createElement('div');
-  calendarDiv.id = 'customCalendar';
-  calendarDiv.style.cssText = 'margin-top:10px;background:#1a222d;border:1px solid rgba(255,200,100,0.2);border-radius:8px;padding:10px;font-size:12px;';
-  dateSelect.parentNode.appendChild(calendarDiv);
-
-  var currentDate = new Date();
-  var currentMonth = currentDate.getMonth();
-  var currentYear = currentDate.getFullYear();
-  var publishedDates = new Set();
-
-  // 从接口拿已发布日期
-  fetch('/api/published_dates')
-    .then(r => r.json())
-    .then(dates => {
-      dates.forEach(d => publishedDates.add(d.replace(/-/g,'')));
-      renderCalendar(currentYear, currentMonth);
-    })
-    .catch(() => renderCalendar(currentYear, currentMonth));
-
-  function renderCalendar(year, month) {
-    var days = ['日','一','二','三','四','五','六'];
-    var html = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">';
-    html += '<button onclick="prevMonth()" style="background:none;border:none;color:#ffd700;cursor:pointer;">◀</button>';
-    html += '<span style="color:#ffd700;font-weight:bold;">' + year + '年' + (month+1) + '月</span>';
-    html += '<button onclick="nextMonth()" style="background:none;border:none;color:#ffd700;cursor:pointer;">▶</button>';
-    html += '</div>';
-    html += '<div style="display:grid;grid-template-columns:repeat(7,1fr);text-align:center;color:#888;margin-bottom:4px;">';
-    days.forEach(d => html += '<div>' + d + '</div>');
-    html += '</div>';
-    html += '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center;">';
-
-    var firstDay = new Date(year, month, 1).getDay();
-    var daysInMonth = new Date(year, month+1, 0).getDate();
-    var today = new Date();
-
-    for (var i=0; i<firstDay; i++) html += '<div></div>';
-    for (var d=1; d<=daysInMonth; d++) {
-      var dateStr = '' + year + ('0'+(month+1)).slice(-2) + ('0'+d).slice(-2);
-      var cellDate = new Date(year, month, d);
-      var isFuture = cellDate > today;
-      var isWeekend = cellDate.getDay() === 0 || cellDate.getDay() === 6;
-      var isPublished = publishedDates.has(dateStr);
-
-      var cellStyle = 'padding:4px;cursor:default;position:relative;';
-      var cellText = d;
-      if (isFuture || isWeekend) {
-        cellStyle += 'color:#555;';
-      } else {
-        cellStyle += 'cursor:pointer;color:#fff;';
-        cellStyle += 'onclick="selectDate(' + year + ',' + month + ',' + d + ')"';
-      }
-      if (isPublished) {
-        cellStyle += 'color:#ffd700;font-weight:bold;';
-      }
-
-      html += '<div style="' + cellStyle + '" ' + cellStyle + '>' + cellText;
-      if (isPublished) html += '<div style="font-size:9px;color:#4ade80;">✓</div>';
-      else if (!isFuture && !isWeekend) html += '<div style="font-size:9px;color:#ef4444;">○</div>';
-      html += '</div>';
-    }
-    html += '</div>';
-    calendarDiv.innerHTML = html;
-  }
-
-  window.prevMonth = function() {
-    currentMonth--;
-    if (currentMonth < 0) { currentMonth = 11; currentYear--; }
-    renderCalendar(currentYear, currentMonth);
-  };
-  window.nextMonth = function() {
-    currentMonth++;
-    if (currentMonth > 11) { currentMonth = 0; currentYear++; }
-    renderCalendar(currentYear, currentMonth);
-  };
-  window.selectDate = function(y, m, d) {
-    var dateStr = y + '-' + ('0'+(m+1)).slice(-2) + '-' + ('0'+d).slice(-2);
-    dateSelect.value = dateStr;
-    dateSelect.dispatchEvent(new Event('change'));
-    // 自动触发补按钮逻辑
-    var backfillBtn = document.getElementById('backfillBtn');
-    if (backfillBtn) backfillBtn.style.display = 'inline-block';
-  };
-});
-
-// [已废弃] 旧的内嵌日历插入逻辑已移除：它会覆盖 window.calSelectDate，导致浮窗点日期不跳转。
-// 现在统一使用 showCalendarPopup + 末尾的 window.calSelectDate。
-window.addEventListener('load', function() { /* deprecated inline calendar removed */ });
-
-// 替换原来的日期区域
-window.addEventListener('load', function() {
-  setTimeout(function() {
-    // 找原来的日期显示元素，替换成按钮
-    var oldDateEls = document.querySelectorAll('.header-date, .current-date, .date-display');
-    oldDateEls.forEach(function(el) {
-      el.style.cursor = 'pointer';
-      el.title = '点击打开日历选择日期';
-      el.onclick = function(e) {
-        e.stopPropagation();
-        showCalendarPopup();
-      };
-    });
-
-    // 点页面其他地方关闭日历浮窗
-    document.addEventListener('click', function(e) {
-      var pop = document.getElementById('calPopup');
-      if (pop && !pop.contains(e.target) && e.target.id !== 'calTitle' && !e.target.classList.contains('cal-arrow')) {
-        pop.remove();
-      }
-    });
-  }, 1500);
-});
-
-function showCalendarPopup() {
-  var old = document.getElementById('calPopup');
-  if (old) old.remove();
-  var pop = document.createElement('div');
-  pop.id = 'calPopup';
-  pop.style.cssText = 'position:fixed;right:24px;top:60px;width:320px;background:#1a222d;border:1px solid rgba(255,200,100,0.3);border-radius:12px;padding:16px;z-index:99999;box-shadow:0 8px 32px rgba(0,0,0,0.6);';
-  pop.innerHTML = `
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-      <button class="cal-arrow" onclick="calPrevMonth()" style="background:none;border:none;color:#ffd700;cursor:pointer;font-size:16px;">◀</button>
-      <span id="calTitle" style="color:#ffd700;font-weight:bold;font-size:15px;">2026年9月</span>
-      <button class="cal-arrow" onclick="calNextMonth()" style="background:none;border:none;color:#ffd700;cursor:pointer;font-size:16px;">▶</button>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(7,1fr);text-align:center;color:#888;margin-bottom:8px;font-size:12px;">
-      <div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div>
-    </div>
-    <div id="calGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;font-size:13px;"></div>
-    <div style="margin-top:12px;text-align:right;">
-      <button onclick="closeCalPopup()" style="background:transparent;border:1px solid rgba(255,255,255,0.2);color:#fff;border-radius:6px;padding:4px 12px;cursor:pointer;">关闭</button>
-    </div>
-  `;
-  document.body.appendChild(pop);
-  window.calCurrentY = 2026;
-  window.calCurrentM = 8;
-  // 2026年9月所有A股交易日
-window.calPublished = new Set(['20260901','20260902','20260903','20260904','20260907','20260908','20260909','20260910','20260911','20260914','20260915','20260916','20260917','20260918','20260921','20260922','20260923','20260924']);
-window.calAllTradingDays = new Set(['20260901','20260902','20260903','20260904','20260907','20260908','20260909','20260910','20260911','20260914','20260915','20260916','20260917','20260918','20260921','20260922','20260923','20260924']);
-  window.renderCal = function() {
-    // 2026年9月所有交易日（硬编码，共19天）
-    var sepTradingDays = [1,2,3,4,7,8,9,10,11,14,15,16,17,18,21,22,23,24,25];
-    var sepPublished = new Set([10,11,14,16,18,21,22,23,24]);
-    var html = '';
-    var firstDay = new Date(2026, 8, 1).getDay(); // 2026-09-01是周几
-    var daysInMonth = 30; // 9月有30天
-    var today = new Date();
-    for(var i=0;i<firstDay;i++) html += '<div style="padding:6px 0;"></div>';
-    for(var d=1;d<=daysInMonth;d++) {
-      var isTrading = sepTradingDays.indexOf(d) >= 0;
-      var isFuture = d > 25; // 25号之后是未来
-      if(!isTrading || isFuture) {
-        html += '<div style="padding:6px 0;color:#555;">'+d+'</div>';
-      } else {
-        var isPub = sepPublished.has(d);
-        html += '<div style="padding:6px 0;cursor:pointer;color:#fff;border-radius:4px;" onclick="calSelectDate(2026,8,'+d+')">'+d;
-        if(isPub) html += '<div style="font-size:10px;color:#4ade80;">✓</div>';
-        else html += '<div style="font-size:10px;color:#ef4444;">○</div>';
-        html += '</div>';
-      }
-    }
-    document.getElementById('calGrid').innerHTML = html;
-    document.getElementById('calTitle').textContent = '2026年9月';
-  };
-  window.calPrevMonth = function() { window.calCurrentM--; if(window.calCurrentM<0){window.calCurrentM=11;window.calCurrentY--;} renderCal(); };
-  window.calNextMonth = function() { window.calCurrentM++; if(window.calCurrentM>11){window.calCurrentM=0;window.calCurrentY++;} renderCal(); };
-  window.calSelectDate = function(y,m,d) {
-    var ds = y+'-'+('0'+(m+1)).slice(-2)+'-'+('0'+d).slice(-2);
-    // 找到日期选择的select，切换日期
-    var dateSel = document.querySelector('select');
-    if(dateSel) {
-      dateSel.value = ds;
-      dateSel.dispatchEvent(new Event('change'));
-    }
-    closeCalPopup();
-  };
-  window.closeCalPopup = function() {
-    var pop = document.getElementById('calPopup');
-    if(pop) pop.remove();
-  };
-  renderCal();
-}
-
-window.addEventListener('load', function() {
-  setTimeout(function() {
-    var header = document.querySelector('header, .header, .top-bar, nav');
-    if (!header) return;
-    if (document.getElementById('openCalBtn')) return;
-    var btn = document.createElement('button');
-    btn.id = 'openCalBtn';
-    btn.textContent = '📅 选择日期';
-    btn.style.cssText = 'background:linear-gradient(90deg,#ffd700,#ff9500);color:#1a1b1c;border:none;border-radius:6px;padding:6px 12px;cursor:pointer;font-size:13px;font-weight:bold;margin-left:12px;';
-    btn.onclick = function(e) {
-      e.stopPropagation();
-      showCalendarPopup();
-    };
-    header.appendChild(btn);
-  }, 1500);
-});
-
-// 全局监听点击右上角日期区域，弹日历
-document.addEventListener('click', function(e) {
-  var target = e.target;
-  // 匹配右上角的日期文本（2026-xx-xx格式）
-  if (target.textContent && /2026-\d{2}-\d{2}/.test(target.textContent) && target.offsetTop < 100) {
-    e.preventDefault();
-    e.stopPropagation();
-    showCalendarPopup();
-  }
-});
-
-// 页面加载后删除所有带最新字样的标签
-window.addEventListener('load', function() {
-  setTimeout(function() {
-    var allEls = document.querySelectorAll('span, div, badge, .tag');
-    allEls.forEach(function(el) {
-      if (el.textContent.trim() === '最新') {
-        el.remove();
-      }
-    });
-  }, 2000);
-});
-
-// 点日期下拉框不弹旧选项，直接弹月历浮窗
-window.addEventListener('load', function() {
-  setTimeout(function() {
-    var dateSelect = document.querySelector('select');
-    if (!dateSelect) return;
-    dateSelect.addEventListener('mousedown', function(e) {
-      e.preventDefault();
-      e.stopPropagation();
-      showCalendarPopup();
-    });
-    dateSelect.addEventListener('click', function(e) {
-      e.preventDefault();
-      e.stopPropagation();
-      showCalendarPopup();
-    });
-    dateSelect.style.cursor = 'pointer';
-  }, 2000);
-});
-
-window.addEventListener('load', function() {
-  setTimeout(function() {
-    var selects = document.querySelectorAll('select');
-    var info = [];
-    selects.forEach(function(s,i) {
-      info.push(i + ': id=' + s.id + ' name=' + s.name + ' options=' + s.options.length);
-    });
-    console.log('页面所有select:', info.join(' | '));
-    // 直接给每个select都加点击弹日历
-    selects.forEach(function(s) {
-      if (s.options.length > 5) { // 日期下拉框选项多
-        s.addEventListener('mousedown', function(e) {
-          e.preventDefault();
-          e.stopPropagation();
-          showCalendarPopup();
-        }, true);
-        s.addEventListener('click', function(e) {
-          e.preventDefault();
-          e.stopPropagation();
-          showCalendarPopup();
-        }, true);
-      }
-    });
-  }, 2500);
-});
-
-// 给playDate下拉框加点击弹日历
-window.addEventListener('load', function() {
-  setTimeout(function() {
-    var playDate = document.getElementById('playDate');
-    if (!playDate) return;
-    playDate.addEventListener('mousedown', function(e) {
-      e.preventDefault();
-      e.stopPropagation();
-      showCalendarPopup();
-    }, true);
-    playDate.addEventListener('click', function(e) {
-      e.preventDefault();
-      e.stopPropagation();
-      showCalendarPopup();
-    }, true);
-  }, 1000);
-});
-
-// 完整重写日历弹出函数
-window.showCalendarPopup = function() {
-  var old = document.getElementById('calPopup');
-  if (old) old.remove();
-  var pop = document.createElement('div');
-  pop.id = 'calPopup';
-  pop.style.cssText = 'position:fixed;width:320px;background:#1a222d;border:1px solid rgba(255,200,100,0.3);border-radius:12px;padding:16px;z-index:99999;box-shadow:0 8px 32px rgba(0,0,0,0.6);';
-  pop.innerHTML = `
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-      <span style="color:#ffd700;font-weight:bold;font-size:15px;">2026年9月</span>
-      <button onclick="closeCalPopup()" style="background:transparent;border:none;color:#fff;font-size:16px;cursor:pointer;">×</button>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(7,1fr);text-align:center;color:#888;margin-bottom:8px;font-size:12px;">
-      <div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div>
-    </div>
-    <div id="calGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;font-size:13px;"></div>
-  `;
-  document.body.appendChild(pop);
-
-  // 定位：左边缘对齐"今日"日期框(#playDate)，再整体左移20px，top 贴其下边缘
-  var anchor = document.getElementById('playDate');
-  if (!anchor) anchor = document.querySelector('.rp-date');
-  if (anchor) {
-    var rect = anchor.getBoundingClientRect();
-    var left = rect.left - 70;
-    var pw = 352; // pop 宽320 + padding/边框
-    var maxLeft = window.innerWidth - pw - 8;
-    if (maxLeft < 8) maxLeft = 8;
-    if (left > maxLeft) left = maxLeft;
-    if (left < 8) left = 8;
-    pop.style.left = left + 'px';
-    pop.style.top = (rect.bottom + 6) + 'px';
-  } else {
-    pop.style.left = '24px';
-    pop.style.top = '60px';
-  }
-
-  var grid = pop.querySelector('#calGrid');
-  var fallbackTrading = new Set(['20260901','20260902','20260903','20260904','20260907','20260908','20260909','20260910','20260911','20260914','20260915','20260916','20260917','20260918','20260921','20260922','20260923','20260924']);
-  var fallbackPublished = new Set(['20260901','20260902','20260924']);
-
-  function renderGrid(tradingSet, publishedSet) {
-    if (!grid) return;
-    var html = '';
-    // 2026-09-01 是周二，周日/周一前空两格
-    var firstDayOffset = 2;
-    for (var i = 0; i < firstDayOffset; i++) html += '<div style="padding:6px 0;"></div>';
-    for (var d = 1; d <= 30; d++) {
-      var ds = '202609' + ('0' + d).slice(-2);
-      if (!tradingSet.has(ds)) {
-        // 非交易日：灰色，不可选
-        html += '<div style="padding:6px 0;color:#555;">' + d + '</div>';
-      } else if (publishedSet.has(ds)) {
-        // 已采集且评分正常：正常白色数字
-        html += '<div style="padding:6px 0;cursor:pointer;color:#fff;" onclick="calSelectDate(2026,8,' + d + ')">' + d + '</div>';
-      } else {
-        // 交易日但未计算：红色圆圈把数字包裹住
-        html += '<div style="padding:6px 0;cursor:pointer;text-align:center;" onclick="calSelectDate(2026,8,' + d + ')"><span style="display:inline-block;min-width:22px;height:22px;line-height:22px;border:1px solid #ef4444;border-radius:50%;color:#fff;">' + d + '</span></div>';
-      }
-    }
-    grid.innerHTML = html;
-  }
-
-  // 先立即用本地 fallback 渲染，避免浮窗卡在"正在加载"；
-  // 再异步拉本地缓存接口(/api/trading-calendar，读文件不打外部API)和已发布日期(/api/dates)刷新
-  renderGrid(fallbackTrading, fallbackPublished);
-  Promise.all([
-    fetch('/api/trading-calendar', {cache: 'no-store'}).then(function(r){return r.json();}),
-    fetch('/api/dates', {cache: 'no-store'}).then(function(r){return r.json();})
-  ]).then(function(results){
-    var tradingSet = new Set((results[0].days || []).map(function(d){return String(d).replace(/-/g,'');}));
-    var publishedSet = new Set((results[1].dates || []).map(function(d){return String(d).replace(/-/g,'');}));
-    if (!tradingSet.size) tradingSet = fallbackTrading;
-    window.__TRADING_DAYS__ = Array.from(tradingSet).sort();
-    renderGrid(tradingSet, publishedSet);
-    syncReplayUI();
-  }).catch(function(){
-    renderGrid(fallbackTrading, fallbackPublished);
-  });
-
-  window.closeCalPopup = function() {
-    var pop = document.getElementById('calPopup');
-    if(pop) pop.remove();
-  };
-};
-
-// 覆盖原来的日期选择函数：跳转该日期视图 + 同步补录下拉框 + 收起日历
-window.calSelectDate = function(y,m,d) {
-  var ds = y + '-' + ('0'+(m+1)).slice(-2) + '-' + ('0'+d).slice(-2);
-  var compact = ds.replace(/-/g,'');
-  // 记录用户手动选的日期，syncReplayUI 重建 options 时会保留它
-  window.__MANUAL_DATE__ = compact;
-  // 按指定日期加载仪表盘（未发布日期也会触发请求/预览）
-  if (window.loadDashboardByDate) {
-    window.loadDashboardByDate(compact);
-  }
-  // 同步补录日期下拉框，使"补"按钮补的就是日历选中的这一天
-  var backfillDate = document.getElementById('backfillDate');
-  if (backfillDate) {
-    backfillDate.value = compact;
-    backfillDate.dispatchEvent(new Event('change'));
-  }
-  // 立即显示"补"按钮
-  var backfillBtn = document.getElementById('backfillBtn');
-  if (backfillBtn) backfillBtn.classList.add('backfill-show');
-  closeCalPopup();
-};

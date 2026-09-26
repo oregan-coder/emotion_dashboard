@@ -9,10 +9,10 @@ from copy import deepcopy
 from collections import Counter
 from datetime import datetime, timezone, timedelta
 from types import SimpleNamespace
-from approved_policy import (TradeCalendar, day, filter_scope, scope_decision,
+from core.approved_policy import (TradeCalendar, day, filter_scope, scope_decision,
     cohort_metric, highest_board_2b, select_yesterday_performance, source_usable)
-from input_contracts import number, boolean, board_count
-from market_breadth_legu import MODE, parse_native, SCOPE, SOURCE
+from core.input_contracts import number, boolean, board_count
+from collection.market_breadth_legu import MODE, parse_native, SCOPE, SOURCE
 
 KEYS=('limit_up','limit_down','open_board','previous_limit_up','previous_pool_performance')
 
@@ -68,8 +68,8 @@ def _fields(row,frame):
 
 def build_bundle(data,cal_meta,identities,master_captures,meta,batch_evidence,
                  diagnostics,*,candidate_supplier=None,validation_policy=None,primary_supplier=None):
-    from approved_data_adapter import normalize_frame,capture_frame_inputs,fetch_ths_883900
-    from candidate_quote_evidence import collect_candidates,cents
+    from core.approved_data_adapter import normalize_frame,capture_frame_inputs,fetch_ths_883900
+    from evidence.candidate_quote_evidence import collect_candidates,cents
     d,p=day(data.date),day(data.previous_date)
     listings={c:r.get('listing_date') for c,r in identities.items()}
     frames={k:getattr(data,k,None) for k in KEYS}
@@ -173,7 +173,7 @@ def build_bundle(data,cal_meta,identities,master_captures,meta,batch_evidence,
         'today_records':list(tm.values()),'previous_records':prior,
         'source_meta':{'today':current_meta,'previous':meta['previous_limit_up'],'breadth':receipts['market_breadth']},
         'market_breadth':native,'acquisition_receipts':receipts,'batch_close_evidence':be,
-        'primary_883900':fetch_ths_883900(d,supplier=primary_supplier),
+        'primary_883900':fetch_ths_883900(d,p,supplier=primary_supplier),
         'candidate_quote_evidence':proofs,'frame_inputs':fi,
         'frame_capture_layer':'POST_EXISTING_FETCHER_BEFORE_APPROVED_POLICY_NOT_HTTP_RESPONSE',
         'security_master_inputs':master_captures,'diagnostics':diagnostics,
@@ -201,7 +201,7 @@ def apply_context(bundle,base):
     d,p=bundle['date'],bundle['previous_date'];result=deepcopy(base)
     cal=TradeCalendar(bundle['calendar'].get('dates',[]),verified=bundle['calendar'].get('verified') is True)
     rec=bundle.get('acquisition_receipts',{});raw=bundle.get('frame_inputs',{})
-    from approved_data_adapter import _restore_frame,normalize_frame
+    from core.approved_data_adapter import _restore_frame,normalize_frame
     tm={r.get('code'):r for r in bundle.get('today_records',[])}
     prior=bundle.get('previous_records',[]);pm={r.get('code'):r for r in prior}
     evidence={};scopes={};members={};oks={}
@@ -209,7 +209,7 @@ def apply_context(bundle,base):
         spec=raw.get(key,{})
         codes=[]
         if spec:
-            from input_contracts import find_column,normalize_code
+            from core.input_contracts import find_column,normalize_code
             f=_restore_frame(spec);cc=find_column(f,['代码','股票代码','证券代码','code'])
             if cc:codes=[normalize_code(v) for v in f[cc]]
         idx=pm if key=='previous_limit_up' else tm;date=p if key=='previous_limit_up' else d
@@ -307,17 +307,21 @@ def apply_context(bundle,base):
     if parsed.get('status') != 'VALID':
         try:
             from pathlib import Path
-            from market_breadth_store import read as read_market_breadth
+            from collection.market_breadth_store import read as read_market_breadth, read_import as read_market_breadth_import
             fact_db = Path(__file__).resolve().parent / 'data' / '.migration_shadow' / 'market_store_5535.next.sqlite3'
             fact = read_market_breadth(fact_db, d)
             if fact and fact.get('status') == 'VALID' and str(fact.get('source_date') or d) == d:
+                import_evidence = read_market_breadth_import(fact_db, fact.get('source_batch_id'))
                 parsed = {
                     **parsed,
                     'status': 'VALID', 'complete': True,
                     'up': fact.get('up_count'), 'down': fact.get('down_count'),
                     'flat': fact.get('flat_count'), 'unknown': fact.get('unknown_count', 0),
+                    'total': sum(int(fact.get(key) or 0) for key in ('up_count', 'down_count', 'flat_count', 'unknown_count')),
                     'source': fact.get('source') or SOURCE,
                     'source_date': d, 'as_of': fact.get('as_of'),
+                    'source_batch_id': fact.get('source_batch_id'),
+                    'validation_evidence': {'import': import_evidence} if import_evidence else None,
                     'date_verified': True, 'closing_verified': True,
                     'issues': [], 'request_status': 'PERSISTED_VALIDATED_FACT',
                     'validation_method': 'PERSISTED_NARROW_BREADTH_FACT',

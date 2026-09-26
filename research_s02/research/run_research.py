@@ -53,7 +53,10 @@ def main(argv: list[str] | None = None) -> int:
              f"Research score: {result['research_score_proposal']}\n"
              "Formal strategy: NOT_ENABLED\n"
              "Local run completed; this is not market/source verification.\n")
-        (out/'run.log').write_text(log,encoding='utf-8')
+        project_root = Path(__file__).resolve().parents[2]
+        logs_dir = project_root / 'logs'
+        logs_dir.mkdir(parents=True, exist_ok=True)
+        (logs_dir/'research_s02_run.log').write_text(log,encoding='utf-8')
         write_json(out/'output_manifest.json',{'files':{p.name:sha256(p.read_bytes()).hexdigest()
                                                      for p in sorted(out.iterdir()) if p.is_file()}})
         print(log,end='')

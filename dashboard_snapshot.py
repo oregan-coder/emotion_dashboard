@@ -26,7 +26,7 @@ from datetime import datetime
 from pathlib import Path
 
 import pandas as pd
-from input_contracts import number, integer, clean_json, normalize_code
+from core.input_contracts import number, integer, clean_json, normalize_code
 import os
 import traceback
 import hashlib
@@ -148,7 +148,7 @@ def previous_limit_down(previous_date):
     if len(target) != 8 or not target.isdigit():
         return None, "DATA_PENDING"
     try:
-        from history_manager import load_history
+        from storage.history_manager import load_history
         rows = load_history()
         if rows is None or rows.empty:
             return None, "DATA_PENDING"
@@ -180,7 +180,7 @@ def board_ladder(limit_up):
 
     try:
 
-        from three_board_model import _extract_stocks
+        from scoring.three_board_model import _extract_stocks
 
         frame = pd.DataFrame(_extract_stocks(limit_up))
 
@@ -247,7 +247,7 @@ def save_dashboard_snapshot(
 
     try:
 
-        from pool_analyzer import analyze_pool
+        from scoring.pool_analyzer import analyze_pool
 
         pool = analyze_pool(
             getattr(data, "limit_up", None),
@@ -266,7 +266,7 @@ def save_dashboard_snapshot(
 
     try:
 
-        from leader_monitor import build_leader_monitor
+        from analytics.leader_monitor import build_leader_monitor
 
         leader = build_leader_monitor(
             getattr(data, "limit_up", None),
@@ -613,7 +613,7 @@ def save_dashboard_snapshot(
     result["schema_version"] = "5535-direct-repair-1"
     result["provenance"] = {"input_kind":getattr(data,"input_kind","UNCLASSIFIED"),
         "source_files":{n:hashlib.sha256((Path(__file__).parent/n).read_bytes()).hexdigest()
-            for n in ("dashboard_snapshot.py","three_board_model.py","data_quality.py","approved_policy.py","market_pipeline.py")
+            for n in ("dashboard_snapshot.py","scoring/three_board_model.py","scoring/data_quality.py","core/approved_policy.py","market_pipeline.py")
             if (Path(__file__).parent/n).is_file()}}
     result = clean_json(result)
     def atomic_json(target, value):
@@ -643,7 +643,7 @@ def _build_three_board_v2(data, smash, date: str) -> list:
     仅使用截至当日收盘已确定的数据，严禁未来函数。
     """
     try:
-        from three_board_model import evaluate_three_board
+        from scoring.three_board_model import evaluate_three_board
 
         limit_up = getattr(data, "limit_up", None)
         open_board = getattr(data, "open_board", None)
@@ -696,7 +696,7 @@ def _build_three_board_v2(data, smash, date: str) -> list:
         error={"status":"ERROR","type":type(e).__name__,"message":str(e),"traceback":traceback.format_exc()}
         setattr(data, "three_board_runtime", error)
         # Preserve known candidate identities, not a success-looking empty pool.
-        from three_board_model import _extract_stocks
+        from scoring.three_board_model import _extract_stocks
         rows=_extract_stocks(getattr(data,"limit_up",None))
         return [{"code":r["code"],"name":r["name"],"close":r.get("close"),
                  "raw_score":None,"legacy_score":None,"legacy_grade":None,"rank":None,

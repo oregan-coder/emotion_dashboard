@@ -38,7 +38,7 @@ def _calendar(store, config=None):
     if not cal:
         return None
     data = cal['data']
-    from approved_policy import TradeCalendar
+    from core.approved_policy import TradeCalendar
     return TradeCalendar(data.get('days', []), verified=True, source='P50_CALENDAR')
 
 
@@ -114,7 +114,7 @@ def existing_scope_policy(store, date, members, envelope, config):
     dated security master. Unknowns stay UNKNOWN (evidence pending).
     """
     d = day(date)
-    from approved_policy import scope_decision, exchange_board
+    from core.approved_policy import scope_decision, exchange_board
     calendar = _calendar(store, config)
     master = _master(store, config)
     if calendar is None:
@@ -160,7 +160,7 @@ def classify_dated_eod_with_original_rules(store, date, stock_code, quote, confi
     """
     d = day(date)
     c = code(stock_code)
-    from approved_policy import scope_decision, exchange_board
+    from core.approved_policy import scope_decision, exchange_board
     from decimal import Decimal, ROUND_HALF_UP
     calendar = _calendar(store, config)
     master = _master(store, config)
@@ -544,7 +544,7 @@ def build_other_api_views(store):
         def backtest_view():
             try:
                 import pandas as pd
-                from backtest_engine import (calc_overview, calc_emotion_zones,
+                from reports.backtest_engine import (calc_overview, calc_emotion_zones,
                                              calc_smash_backtest,
                                              calc_highest_board_backtest,
                                              calc_trend_data)
@@ -611,7 +611,7 @@ def build_other_api_views(store):
             _op_view('/api/research/cycle-theme|date=' + d, lambda d=d: cycle_view(d)))
 
     def ledger_view(date_arg=None):
-        from evidence_ledger import build_ledger_view, LedgerRootError
+        from evidence.evidence_ledger import build_ledger_view, LedgerRootError
         project_root = str(_project_root(store))
         records_path = str(Path(project_root) / 'research_evidence' / 'records.json')
         try:
