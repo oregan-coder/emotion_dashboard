@@ -1,0 +1,850 @@
+{
+  "schema": "5535_S02_R1_RESEARCH_RESULT_V1",
+  "version": "S02_WEIGHT_PROPOSAL_R1",
+  "implementation_version": "S02_R1_INPUT_ADAPTER_FIX1",
+  "input_type": "CLOSING_EVIDENCE_SUPPLIED",
+  "candidate": {
+    "code": "600108",
+    "name": "亚盛集团",
+    "eligibility_status": "ELIGIBLE_RESEARCH",
+    "eligibility_reason": "0904收盘二板，非ST，上市超过60交易日，非两日一字板（首封09:36:23非开盘）"
+  },
+  "observation": {
+    "trade_date": "2026-09-04",
+    "previous_trade_date": "2026-09-03",
+    "captured_at": "2026-09-04T15:30:00+08:00",
+    "decision_asof": "2026-09-04T16:00:00+08:00",
+    "source_date_verified": true,
+    "closing_verified": true,
+    "previous_trade_date_verified": true
+  },
+  "enabled": false,
+  "approval_status": "PENDING_USER_REVIEW",
+  "strategy_status": "NOT_ENABLED",
+  "item_scores": {
+    "A01": null,
+    "A02": 0.0,
+    "A03": 2.3333333333333335,
+    "A04": 1.793103448275862,
+    "A05": null,
+    "B01": null,
+    "B02": null,
+    "B03": 6,
+    "C02": null,
+    "D01": null,
+    "D02": 3.0,
+    "D03": null
+  },
+  "items": {
+    "A01": {
+      "name": "昨日涨停表现",
+      "proposed_weight": 8,
+      "rule_status": "PENDING_USER_REVIEW",
+      "input_values": {
+        "r_pct": null
+      },
+      "input_units": {
+        "r_pct": "percent"
+      },
+      "expected_units": {
+        "r_pct": "percent"
+      },
+      "score_unit": "proposal_points",
+      "count_basis": null,
+      "source_mode": "LOCAL_APPROVED_EQUAL_WEIGHT_PENDING",
+      "source_review": {
+        "status": "INPUT_PENDING",
+        "source_dates": [
+          "2026-09-04"
+        ],
+        "units_verified": false,
+        "scope_verified": false,
+        "closing_verified": false,
+        "available_at": null,
+        "evidence_refs": []
+      },
+      "source_value_refs": {},
+      "formula": "8*clip01((r_pct+3)/8)",
+      "rationale": "昨日强势群体是否得到正反馈；不额外加入另一项赚钱效应固定分。",
+      "score": null,
+      "data_status": "INPUT_PENDING",
+      "issues": [
+        "ITEM_EVIDENCE_NOT_VERIFIED",
+        "UNITS_VERIFIED_MISSING",
+        "SCOPE_VERIFIED_MISSING",
+        "CLOSING_VERIFIED_MISSING",
+        "EVIDENCE_AVAILABILITY_TIME_UNKNOWN",
+        "EVIDENCE_REFS_MISSING",
+        "A01_APPROVED_SOURCE_MODE_UNSPECIFIED",
+        "INPUT_MISSING:r_pct",
+        "VALUE_REF_MISSING:r_pct"
+      ]
+    },
+    "A02": {
+      "name": "已发生二进三承接",
+      "proposed_weight": 8,
+      "rule_status": "PENDING_USER_REVIEW",
+      "input_values": {
+        "p23": 0.0
+      },
+      "input_units": {
+        "p23": "fraction"
+      },
+      "expected_units": {
+        "p23": "fraction"
+      },
+      "score_unit": "proposal_points",
+      "count_basis": {
+        "numerator": 0,
+        "denominator": 6
+      },
+      "source_mode": null,
+      "source_review": {
+        "status": "VERIFIED",
+        "source_dates": [
+          "2026-09-04"
+        ],
+        "units_verified": true,
+        "scope_verified": true,
+        "closing_verified": true,
+        "available_at": "2026-09-04T15:30:00+08:00",
+        "evidence_refs": [
+          {
+            "file": "0904_market_data.json",
+            "sha256": "4e9099ec9bcff41cfbf7085a88970c6d1d6779720eb4bd3e2d265dbcb6e5b311",
+            "pointer": ""
+          }
+        ]
+      },
+      "source_value_refs": {
+        "p23": {
+          "file": "0904_market_data.json",
+          "sha256": "4e9099ec9bcff41cfbf7085a88970c6d1d6779720eb4bd3e2d265dbcb6e5b311",
+          "pointer": "/A02/p23"
+        }
+      },
+      "formula": "8*clip01(p23/0.50)",
+      "rationale": "与目标相似但使用已发生的接力结果，不引用T+1标签。",
+      "score": 0.0,
+      "data_status": "SUPPLIED_EVIDENCE_PASSED_LOCAL_CHECKS",
+      "issues": []
+    },
+    "A03": {
+      "name": "高位续板保有",
+      "proposed_weight": 7,
+      "rule_status": "PENDING_USER_REVIEW",
+      "input_values": {
+        "fail_high": 0.6666666666666666
+      },
+      "input_units": {
+        "fail_high": "fraction"
+      },
+      "expected_units": {
+        "fail_high": "fraction"
+      },
+      "score_unit": "proposal_points",
+      "count_basis": {
+        "numerator": 2,
+        "denominator": 3
+      },
+      "source_mode": null,
+      "source_review": {
+        "status": "VERIFIED",
+        "source_dates": [
+          "2026-09-04"
+        ],
+        "units_verified": true,
+        "scope_verified": true,
+        "closing_verified": true,
+        "available_at": "2026-09-04T15:30:00+08:00",
+        "evidence_refs": [
+          {
+            "file": "0904_market_data.json",
+            "sha256": "4e9099ec9bcff41cfbf7085a88970c6d1d6779720eb4bd3e2d265dbcb6e5b311",
+            "pointer": ""
+          }
+        ]
+      },
+      "source_value_refs": {
+        "fail_high": {
+          "file": "0904_market_data.json",
+          "sha256": "4e9099ec9bcff41cfbf7085a88970c6d1d6779720eb4bd3e2d265dbcb6e5b311",
+          "pointer": "/A03/fail_high"
+        }
+      },
+      "formula": "7*(1-fail_high)",
+      "rationale": "将高位群体与全市场炸板统计分开。",
+      "score": 2.3333333333333335,
+      "data_status": "SUPPLIED_EVIDENCE_PASSED_LOCAL_CHECKS",
+      "issues": []
+    },
+    "A04": {
+      "name": "市场封板稳定",
+      "proposed_weight": 4,
+      "rule_status": "PENDING_USER_REVIEW",
+      "input_values": {
+        "U": 39,
+        "Z": 48
+      },
+      "input_units": {
+        "U": "stocks",
+        "Z": "stocks"
+      },
+      "expected_units": {
+        "U": "stocks",
+        "Z": "stocks"
+      },
+      "score_unit": "proposal_points",
+      "count_basis": null,
+      "source_mode": null,
+      "source_review": {
+        "status": "VERIFIED",
+        "source_dates": [
+          "2026-09-04"
+        ],
+        "units_verified": true,
+        "scope_verified": true,
+        "closing_verified": true,
+        "available_at": "2026-09-04T15:30:00+08:00",
+        "evidence_refs": [
+          {
+            "file": "0904_market_data.json",
+            "sha256": "4e9099ec9bcff41cfbf7085a88970c6d1d6779720eb4bd3e2d265dbcb6e5b311",
+            "pointer": ""
+          }
+        ]
+      },
+      "source_value_refs": {
+        "U": {
+          "file": "0904_market_data.json",
+          "sha256": "4e9099ec9bcff41cfbf7085a88970c6d1d6779720eb4bd3e2d265dbcb6e5b311",
+          "pointer": "/A04/U"
+        },
+        "Z": {
+          "file": "0904_market_data.json",
+          "sha256": "4e9099ec9bcff41cfbf7085a88970c6d1d6779720eb4bd3e2d265dbcb6e5b311",
+          "pointer": "/A04/Z"
+        }
+      },
+      "formula": "4*U/(U+Z)",
+      "rationale": "衡量最后封住而非只触板；不混用高位失败率。",
+      "score": 1.793103448275862,
+      "data_status": "SUPPLIED_EVIDENCE_PASSED_LOCAL_CHECKS",
+      "issues": []
+    },
+    "A05": {
+      "name": "涨跌停两端力量",
+      "proposed_weight": 3,
+      "rule_status": "PENDING_USER_REVIEW",
+      "input_values": {
+        "U": 39,
+        "D": null
+      },
+      "input_units": {
+        "U": "stocks",
+        "D": "stocks"
+      },
+      "expected_units": {
+        "U": "stocks",
+        "D": "stocks"
+      },
+      "score_unit": "proposal_points",
+      "count_basis": null,
+      "source_mode": null,
+      "source_review": {
+        "status": "INPUT_PENDING",
+        "source_dates": [
+          "2026-09-04"
+        ],
+        "units_verified": false,
+        "scope_verified": false,
+        "closing_verified": false,
+        "available_at": null,
+        "evidence_refs": []
+      },
+      "source_value_refs": {},
+      "formula": "3*U/(U+D)",
+      "rationale": "尾部强弱只给低预算，避免与前四项重复放大。",
+      "score": null,
+      "data_status": "INPUT_PENDING",
+      "issues": [
+        "ITEM_EVIDENCE_NOT_VERIFIED",
+        "UNITS_VERIFIED_MISSING",
+        "SCOPE_VERIFIED_MISSING",
+        "CLOSING_VERIFIED_MISSING",
+        "EVIDENCE_AVAILABILITY_TIME_UNKNOWN",
+        "EVIDENCE_REFS_MISSING",
+        "INPUT_MISSING:D",
+        "VALUE_REF_MISSING:U",
+        "VALUE_REF_MISSING:D"
+      ]
+    },
+    "B01": {
+      "name": "题材有效成员上涨广度",
+      "proposed_weight": 10,
+      "rule_status": "PENDING_USER_REVIEW",
+      "input_values": {
+        "breadth": null
+      },
+      "input_units": {
+        "breadth": "fraction"
+      },
+      "expected_units": {
+        "breadth": "fraction"
+      },
+      "score_unit": "proposal_points",
+      "count_basis": null,
+      "source_mode": null,
+      "source_review": {
+        "status": "INPUT_PENDING",
+        "source_dates": [
+          "2026-09-04"
+        ],
+        "units_verified": false,
+        "scope_verified": false,
+        "closing_verified": false,
+        "available_at": null,
+        "evidence_refs": []
+      },
+      "source_value_refs": {},
+      "formula": "10*breadth",
+      "rationale": "观察广泛参与，不只看涨停股票。",
+      "score": null,
+      "data_status": "INPUT_PENDING",
+      "issues": [
+        "ITEM_EVIDENCE_NOT_VERIFIED",
+        "UNITS_VERIFIED_MISSING",
+        "SCOPE_VERIFIED_MISSING",
+        "CLOSING_VERIFIED_MISSING",
+        "EVIDENCE_AVAILABILITY_TIME_UNKNOWN",
+        "EVIDENCE_REFS_MISSING",
+        "NUMERATOR_DENOMINATOR_REQUIRED",
+        "INPUT_MISSING:breadth",
+        "VALUE_REF_MISSING:breadth"
+      ]
+    },
+    "B02": {
+      "name": "题材两日相对强度",
+      "proposed_weight": 12,
+      "rule_status": "PENDING_USER_REVIEW",
+      "input_values": {
+        "excess_median_T": null,
+        "excess_median_previous": null
+      },
+      "input_units": {
+        "excess_median_T": "percentage_points",
+        "excess_median_previous": "percentage_points"
+      },
+      "expected_units": {
+        "excess_median_T": "percentage_points",
+        "excess_median_previous": "percentage_points"
+      },
+      "score_unit": "proposal_points",
+      "count_basis": null,
+      "source_mode": null,
+      "source_review": {
+        "status": "INPUT_PENDING",
+        "source_dates": [
+          "2026-09-03",
+          "2026-09-04"
+        ],
+        "units_verified": false,
+        "scope_verified": false,
+        "closing_verified": false,
+        "available_at": null,
+        "evidence_refs": []
+      },
+      "source_value_refs": {},
+      "formula": "6*I(excess_median_T>0)+6*I(excess_median_previous>0)",
+      "rationale": "当日和前日均有相对表现才满档；不是五日周期。",
+      "score": null,
+      "data_status": "INPUT_PENDING",
+      "issues": [
+        "ITEM_EVIDENCE_NOT_VERIFIED",
+        "UNITS_VERIFIED_MISSING",
+        "SCOPE_VERIFIED_MISSING",
+        "CLOSING_VERIFIED_MISSING",
+        "ITEM_SOURCE_DATES_MISMATCH_OR_MISSING",
+        "EVIDENCE_AVAILABILITY_TIME_UNKNOWN",
+        "EVIDENCE_REFS_MISSING",
+        "INPUT_MISSING:excess_median_T",
+        "INPUT_MISSING:excess_median_previous",
+        "VALUE_REF_MISSING:excess_median_T",
+        "VALUE_REF_MISSING:excess_median_previous"
+      ]
+    },
+    "B03": {
+      "name": "题材梯队规模与层次",
+      "proposed_weight": 18,
+      "rule_status": "PENDING_USER_REVIEW",
+      "input_values": {
+        "n1": 10,
+        "n2": 0,
+        "n3plus": 0
+      },
+      "input_units": {
+        "n1": "stocks",
+        "n2": "stocks",
+        "n3plus": "stocks"
+      },
+      "expected_units": {
+        "n1": "stocks",
+        "n2": "stocks",
+        "n3plus": "stocks"
+      },
+      "score_unit": "proposal_points",
+      "count_basis": null,
+      "source_mode": null,
+      "source_review": {
+        "status": "VERIFIED",
+        "source_dates": [
+          "2026-09-04"
+        ],
+        "units_verified": true,
+        "scope_verified": true,
+        "closing_verified": true,
+        "available_at": "2026-09-04T15:30:00+08:00",
+        "evidence_refs": [
+          {
+            "file": "0904_market_data.json",
+            "sha256": "4e9099ec9bcff41cfbf7085a88970c6d1d6779720eb4bd3e2d265dbcb6e5b311",
+            "pointer": ""
+          }
+        ]
+      },
+      "source_value_refs": {},
+      "formula": "lower_points(n1)+peer_points(n2)+upper_points(n3plus)+structure_points(n1,n2,n3plus)",
+      "rationale": "分别观察新增首板、同高度共同出现、上层支持和多层共存；本项是结构强度，不是主线或龙头认定。",
+      "score": 6,
+      "data_status": "SUPPLIED_EVIDENCE_PASSED_LOCAL_CHECKS",
+      "issues": []
+    },
+    "C02": {
+      "name": "首板阶段相对先手",
+      "proposed_weight": 8,
+      "rule_status": "PENDING_USER_REVIEW",
+      "input_values": {
+        "n": null,
+        "rank": null
+      },
+      "input_units": {
+        "n": "stocks",
+        "rank": "average_rank"
+      },
+      "expected_units": {
+        "n": "stocks",
+        "rank": "average_rank"
+      },
+      "score_unit": "proposal_points",
+      "count_basis": null,
+      "source_mode": null,
+      "source_review": {
+        "status": "INPUT_PENDING",
+        "source_dates": [
+          "2026-09-03"
+        ],
+        "units_verified": false,
+        "scope_verified": false,
+        "closing_verified": false,
+        "available_at": null,
+        "evidence_refs": []
+      },
+      "source_value_refs": {},
+      "formula": "8*(n-rank)/(n-1) if n>=2 else null",
+      "rationale": "限制唯一时序指标预算，不拿先封替代业务关联、主线或核心判断。",
+      "score": null,
+      "data_status": "INPUT_PENDING",
+      "issues": [
+        "ITEM_EVIDENCE_NOT_VERIFIED",
+        "UNITS_VERIFIED_MISSING",
+        "SCOPE_VERIFIED_MISSING",
+        "CLOSING_VERIFIED_MISSING",
+        "EVIDENCE_AVAILABILITY_TIME_UNKNOWN",
+        "EVIDENCE_REFS_MISSING",
+        "MEMBERSHIP_COMPLETE_MISSING",
+        "CANDIDATE_NOT_IN_COMPLETE_PRIOR_FIRST_BOARD_SET",
+        "NOT_COMPARABLE_SINGLETON",
+        "INPUT_MISSING:n",
+        "INPUT_MISSING:rank",
+        "MEMBER_LIST_REF_MISSING_OR_INVALID:'NoneType' object is not subscriptable"
+      ]
+    },
+    "D01": {
+      "name": "最后封板后持续时间",
+      "proposed_weight": 10,
+      "rule_status": "PENDING_USER_REVIEW",
+      "input_values": {
+        "remaining_session_minutes": 232.16666666666669
+      },
+      "input_units": {
+        "remaining_session_minutes": "minutes"
+      },
+      "expected_units": {
+        "remaining_session_minutes": "minutes"
+      },
+      "score_unit": "proposal_points",
+      "count_basis": null,
+      "source_mode": null,
+      "source_review": {
+        "status": "INPUT_PENDING",
+        "source_dates": [
+          "2026-09-04"
+        ],
+        "units_verified": false,
+        "scope_verified": false,
+        "closing_verified": false,
+        "available_at": null,
+        "evidence_refs": []
+      },
+      "source_value_refs": {},
+      "formula": "10*remaining_session_minutes/240",
+      "rationale": "表示最终封住后的持续时长；不是预测下午不会开板。",
+      "score": null,
+      "data_status": "INPUT_PENDING",
+      "issues": [
+        "ITEM_EVIDENCE_NOT_VERIFIED",
+        "UNITS_VERIFIED_MISSING",
+        "SCOPE_VERIFIED_MISSING",
+        "CLOSING_VERIFIED_MISSING",
+        "EVIDENCE_AVAILABILITY_TIME_UNKNOWN",
+        "EVIDENCE_REFS_MISSING",
+        "VALUE_REF_MISSING:remaining_session_minutes"
+      ]
+    },
+    "D02": {
+      "name": "当日开板次数",
+      "proposed_weight": 6,
+      "rule_status": "PENDING_USER_REVIEW",
+      "input_values": {
+        "open_break_count": 1
+      },
+      "input_units": {
+        "open_break_count": "times"
+      },
+      "expected_units": {
+        "open_break_count": "times"
+      },
+      "score_unit": "proposal_points",
+      "count_basis": null,
+      "source_mode": null,
+      "source_review": {
+        "status": "VERIFIED",
+        "source_dates": [
+          "2026-09-04"
+        ],
+        "units_verified": true,
+        "scope_verified": true,
+        "closing_verified": true,
+        "available_at": "2026-09-04T15:30:00+08:00",
+        "evidence_refs": [
+          {
+            "file": "0904_market_data.json",
+            "sha256": "4e9099ec9bcff41cfbf7085a88970c6d1d6779720eb4bd3e2d265dbcb6e5b311",
+            "pointer": ""
+          }
+        ]
+      },
+      "source_value_refs": {
+        "open_break_count": {
+          "file": "600108_0904_stock_data.json",
+          "sha256": "5ba7bb3e3c947e17c6f15d813c4d04dd1653abf84e3a9ddf32e6736166acedeb",
+          "pointer": "/open_break_count"
+        }
+      },
+      "formula": "6/(1+open_break_count)",
+      "rationale": "与D01构成合计16分的稳定组，不再在其他模块按同一开板事实扣分。",
+      "score": 3.0,
+      "data_status": "SUPPLIED_EVIDENCE_PASSED_LOCAL_CHECKS",
+      "issues": []
+    },
+    "D03": {
+      "name": "收盘封单相对规模",
+      "proposed_weight": 6,
+      "rule_status": "PENDING_USER_REVIEW",
+      "input_values": {
+        "seal_amount": 157784414,
+        "circulating_market_cap": null
+      },
+      "input_units": {
+        "seal_amount": "CNY",
+        "circulating_market_cap": "CNY"
+      },
+      "expected_units": {
+        "seal_amount": "CNY",
+        "circulating_market_cap": "CNY"
+      },
+      "score_unit": "proposal_points",
+      "count_basis": null,
+      "source_mode": null,
+      "source_review": {
+        "status": "INPUT_PENDING",
+        "source_dates": [
+          "2026-09-04"
+        ],
+        "units_verified": false,
+        "scope_verified": false,
+        "closing_verified": false,
+        "available_at": null,
+        "evidence_refs": []
+      },
+      "source_value_refs": {},
+      "formula": "6*clip01(seal_amount/circulating_market_cap/0.01)",
+      "rationale": "仅为静态委托规模的代理，不称为订单流、主力净流入或成交保证。",
+      "score": null,
+      "data_status": "INPUT_PENDING",
+      "issues": [
+        "ITEM_EVIDENCE_NOT_VERIFIED",
+        "UNITS_VERIFIED_MISSING",
+        "SCOPE_VERIFIED_MISSING",
+        "CLOSING_VERIFIED_MISSING",
+        "EVIDENCE_AVAILABILITY_TIME_UNKNOWN",
+        "EVIDENCE_REFS_MISSING",
+        "INPUT_MISSING:circulating_market_cap",
+        "VALUE_REF_MISSING:seal_amount",
+        "VALUE_REF_MISSING:circulating_market_cap"
+      ]
+    }
+  },
+  "b03_composition": {
+    "score": 6,
+    "parts": {
+      "lower": 6,
+      "peer": 0,
+      "upper": 0,
+      "structure": 0
+    },
+    "status": "PROPOSAL_CALCULATED",
+    "max": 18,
+    "counts_excluding_candidate": {
+      "n1": 10,
+      "n2": 0,
+      "n3plus": 0
+    },
+    "theme_id": "AGRICULTURE_BROAD",
+    "trade_date": "2026-09-04",
+    "counts": {
+      "n1": 10,
+      "n2": 0,
+      "n3plus": 0
+    },
+    "groups": {
+      "n1": [
+        {
+          "code": "001366",
+          "name": "播恩集团",
+          "trade_date": "2026-09-04",
+          "theme_id": "AGRICULTURE_BROAD",
+          "selection": "INCLUDED",
+          "close_limit_up": true,
+          "board_count": 1,
+          "industry": "饲料",
+          "data_status": "VERIFIED"
+        },
+        {
+          "code": "000798",
+          "name": "中水渔业",
+          "trade_date": "2026-09-04",
+          "theme_id": "AGRICULTURE_BROAD",
+          "selection": "INCLUDED",
+          "close_limit_up": true,
+          "board_count": 1,
+          "industry": "渔业",
+          "data_status": "VERIFIED"
+        },
+        {
+          "code": "600354",
+          "name": "敦煌种业",
+          "trade_date": "2026-09-04",
+          "theme_id": "AGRICULTURE_BROAD",
+          "selection": "INCLUDED",
+          "close_limit_up": true,
+          "board_count": 1,
+          "industry": "种植业",
+          "data_status": "VERIFIED"
+        },
+        {
+          "code": "002124",
+          "name": "天邦食品",
+          "trade_date": "2026-09-04",
+          "theme_id": "AGRICULTURE_BROAD",
+          "selection": "INCLUDED",
+          "close_limit_up": true,
+          "board_count": 1,
+          "industry": "养殖业",
+          "data_status": "VERIFIED"
+        },
+        {
+          "code": "603151",
+          "name": "邦基科技",
+          "trade_date": "2026-09-04",
+          "theme_id": "AGRICULTURE_BROAD",
+          "selection": "INCLUDED",
+          "close_limit_up": true,
+          "board_count": 1,
+          "industry": "饲料",
+          "data_status": "VERIFIED"
+        },
+        {
+          "code": "000592",
+          "name": "平潭发展",
+          "trade_date": "2026-09-04",
+          "theme_id": "AGRICULTURE_BROAD",
+          "selection": "INCLUDED",
+          "close_limit_up": true,
+          "board_count": 1,
+          "industry": "林业Ⅱ",
+          "data_status": "VERIFIED"
+        },
+        {
+          "code": "000735",
+          "name": "罗牛山",
+          "trade_date": "2026-09-04",
+          "theme_id": "AGRICULTURE_BROAD",
+          "selection": "INCLUDED",
+          "close_limit_up": true,
+          "board_count": 1,
+          "industry": "养殖业",
+          "data_status": "VERIFIED"
+        },
+        {
+          "code": "000702",
+          "name": "正虹科技",
+          "trade_date": "2026-09-04",
+          "theme_id": "AGRICULTURE_BROAD",
+          "selection": "INCLUDED",
+          "close_limit_up": true,
+          "board_count": 1,
+          "industry": "饲料",
+          "data_status": "VERIFIED"
+        },
+        {
+          "code": "600975",
+          "name": "新五丰",
+          "trade_date": "2026-09-04",
+          "theme_id": "AGRICULTURE_BROAD",
+          "selection": "INCLUDED",
+          "close_limit_up": true,
+          "board_count": 1,
+          "industry": "养殖业",
+          "data_status": "VERIFIED"
+        },
+        {
+          "code": "000876",
+          "name": "新希望",
+          "trade_date": "2026-09-04",
+          "theme_id": "AGRICULTURE_BROAD",
+          "selection": "INCLUDED",
+          "close_limit_up": true,
+          "board_count": 1,
+          "industry": "饲料",
+          "data_status": "VERIFIED"
+        }
+      ],
+      "n2": [],
+      "n3plus": []
+    },
+    "selection_audit": [
+      {
+        "code": "600108",
+        "action": "REMOVE_CANDIDATE_SELF",
+        "row": 0
+      }
+    ],
+    "issues": [],
+    "composition_verified": true,
+    "evidence_scope": "SUPPLIED_LOCAL_EVIDENCE_CONTRACT"
+  },
+  "c02_ranking": {
+    "n": null,
+    "rank": null,
+    "members": [],
+    "selection_audit": [],
+    "issues": [
+      "MEMBERSHIP_COMPLETE_MISSING",
+      "CANDIDATE_NOT_IN_COMPLETE_PRIOR_FIRST_BOARD_SET",
+      "NOT_COMPARABLE_SINGLETON"
+    ],
+    "rule": "previous-day all eligible first boards; later failures retained; average tie ranks"
+  },
+  "known_subtotal": 13.126436781609195,
+  "known_scored_item_count": 5,
+  "research_score_proposal": null,
+  "modules": {
+    "A": null,
+    "B": null,
+    "C": null,
+    "D": null
+  },
+  "observations_only": {
+    "C01": {
+      "score": null,
+      "role": "OBSERVATION_ONLY",
+      "details": {
+        "theme": "农业（广义）",
+        "industry": "种植业",
+        "static_concepts": [
+          "农业",
+          "种植业",
+          "粮食",
+          "乡村振兴",
+          "央国企改革",
+          "甘肃"
+        ],
+        "note": "行业为种植业，用户确认交易题材为农业；静态概念仅作参考"
+      }
+    },
+    "C03": {
+      "score": null,
+      "role": "OBSERVATION_ONLY",
+      "details": {
+        "note": "连板前相对强度待20日历史数据"
+      }
+    },
+    "D04": {
+      "score": null,
+      "role": "OBSERVATION_ONLY",
+      "details": {
+        "turnover_pct": null,
+        "note": "换手率及20日中位基准待确认"
+      }
+    }
+  },
+  "mainline_five_steps": {
+    "event_date_t0": null,
+    "step1_message_level": "UNKNOWN",
+    "step2_first_day_movement": "PARTIAL（0904农业11只涨停）",
+    "step3_capacity_leader": "UNKNOWN",
+    "step4_old_dragon_movement": "UNKNOWN",
+    "step5_status": "INPUT_PENDING",
+    "explanation": "农业题材异动日t0待确认；0904农业11只涨停显示群体异动，但容量中军和老龙异动待确认"
+  },
+  "issues": [],
+  "formula_demonstrations_not_scores": [
+    {
+      "item": "D01",
+      "description": "最后封板09:37:50，按提案时钟约定剩余分钟约322分钟（09:37:50到11:30=112.17分钟+13:00-15:00=120分钟=232.17分钟？需重新计算）",
+      "note": "仅演示，不计入有效得分"
+    },
+    {
+      "item": "D03",
+      "description": "封板资金157,784,414元，流通市值待确认；若流通市值约50亿，封单比约0.32%",
+      "note": "仅演示，不计入有效得分"
+    }
+  ],
+  "final_score": null,
+  "grade": null,
+  "permission": null,
+  "note": "Independent proposal only. No production writes. Source hashes prove local file identity, not market truth. No future label input, no normalization, no probabilities, no approval inferred.",
+  "provenance": {
+    "input_file": "F:\\PythonProject\\emotion_dashboard\\research_s02\\inputs\\600108_20260904_agriculture.json",
+    "input_sha256": "f358d0cca29cf0b4d4a08ccff97d34644515e2d99c5f6f16b642c1dc07d72a50",
+    "proposal_sha256": "18ee5db8acba317fcbdac60f62b0a71ed98b2b087f10922f67fa3c5a4638ce6e",
+    "implementation_sha256": {
+      "reference_calculator.py": "d69461032216966e10579cf609bf4ea355e98e86478656ff5d39c3904840e3b8",
+      "research_adapter.py": "a3ef6bfa100b5c87235caa46800a1b756ce47f0e1193b8b3db767b186efcba4f",
+      "run_research.py": "19b5ba9b75ac1b7f47128b0c45aaa8ab090930c8ed0d26a4be7ed4b7179b3edc"
+    },
+    "built_at_utc": "2026-09-10T06:13:24.635083+00:00",
+    "observation_dates_not_inferred_from_run_time": true
+  }
+}

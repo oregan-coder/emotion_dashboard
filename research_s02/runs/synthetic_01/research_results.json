@@ -1,0 +1,566 @@
+{
+  "schema": "5535_S02_R1_RESEARCH_RESULT_V1",
+  "version": "S02_WEIGHT_PROPOSAL_R1",
+  "implementation_version": "S02_R1_INPUT_ADAPTER_FIX1",
+  "input_type": "SYNTHETIC",
+  "candidate": {
+    "code": "999999",
+    "name": "合成候选，非真实证券",
+    "eligibility_status": "SYNTHETIC_ELIGIBLE",
+    "eligibility_reason": "仅测试字段契约，不代表真实范围核实"
+  },
+  "observation": {
+    "trade_date": "2026-09-10",
+    "previous_trade_date": "2026-09-09",
+    "captured_at": "SYNTHETIC_NOT_MARKET_CAPTURE",
+    "source_date_verified": false,
+    "closing_verified": false,
+    "previous_trade_date_verified": false
+  },
+  "enabled": false,
+  "approval_status": "PENDING_USER_REVIEW",
+  "strategy_status": "NOT_ENABLED",
+  "item_scores": {
+    "A01": 5.0,
+    "A02": 4.8,
+    "A03": 5.25,
+    "A04": 3.0,
+    "A05": 2.7,
+    "B01": 7.0,
+    "B02": 12,
+    "B03": 12,
+    "C02": 6.4,
+    "D01": 7.5,
+    "D02": 3.0,
+    "D03": 3.5999999999999996
+  },
+  "items": {
+    "A01": {
+      "name": "昨日涨停表现",
+      "proposed_weight": 8,
+      "rule_status": "PENDING_USER_REVIEW",
+      "input_values": {
+        "r_pct": 2.0
+      },
+      "input_units": {
+        "r_pct": "percent"
+      },
+      "expected_units": {
+        "r_pct": "percent"
+      },
+      "score_unit": "proposal_points",
+      "count_basis": null,
+      "source_mode": "LOCAL_APPROVED_EQUAL_WEIGHT",
+      "source_review": {},
+      "source_value_refs": {},
+      "formula": "8*clip01((r_pct+3)/8)",
+      "rationale": "昨日强势群体是否得到正反馈；不额外加入另一项赚钱效应固定分。",
+      "score": 5.0,
+      "data_status": "SYNTHETIC_ARITHMETIC",
+      "issues": []
+    },
+    "A02": {
+      "name": "已发生二进三承接",
+      "proposed_weight": 8,
+      "rule_status": "PENDING_USER_REVIEW",
+      "input_values": {
+        "p23": 0.3
+      },
+      "input_units": {
+        "p23": "fraction"
+      },
+      "expected_units": {
+        "p23": "fraction"
+      },
+      "score_unit": "proposal_points",
+      "count_basis": {
+        "numerator": 3,
+        "denominator": 10
+      },
+      "source_mode": null,
+      "source_review": {},
+      "source_value_refs": {},
+      "formula": "8*clip01(p23/0.50)",
+      "rationale": "与目标相似但使用已发生的接力结果，不引用T+1标签。",
+      "score": 4.8,
+      "data_status": "SYNTHETIC_ARITHMETIC",
+      "issues": []
+    },
+    "A03": {
+      "name": "高位续板保有",
+      "proposed_weight": 7,
+      "rule_status": "PENDING_USER_REVIEW",
+      "input_values": {
+        "fail_high": 0.25
+      },
+      "input_units": {
+        "fail_high": "fraction"
+      },
+      "expected_units": {
+        "fail_high": "fraction"
+      },
+      "score_unit": "proposal_points",
+      "count_basis": {
+        "numerator": 1,
+        "denominator": 4
+      },
+      "source_mode": null,
+      "source_review": {},
+      "source_value_refs": {},
+      "formula": "7*(1-fail_high)",
+      "rationale": "将高位群体与全市场炸板统计分开。",
+      "score": 5.25,
+      "data_status": "SYNTHETIC_ARITHMETIC",
+      "issues": []
+    },
+    "A04": {
+      "name": "市场封板稳定",
+      "proposed_weight": 4,
+      "rule_status": "PENDING_USER_REVIEW",
+      "input_values": {
+        "U": 90,
+        "Z": 30
+      },
+      "input_units": {
+        "U": "stocks",
+        "Z": "stocks"
+      },
+      "expected_units": {
+        "U": "stocks",
+        "Z": "stocks"
+      },
+      "score_unit": "proposal_points",
+      "count_basis": null,
+      "source_mode": null,
+      "source_review": {},
+      "source_value_refs": {},
+      "formula": "4*U/(U+Z)",
+      "rationale": "衡量最后封住而非只触板；不混用高位失败率。",
+      "score": 3.0,
+      "data_status": "SYNTHETIC_ARITHMETIC",
+      "issues": []
+    },
+    "A05": {
+      "name": "涨跌停两端力量",
+      "proposed_weight": 3,
+      "rule_status": "PENDING_USER_REVIEW",
+      "input_values": {
+        "U": 90,
+        "D": 10
+      },
+      "input_units": {
+        "U": "stocks",
+        "D": "stocks"
+      },
+      "expected_units": {
+        "U": "stocks",
+        "D": "stocks"
+      },
+      "score_unit": "proposal_points",
+      "count_basis": null,
+      "source_mode": null,
+      "source_review": {},
+      "source_value_refs": {},
+      "formula": "3*U/(U+D)",
+      "rationale": "尾部强弱只给低预算，避免与前四项重复放大。",
+      "score": 2.7,
+      "data_status": "SYNTHETIC_ARITHMETIC",
+      "issues": []
+    },
+    "B01": {
+      "name": "题材有效成员上涨广度",
+      "proposed_weight": 10,
+      "rule_status": "PENDING_USER_REVIEW",
+      "input_values": {
+        "breadth": 0.7
+      },
+      "input_units": {
+        "breadth": "fraction"
+      },
+      "expected_units": {
+        "breadth": "fraction"
+      },
+      "score_unit": "proposal_points",
+      "count_basis": {
+        "numerator": 7,
+        "denominator": 10
+      },
+      "source_mode": null,
+      "source_review": {},
+      "source_value_refs": {},
+      "formula": "10*breadth",
+      "rationale": "观察广泛参与，不只看涨停股票。",
+      "score": 7.0,
+      "data_status": "SYNTHETIC_ARITHMETIC",
+      "issues": []
+    },
+    "B02": {
+      "name": "题材两日相对强度",
+      "proposed_weight": 12,
+      "rule_status": "PENDING_USER_REVIEW",
+      "input_values": {
+        "excess_median_T": 1.0,
+        "excess_median_previous": 1.0
+      },
+      "input_units": {
+        "excess_median_T": "percentage_points",
+        "excess_median_previous": "percentage_points"
+      },
+      "expected_units": {
+        "excess_median_T": "percentage_points",
+        "excess_median_previous": "percentage_points"
+      },
+      "score_unit": "proposal_points",
+      "count_basis": null,
+      "source_mode": null,
+      "source_review": {},
+      "source_value_refs": {},
+      "formula": "6*I(excess_median_T>0)+6*I(excess_median_previous>0)",
+      "rationale": "当日和前日均有相对表现才满档；不是五日周期。",
+      "score": 12,
+      "data_status": "SYNTHETIC_ARITHMETIC",
+      "issues": []
+    },
+    "B03": {
+      "name": "题材梯队规模与层次",
+      "proposed_weight": 18,
+      "rule_status": "PENDING_USER_REVIEW",
+      "input_values": {
+        "n1": 3,
+        "n2": 1,
+        "n3plus": 1
+      },
+      "input_units": {
+        "n1": "stocks",
+        "n2": "stocks",
+        "n3plus": "stocks"
+      },
+      "expected_units": {
+        "n1": "stocks",
+        "n2": "stocks",
+        "n3plus": "stocks"
+      },
+      "score_unit": "proposal_points",
+      "count_basis": null,
+      "source_mode": null,
+      "source_review": {},
+      "source_value_refs": {},
+      "formula": "lower_points(n1)+peer_points(n2)+upper_points(n3plus)+structure_points(n1,n2,n3plus)",
+      "rationale": "分别观察新增首板、同高度共同出现、上层支持和多层共存；本项是结构强度，不是主线或龙头认定。",
+      "score": 12,
+      "data_status": "SYNTHETIC_ARITHMETIC",
+      "issues": []
+    },
+    "C02": {
+      "name": "首板阶段相对先手",
+      "proposed_weight": 8,
+      "rule_status": "PENDING_USER_REVIEW",
+      "input_values": {
+        "n": 6,
+        "rank": 2.0
+      },
+      "input_units": {
+        "n": "stocks",
+        "rank": "average_rank"
+      },
+      "expected_units": {
+        "n": "stocks",
+        "rank": "average_rank"
+      },
+      "score_unit": "proposal_points",
+      "count_basis": null,
+      "source_mode": null,
+      "source_review": {},
+      "source_value_refs": {},
+      "formula": "8*(n-rank)/(n-1) if n>=2 else null",
+      "rationale": "限制唯一时序指标预算，不拿先封替代业务关联、主线或核心判断。",
+      "score": 6.4,
+      "data_status": "SYNTHETIC_ARITHMETIC",
+      "issues": []
+    },
+    "D01": {
+      "name": "最后封板后持续时间",
+      "proposed_weight": 10,
+      "rule_status": "PENDING_USER_REVIEW",
+      "input_values": {
+        "remaining_session_minutes": 180.0
+      },
+      "input_units": {
+        "remaining_session_minutes": "minutes"
+      },
+      "expected_units": {
+        "remaining_session_minutes": "minutes"
+      },
+      "score_unit": "proposal_points",
+      "count_basis": null,
+      "source_mode": null,
+      "source_review": {},
+      "source_value_refs": {},
+      "formula": "10*remaining_session_minutes/240",
+      "rationale": "表示最终封住后的持续时长；不是预测下午不会开板。",
+      "score": 7.5,
+      "data_status": "SYNTHETIC_ARITHMETIC",
+      "issues": []
+    },
+    "D02": {
+      "name": "当日开板次数",
+      "proposed_weight": 6,
+      "rule_status": "PENDING_USER_REVIEW",
+      "input_values": {
+        "open_break_count": 1
+      },
+      "input_units": {
+        "open_break_count": "times"
+      },
+      "expected_units": {
+        "open_break_count": "times"
+      },
+      "score_unit": "proposal_points",
+      "count_basis": null,
+      "source_mode": null,
+      "source_review": {},
+      "source_value_refs": {},
+      "formula": "6/(1+open_break_count)",
+      "rationale": "与D01构成合计16分的稳定组，不再在其他模块按同一开板事实扣分。",
+      "score": 3.0,
+      "data_status": "SYNTHETIC_ARITHMETIC",
+      "issues": []
+    },
+    "D03": {
+      "name": "收盘封单相对规模",
+      "proposed_weight": 6,
+      "rule_status": "PENDING_USER_REVIEW",
+      "input_values": {
+        "seal_amount": 6000000,
+        "circulating_market_cap": 1000000000
+      },
+      "input_units": {
+        "seal_amount": "CNY",
+        "circulating_market_cap": "CNY"
+      },
+      "expected_units": {
+        "seal_amount": "CNY",
+        "circulating_market_cap": "CNY"
+      },
+      "score_unit": "proposal_points",
+      "count_basis": null,
+      "source_mode": null,
+      "source_review": {},
+      "source_value_refs": {},
+      "formula": "6*clip01(seal_amount/circulating_market_cap/0.01)",
+      "rationale": "仅为静态委托规模的代理，不称为订单流、主力净流入或成交保证。",
+      "score": 3.5999999999999996,
+      "data_status": "SYNTHETIC_ARITHMETIC",
+      "issues": []
+    }
+  },
+  "b03_composition": {
+    "score": 12,
+    "parts": {
+      "lower": 4,
+      "peer": 1,
+      "upper": 2,
+      "structure": 5
+    },
+    "status": "PROPOSAL_CALCULATED",
+    "max": 18,
+    "counts_excluding_candidate": {
+      "n1": 3,
+      "n2": 1,
+      "n3plus": 1
+    },
+    "theme_id": "SYNTHETIC_THEME",
+    "trade_date": "2026-09-10",
+    "counts": {
+      "n1": 3,
+      "n2": 1,
+      "n3plus": 1
+    },
+    "groups": {
+      "n1": [
+        {
+          "code": "910000",
+          "name": "虚构成员",
+          "theme_id": "SYNTHETIC_THEME",
+          "trade_date": "2026-09-10",
+          "board_count": 1,
+          "close_limit_up": true,
+          "selection": "INCLUDED"
+        },
+        {
+          "code": "910001",
+          "name": "虚构成员",
+          "theme_id": "SYNTHETIC_THEME",
+          "trade_date": "2026-09-10",
+          "board_count": 1,
+          "close_limit_up": true,
+          "selection": "INCLUDED"
+        },
+        {
+          "code": "910002",
+          "name": "虚构成员",
+          "theme_id": "SYNTHETIC_THEME",
+          "trade_date": "2026-09-10",
+          "board_count": 1,
+          "close_limit_up": true,
+          "selection": "INCLUDED"
+        }
+      ],
+      "n2": [
+        {
+          "code": "910003",
+          "name": "虚构成员",
+          "theme_id": "SYNTHETIC_THEME",
+          "trade_date": "2026-09-10",
+          "board_count": 2,
+          "close_limit_up": true,
+          "selection": "INCLUDED"
+        }
+      ],
+      "n3plus": [
+        {
+          "code": "910004",
+          "name": "虚构成员",
+          "theme_id": "SYNTHETIC_THEME",
+          "trade_date": "2026-09-10",
+          "board_count": 3,
+          "close_limit_up": true,
+          "selection": "INCLUDED"
+        }
+      ]
+    },
+    "selection_audit": [
+      {
+        "code": "999999",
+        "action": "REMOVE_CANDIDATE_SELF",
+        "row": 5
+      }
+    ],
+    "issues": [],
+    "composition_verified": true,
+    "evidence_scope": "SYNTHETIC"
+  },
+  "c02_ranking": {
+    "n": 6,
+    "rank": 2.0,
+    "members": [
+      {
+        "code": "920000",
+        "name": "虚构前日首板",
+        "theme_id": "SYNTHETIC_THEME",
+        "trade_date": "2026-09-09",
+        "board_count": 1,
+        "close_limit_up": true,
+        "selection": "INCLUDED",
+        "first_seal_time": "09:35:00",
+        "today_promotion": "UNUSED"
+      },
+      {
+        "code": "999999",
+        "name": "虚构前日首板",
+        "theme_id": "SYNTHETIC_THEME",
+        "trade_date": "2026-09-09",
+        "board_count": 1,
+        "close_limit_up": true,
+        "selection": "INCLUDED",
+        "first_seal_time": "09:40:00",
+        "today_promotion": "UNUSED"
+      },
+      {
+        "code": "920002",
+        "name": "虚构前日首板",
+        "theme_id": "SYNTHETIC_THEME",
+        "trade_date": "2026-09-09",
+        "board_count": 1,
+        "close_limit_up": true,
+        "selection": "INCLUDED",
+        "first_seal_time": "10:00:00",
+        "today_promotion": "UNUSED"
+      },
+      {
+        "code": "920003",
+        "name": "虚构前日首板",
+        "theme_id": "SYNTHETIC_THEME",
+        "trade_date": "2026-09-09",
+        "board_count": 1,
+        "close_limit_up": true,
+        "selection": "INCLUDED",
+        "first_seal_time": "10:15:00",
+        "today_promotion": "UNUSED"
+      },
+      {
+        "code": "920004",
+        "name": "虚构前日首板",
+        "theme_id": "SYNTHETIC_THEME",
+        "trade_date": "2026-09-09",
+        "board_count": 1,
+        "close_limit_up": true,
+        "selection": "INCLUDED",
+        "first_seal_time": "10:30:00",
+        "today_promotion": "UNUSED"
+      },
+      {
+        "code": "920005",
+        "name": "虚构前日首板",
+        "theme_id": "SYNTHETIC_THEME",
+        "trade_date": "2026-09-09",
+        "board_count": 1,
+        "close_limit_up": true,
+        "selection": "INCLUDED",
+        "first_seal_time": "11:00:00",
+        "today_promotion": "UNUSED"
+      }
+    ],
+    "selection_audit": [],
+    "issues": [],
+    "rule": "previous-day all eligible first boards; later failures retained; average tie ranks"
+  },
+  "known_subtotal": 72.25,
+  "known_scored_item_count": 12,
+  "research_score_proposal": 72.25,
+  "modules": {
+    "A": 20.75,
+    "B": 31.0,
+    "C": 6.4,
+    "D": 14.1
+  },
+  "observations_only": {
+    "C01": {
+      "score": null,
+      "role": "OBSERVATION_ONLY",
+      "details": {
+        "status": "SYNTHETIC_OBSERVER",
+        "score": null
+      }
+    },
+    "C03": {
+      "score": null,
+      "role": "OBSERVATION_ONLY",
+      "details": null
+    },
+    "D04": {
+      "score": null,
+      "role": "OBSERVATION_ONLY",
+      "details": null
+    }
+  },
+  "mainline_five_steps": {},
+  "issues": [],
+  "formula_demonstrations_not_scores": [],
+  "final_score": null,
+  "grade": null,
+  "permission": null,
+  "note": "Independent proposal only. No production writes. Source hashes prove local file identity, not market truth. No future label input, no normalization, no probabilities, no approval inferred.",
+  "provenance": {
+    "input_file": "F:\\PythonProject\\emotion_dashboard\\research_s02\\inputs\\synthetic_72_25.json",
+    "input_sha256": "3b78ccb7ab386ea9bf280f1314d00fb71adcbb88076e321e1814223bf6c2417d",
+    "proposal_sha256": "18ee5db8acba317fcbdac60f62b0a71ed98b2b087f10922f67fa3c5a4638ce6e",
+    "implementation_sha256": {
+      "reference_calculator.py": "d69461032216966e10579cf609bf4ea355e98e86478656ff5d39c3904840e3b8",
+      "research_adapter.py": "a3ef6bfa100b5c87235caa46800a1b756ce47f0e1193b8b3db767b186efcba4f",
+      "run_research.py": "19b5ba9b75ac1b7f47128b0c45aaa8ab090930c8ed0d26a4be7ed4b7179b3edc"
+    },
+    "built_at_utc": "2026-09-10T06:00:48.680945+00:00",
+    "observation_dates_not_inferred_from_run_time": true
+  }
+}

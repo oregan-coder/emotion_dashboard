@@ -1,0 +1,515 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>灵境・资本全域决策舱 V6.6.0</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%23f6465d'/><text x='50' y='68' font-size='52' text-anchor='middle' fill='white' font-family='sans-serif' font-weight='bold'>板</text></svg>">
+<link rel="stylesheet" href="/static/style.css">
+<link rel="stylesheet" href="/static/command-center.css">
+<link rel="stylesheet" href="/static/cockpit-redesign.css">
+<script src="/static/js/echarts.min.js"></script>
+<script>window.echarts||document.write('<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"><\/script>')</script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="logo">橙子出品</span>
+    <span class="title">灵境・资本全域决策舱 <em>V6.6.0</em></span>
+    <button id="sideToggle" class="side-toggle" title="展开/收起目录">☰</button>
+  </div>
+  <div class="topbar-right">
+    <button id="updateBtn" class="update-btn" title="收盘后点击获取最新数据">
+      <span class="update-icon">↻</span>
+      <span class="update-text">更新数据</span>
+    </button>
+    <label class="backfill-picker" for="backfillDate">
+      <span>补录日期</span>
+      <select id="backfillDate" title="选择待补录交易日">
+        <option value="">请选择补录日期</option>
+        <option value="20260924">2026-09-24</option>
+        <option value="20260923">2026-09-23</option>
+        <option value="20260922">2026-09-22</option>
+        <option value="20260921">2026-09-21</option>
+        <option value="20260918">2026-09-18</option>
+        <option value="20260917">2026-09-17</option>
+        <option value="20260916">2026-09-16</option>
+        <option value="20260915">2026-09-15</option>
+        <option value="20260914">2026-09-14</option>
+        <option value="20260911">2026-09-11</option>
+        <option value="20260910">2026-09-10</option>
+        <option value="20260909">2026-09-09</option>
+        <option value="20260908">2026-09-08</option>
+        <option value="20260907">2026-09-07</option>
+        <option value="20260904">2026-09-04</option>
+        <option value="20260903">2026-09-03</option>
+        <option value="20260902">2026-09-02</option>
+        <option value="20260901">2026-09-01</option>
+      </select>
+    </label>
+    <button id="backfillBtn" class="backfill-btn" title="补录所选交易日" disabled>补</button>
+    <div class="replay" id="replayBox">
+      <button id="prevDay" class="rp-btn" title="上一个交易日">◀</button>
+      <div class="rp-date">
+        <span class="rp-label">已发布回放</span>
+        <select id="playDate" class="rp-select" title="选择历史交易日"></select>
+        <span id="playState" class="rp-state">--</span>
+      </div>
+      <button id="nextDay" class="rp-btn" title="下一个交易日">▶</button>
+      <button id="backToday" class="rp-btn rp-today" title="回到今日" style="display:none;">回</button>
+    </div>
+    <div class="meta">
+      <span class="chip dim" id="updateTime">--</span>
+    </div>
+  </div>
+</header>
+<div class="layout-shell">
+<button class="side-handle" id="sideHandle" title="展开/收起目录">▶</button>
+<aside class="side-drawer" id="sideDrawer">
+  <a href="/backtest" class="side-link" title="历史回测分析" class="side-link ls4">历史回测</a>
+  <a href="/validation" class="side-link" title="数据与验证只读页面" class="side-link ls5">数据与验证</a>
+  <a href="/research/cycle-theme" class="side-link" title="情绪周期与主线观察研究页" class="side-link ls5">周期与主线</a>
+  <a href="/research/theme-review" class="side-link" title="暂停计算，仅查看既有独立修订">题材复核存档</a>
+</aside>
+<div class="side-mask" id="sideMask"></div>
+
+<main class="container">
+
+  <!-- 空数据提示 -->
+  <div id="emptyTip" class="empty hidden">
+    <div class="empty-title">暂无仪表盘数据</div>
+    <div class="empty-desc">
+      请先在项目目录运行 <code>python start.py</code> 生成当日数据，<br>
+      再刷新本页面查看仪表盘。
+    </div>
+  </div>
+
+  <!-- 明日三板预案 · 长横幅 -->
+  <section class="banner">
+    <div class="banner-head">
+      <h2>明日三板预案</h2>
+      <span class="banner-sub">基于今日2板强度 + 同概念批量涨停 + 首板衍生</span>
+      <div class="banner-pager">
+        <button id="bannerPrev" class="pager-btn" title="上一页">◀</button>
+        <span id="bannerPage" class="pager-info">1 / 1</span>
+        <button id="bannerNext" class="pager-btn" title="下一页">▶</button>
+      </div>
+    </div>
+    <div class="banner-cards" id="bannerCandidates"></div>
+    <div class="banner-popup" id="bannerPopup"></div>
+  </section>
+
+  <!-- 砸盘情绪（含下方涨停生态/操作策略） / 今日情绪总览 -->
+  <section class="hero">
+    <div class="panel smash-panel">
+      <h3>砸盘情绪 <span class="smash-hf" id="smashHighFeedback">--</span></h3>
+      <div class="smash-risk-tip" id="smashRiskTip" style="display:none;"></div>
+      <div id="smashTrend" class="chart chart-trend-sm"></div>
+
+      <!-- 龙头监控 -->
+      <div class="leader-monitor" id="leaderMonitor">
+        <div class="lm-top">
+          <div class="lm-highest" id="lmHighest"></div>
+          <div class="lm-risk" id="lmRisk"></div>
+        </div>
+        <div class="lm-high-boards" id="lmHighBoards"></div>
+        <div class="lm-high-break" id="lmHighBreak"></div>
+      </div>
+
+      <!-- 连板梯队（砸盘情绪下方，横向舒展） -->
+      <div class="ladder-block">
+        <h4>连板梯队</h4>
+        <div id="ladderChart" class="chart chart-ladder-wide"></div>
+        <div class="leader-line" id="leaderLine"></div>
+      </div>
+
+      <!-- 砸盘情绪下方并列：涨停生态 + 操作策略 -->
+      <div class="smash-sub">
+        <div class="sub-card">
+          <h4>涨停生态</h4>
+          <div class="tiles tiles-sm" id="limitTiles"></div>
+        </div>
+        <div class="sub-card strategy-sub">
+          <h4>操作策略</h4>
+          <p class="strategy-sm" id="strategyText">--</p>
+          <p class="strategy-desc-sm" id="cycleDesc">--</p>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="panel hero-right">
+      <h3>今日情绪总览</h3>
+      <div class="gauge-row">
+        <div class="gauge-wrap">
+          <div class="gauge-circle" id="emotionGauge">
+            <div class="gauge-wave" id="emotionWave"></div>
+            <div class="gauge-num" id="emotionScore">--</div>
+            <div class="gauge-cap">情绪分</div>
+          </div>
+        </div>
+        <div class="gauge-wrap">
+          <div class="gauge-circle" id="positionGauge">
+            <div class="gauge-wave" id="positionWave"></div>
+            <div class="gauge-num" id="positionScore">--</div>
+            <div class="gauge-cap">仓位</div>
+          </div>
+        </div>
+
+      </div>
+      <div class="hero-tags">
+        <div class="tag" id="cycleStage">--</div>
+        <div class="tag" id="heightStage">--</div>
+        <div class="tag" id="smashStatus">--</div>
+      </div>
+
+      <!-- 阶段横条 + 当前指针 -->
+      <div class="cycle-bar" id="cycleBar"><!-- JS渲染 --></div>
+
+      <div class="hero-trend" id="cycleTrend">--</div>
+
+
+      <!-- 涨停梯队 / 概念联动（先出一版） -->
+      <div class="hero-extra">
+        <div class="extra-block">
+          <h4>2板梯队 · 同概念1板</h4>
+          <div id="secondPool" class="pool-list"></div>
+        </div>
+        <div class="extra-block">
+          <h4>1板首板 · 按首封时间</h4>
+          <div id="firstPool" class="pool-list"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 市场广度 -->
+  <section class="grid2">
+    <div class="panel" style="grid-column:1/-1;">
+      <h3>市场广度</h3>
+      <div id="marketChart" class="chart chart-half"></div>
+      <div class="mini-stats" id="marketStats"></div>
+    </div>
+  </section>
+
+</main>
+</div>
+
+<!-- 更新数据进度浮层 -->
+<div id="updateOverlay" class="update-overlay">
+  <span class="uo-close" id="updateClose">×</span>
+  <div class="uo-title">
+    <span>↻</span>
+    <span id="updateTitle">数据更新中</span>
+  </div>
+  <div class="uo-bar"><div class="uo-bar-fill"></div></div>
+<div class="uo-progress" id="updateProgress">正在初始化...</div>
+  <div class="uo-result" id="updateResult" style="display:none;"></div>
+  <div class="uo-error" id="updateError" style="display:none;"></div>
+  <button type="button" id="updateStopButton" aria-label="停止更新" style="margin-top:10px;padding:6px 14px;border-radius:8px;border:1px solid rgba(255,255,255,.3);background:#8b1e1e;color:#fff;cursor:pointer;">停止</button>
+</div>
+
+<footer>
+  <span>核心计算由 <code>start.py</code> 完成 · 网页仅做展示</span>
+  <span>启动：<code>python web_app.py</code> · 每日更新数据：<code>python start.py</code></span>
+</footer>
+
+<script src="/static/js/chart.js?v=20260926-backfill2"></script>
+<script src="/static/cockpit-redesign.js"></script>
+
+<script>
+(function(){
+  var t=document.getElementById('sideToggle'),d=document.getElementById('sideDrawer'),m=document.getElementById('sideMask');
+  var h=document.getElementById('sideHandle');
+  function paint(){ if(!h)return; var o=d.classList.contains('open'); h.classList.toggle('open',o); h.textContent=o?'◀':'▶'; }
+  function open(){d.classList.add('open');m.classList.add('open');paint();}
+  function close(){d.classList.remove('open');m.classList.remove('open');paint();}
+  paint();
+  if(t){t.addEventListener('click',function(){d.classList.contains('open')?close():open();});}
+  if(h){h.addEventListener('click',function(){d.classList.contains('open')?close():open();});}
+  if(m){m.addEventListener('click',close);}
+  window.addEventListener('keydown',function(e){if(e.key==='Escape')close();});
+})();
+</script>
+<!-- 5535_PRE_CLOSE_UPDATE_GUARD_R1_BEGIN -->
+<script id="5535-pre-close-update-guard-r1">
+(function () {
+  'use strict';
+
+  var MESSAGE = '该交易日未收盘，为了数据准确性，请收盘后再重试；';
+  var ZONE = 'Asia/Shanghai';
+
+  function normalizeText(s) {
+    return String(s || '').replace(/\s+/g, '').trim();
+  }
+
+  function actionElement(target) {
+    if (!target || !target.closest) return null;
+    return target.closest('button, a, [role="button"], input[type="button"], input[type="submit"]');
+  }
+
+  function actionText(el) {
+    if (!el) return '';
+    if (el.tagName === 'INPUT') return normalizeText(el.value || '');
+    return normalizeText(el.textContent || el.innerText || el.getAttribute('aria-label') || el.title || '');
+  }
+
+  function isCurrentUpdateAction(el) {
+    return actionText(el).indexOf('更新数据') !== -1;
+  }
+
+  function cnNowParts() {
+    var now = new Date();
+    var parts = new Intl.DateTimeFormat('en-CA', {
+      timeZone: ZONE,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    }).formatToParts(now);
+    var out = {};
+    parts.forEach(function (p) {
+      if (p.type !== 'literal') out[p.type] = p.value;
+    });
+    out.weekday = new Intl.DateTimeFormat('en-US', {
+      timeZone: ZONE,
+      weekday: 'short'
+    }).format(now);
+    return out;
+  }
+
+  function isPreCloseTradingDayNow() {
+    var p = cnNowParts();
+    if (p.weekday === 'Sat' || p.weekday === 'Sun') return false;
+    var hour = Number(p.hour);
+    return hour < 15;
+  }
+
+  function showMessage() {
+    if (typeof window.alert === 'function') {
+      window.alert(MESSAGE);
+      return;
+    }
+    try {
+      var node = document.createElement('div');
+      node.setAttribute('role', 'alert');
+      node.textContent = MESSAGE;
+      node.style.cssText =
+        'position:fixed;left:50%;top:22%;transform:translateX(-50%);z-index:2147483647;' +
+        'padding:14px 20px;border-radius:10px;background:#171717;color:#fff;font-size:15px;' +
+        'box-shadow:0 8px 30px rgba(0,0,0,.28);max-width:min(90vw,620px);';
+      document.body.appendChild(node);
+      setTimeout(function () {
+        if (node.parentNode) node.parentNode.removeChild(node);
+      }, 3200);
+    } catch (e) {}
+  }
+
+  document.addEventListener('click', function (event) {
+    var el = actionElement(event.target);
+    if (!isCurrentUpdateAction(el)) return;
+    if (!isPreCloseTradingDayNow()) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    if (typeof event.stopImmediatePropagation === 'function') {
+      event.stopImmediatePropagation();
+    }
+    showMessage();
+    return false;
+  }, true);
+
+  window.__5535_PRE_CLOSE_UPDATE_GUARD__ = Object.freeze({
+    version: 'R1',
+    timezone: ZONE,
+    closeTime: '15:00',
+    message: MESSAGE,
+    historicalSupplementButtonAffected: false
+  });
+})();
+</script>
+<!-- 5535_PRE_CLOSE_UPDATE_GUARD_R1_END -->
+
+<!-- 5535_UPDATE_OVERLAY_STOP_FINAL_BEGIN -->
+<script id="5535-update-overlay-stop-final">
+(function(){
+  'use strict';
+  if(window.__5535_UPDATE_OVERLAY_STOP_FINAL__)return;
+  var stopped=false,controllers=new Set(),xhrs=new Set();
+  var nativeFetch=window.fetch,nativeSend=window.XMLHttpRequest&&window.XMLHttpRequest.prototype.send;
+  function isUpdate(input){
+    try{
+      var u=typeof input==='string'?input:(input&&input.url)||'';
+      var a=document.createElement('a');a.href=u;
+      return a.pathname==='/api/update'||a.pathname==='/api/update/status';
+    }catch(e){return false;}
+  }
+  function reset(){
+    stopped=false;window.__5535_UPDATE_STOP_REQUESTED__=false;
+    var b=document.getElementById('updateStopButton');
+    if(b){b.disabled=false;b.textContent='停止';}
+  }
+  function stop(e){
+    if(e){e.preventDefault();e.stopPropagation();if(e.stopImmediatePropagation)e.stopImmediatePropagation();}
+    stopped=true;window.__5535_UPDATE_STOP_REQUESTED__=true;
+    ['stopUpdate','cancelUpdate','abortUpdate','stopDataUpdate','cancelDataUpdate'].forEach(function(n){
+      try{var f=window[n];if(typeof f==='function'&&f!==stop)f.call(window);}catch(x){}
+    });
+    controllers.forEach(function(c){try{c.abort();}catch(x){}});controllers.clear();
+    xhrs.forEach(function(x){try{x.abort();}catch(y){}});xhrs.clear();
+    var ub=document.getElementById('updateBtn');if(ub)ub.classList.remove('running');
+    var o=document.getElementById('updateOverlay');
+    if(o){o.classList.remove('show','active','loading');o.style.display='none';o.setAttribute('data-update-stopped','1');}
+    var b=document.getElementById('updateStopButton');if(b){b.disabled=true;b.textContent='已停止';}
+    try{fetch('/api/update/stop',{method:'POST'}).catch(function(){});}catch(x){}
+    try{window.dispatchEvent(new CustomEvent('5535:update-stop'));}catch(x){}
+  }
+  if(typeof nativeFetch==='function'){
+    window.fetch=function(input,init){
+      if(stopped&&isUpdate(input))return Promise.reject(new DOMException('Update stopped','AbortError'));
+      if(!isUpdate(input))return nativeFetch.apply(this,arguments);
+      var c=new AbortController(),next=Object.assign({},init||{});
+      try{
+        if(next.signal&&window.AbortSignal&&typeof AbortSignal.any==='function')next.signal=AbortSignal.any([next.signal,c.signal]);
+        else if(!next.signal)next.signal=c.signal;
+      }catch(e){next.signal=c.signal;}
+      controllers.add(c);
+      return nativeFetch.call(this,input,next).finally(function(){controllers.delete(c);});
+    };
+  }
+  if(nativeSend){
+    window.XMLHttpRequest.prototype.send=function(){
+      try{xhrs.add(this);this.addEventListener('loadend',function(){xhrs.delete(this);});}catch(e){}
+      return nativeSend.apply(this,arguments);
+    };
+  }
+  document.addEventListener('click',function(e){
+    var t=e.target&&e.target.closest?e.target.closest('#updateStopButton,#updateBtn'):null;
+    if(!t)return;
+    if(t.id==='updateStopButton')stop(e);else reset();
+  },true);
+  window.__5535_UPDATE_OVERLAY_STOP_FINAL__=Object.freeze({
+    bindingLocation:'independent_index_script_outside_update_control_block'
+  });
+})();
+</script>
+<!-- 5535_UPDATE_OVERLAY_STOP_FINAL_END -->
+
+<script>
+// 交易日15点前拦截更新数据
+document.addEventListener('click', function(e) {
+    const btn = e.target.closest('#updateBtn');
+    if (!btn) return;
+    const now = new Date();
+    // 转成北京时间
+    const beijingHour = new Date(now.getTime() + (now.getTimezoneOffset() + 480) * 60000).getHours();
+    const beijingMin = new Date(now.getTime() + (now.getTimezoneOffset() + 480) * 60000).getMinutes();
+    const day = new Date(now.getTime() + (now.getTimezoneOffset() + 480) * 60000).getDay();
+    // 周一到周五，15点前拦截
+    if (day >= 1 && day <=5 && (beijingHour < 15)) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        alert("该交易日未收盘，为了数据准确性，请收盘后再重试；");
+    }
+}, true);
+</script>
+<script id="5535-backfill-date-init">
+(function () {
+  'use strict';
+  if (window.__5535_BACKFILL_DATE_INIT__) return;
+  window.__5535_BACKFILL_DATE_INIT__ = true;
+
+  var select = document.getElementById('backfillDate');
+  var button = document.getElementById('backfillBtn');
+  var overlay = document.getElementById('updateOverlay');
+  var title = document.getElementById('updateTitle');
+  var progress = document.getElementById('updateProgress');
+  var result = document.getElementById('updateResult');
+  var error = document.getElementById('updateError');
+  if (!select) return;
+
+  function syncButton() {
+    if (button) button.disabled = !select.value || !!button.classList.contains('running');
+  }
+
+  function dateText(value) {
+    var s = String(value || '').replace(/-/g, '');
+    return /^\d{8}$/.test(s) ? s.slice(0, 4) + '-' + s.slice(4, 6) + '-' + s.slice(6) : s;
+  }
+
+  select.addEventListener('change', syncButton);
+  syncButton();
+  fetch('/api/backfill/dates?month=202609', { cache: 'no-store' })
+    .then(function (response) {
+      return response.json().then(function (body) {
+        if (!response.ok) throw new Error(body.error || '交易日历不可用');
+        return body;
+      });
+    })
+    .then(function (body) {
+      if (!Array.isArray(body.dates) || !body.dates.length) {
+        select.disabled = false;
+        syncButton();
+        return;
+      }
+      select.innerHTML = '';
+      var placeholder = document.createElement('option');
+      placeholder.value = '';
+      placeholder.textContent = '请选择补录日期';
+      select.appendChild(placeholder);
+      (body.dates || []).slice().reverse().forEach(function (date) {
+        var option = document.createElement('option');
+        option.value = date;
+        option.textContent = dateText(date);
+        select.appendChild(option);
+      });
+      select.disabled = !(body.dates || []).length;
+      syncButton();
+    })
+    .catch(function (reason) {
+      // Keep the verified September options rendered in the HTML fallback.
+      // A calendar endpoint outage must not make the selector unclickable.
+      select.disabled = false;
+      syncButton();
+      if (window.console && console.warn) console.warn('补录交易日历加载失败：' + reason.message);
+    });
+
+  if (button && !button.dataset.backfillBound) {
+    button.dataset.backfillBound = '1';
+    button.addEventListener('click', function () {
+      var target = select.value;
+      if (!target || button.classList.contains('running')) return;
+      if (!window.confirm('确认补录 ' + dateText(target) + ' 的数据？\\n\\n将重新采集并计算该日的全部数据。\\n\\n该操作可能需要较长时间。')) return;
+      button.classList.add('running');
+      syncButton();
+      if (overlay) overlay.classList.add('show');
+      if (title) title.textContent = '补录 ' + dateText(target) + ' 数据';
+      if (progress) progress.textContent = '正在初始化...';
+      if (result) result.style.display = 'none';
+      if (error) error.style.display = 'none';
+      fetch('/api/update', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({requested_date: target})
+      }).then(function (response) {
+        return response.json().then(function (body) {
+          if (!response.ok || body.status === 'error') throw new Error(body.error || '补录未启动');
+          if (progress && body.progress) progress.textContent = body.progress;
+          return body;
+        });
+      }).catch(function (reason) {
+        if (error) { error.textContent = '请求失败：' + reason.message; error.style.display = 'block'; }
+        button.classList.remove('running');
+        syncButton();
+      });
+    });
+  }
+})();
+</script>
+</body>
+</html>

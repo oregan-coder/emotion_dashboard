@@ -1,0 +1,24 @@
+{
+  "A01": {
+    "r_pct": null,
+    "source_mode": "LOCAL_APPROVED_EQUAL_WEIGHT_PENDING"
+  },
+  "A02": {
+    "p23": 0.0,
+    "numerator": 0,
+    "denominator": 6
+  },
+  "A03": {
+    "fail_high": 0.6666666666666666,
+    "numerator": 2,
+    "denominator": 3
+  },
+  "A04": {
+    "U": 39,
+    "Z": 48
+  },
+  "A05": {
+    "U": 39,
+    "D": null
+  }
+}

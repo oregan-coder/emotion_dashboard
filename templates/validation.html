@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>数据与验证 | A股情绪驾驶舱</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#0b0e14; color:#e0e0e0; font-family:'Consolas','Microsoft YaHei',monospace; font-size:13px; line-height:1.6; }
+.topbar { background:linear-gradient(90deg,#1a1f2e,#0f1320); border-bottom:1px solid #2a3040; padding:10px 20px; display:flex; align-items:center; gap:15px; }
+.topbar .logo { color:#f5a623; font-weight:bold; font-size:15px; background:rgba(245,166,35,0.1); padding:4px 10px; border-radius:4px; }
+.topbar .title { color:#fff; font-size:16px; font-weight:bold; letter-spacing:1px; }
+.topbar .version { color:#888; font-size:11px; border:1px solid #444; padding:2px 6px; border-radius:3px; }
+.topbar .nav { margin-left:auto; display:flex; gap:10px; }
+.topbar .nav a { color:#aaa; text-decoration:none; padding:5px 12px; border-radius:4px; font-size:12px; transition:all 0.2s; }
+.topbar .nav a:hover { color:#fff; background:rgba(255,255,255,0.05); }
+.topbar .nav a.active { color:#f5a623; border-bottom:2px solid #f5a623; }
+.topbar .date-info { color:#888; font-size:12px; margin-left:15px; }
+.container { max-width:1440px; margin:0 auto; padding:20px; }
+h1 { font-size:20px; color:#fff; margin-bottom:5px; display:flex; align-items:center; gap:10px; }
+h1 .icon { color:#f5a623; }
+.subtitle { color:#888; font-size:12px; margin-bottom:15px; }
+.status-bar { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px; }
+.status-badge { padding:6px 12px; border-radius:4px; font-size:12px; display:flex; align-items:center; gap:6px; }
+.status-badge .label { color:#888; }
+.status-badge .value { font-weight:bold; }
+.status-ok { background:rgba(82,196,26,0.1); border:1px solid rgba(82,196,26,0.3); }
+.status-ok .value { color:#52c41a; }
+.status-warn { background:rgba(250,173,20,0.1); border:1px solid rgba(250,173,20,0.3); }
+.status-warn .value { color:#faad14; }
+.status-error { background:rgba(234,102,104,0.1); border:1px solid rgba(234,102,104,0.3); }
+.status-error .value { color:#ea6668; }
+.status-info { background:rgba(139,200,234,0.1); border:1px solid rgba(139,200,234,0.3); }
+.status-info .value { color:#8bc8ea; }
+.section { background:#11151f; border:1px solid #1e2433; border-radius:8px; padding:16px; margin-bottom:16px; }
+.section-title { font-size:15px; color:#fff; margin-bottom:12px; display:flex; align-items:center; gap:8px; padding-bottom:8px; border-bottom:1px solid #1e2433; }
+.section-title .num { color:#f5a623; font-weight:bold; }
+.section-title .hint { margin-left:auto; font-size:11px; color:#666; font-weight:normal; }
+.market-overview { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:10px; margin-bottom:12px; }
+.overview-card { background:#0d1117; border:1px solid #1e2433; border-radius:6px; padding:12px; text-align:center; }
+.overview-card .num { font-size:24px; font-weight:bold; color:#f5a623; }
+.overview-card .label { font-size:11px; color:#888; margin-top:4px; }
+.overview-card .stock { font-size:12px; color:#8bc8ea; margin-top:2px; }
+.metrics-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:10px; }
+.metric-card { background:#0d1117; border:1px solid #1e2433; border-radius:6px; padding:12px; cursor:pointer; transition:all 0.2s; }
+.metric-card:hover { border-color:#f5a623; }
+.metric-card .name { font-size:12px; color:#aaa; margin-bottom:4px; }
+.metric-card .value { font-size:22px; font-weight:bold; color:#fff; }
+.metric-card .ratio { font-size:12px; color:#888; margin-top:2px; }
+.metric-card .status { display:inline-block; padding:2px 8px; border-radius:3px; font-size:10px; margin-top:6px; }
+.status-valid { background:rgba(82,196,26,0.15); color:#52c41a; }
+.status-error-s { background:rgba(234,102,104,0.15); color:#ea6668; }
+.status-missing { background:rgba(136,136,136,0.15); color:#888; }
+.metric-detail { display:none; margin-top:10px; padding-top:10px; border-top:1px solid #1e2433; font-size:11px; }
+.metric-detail.open { display:block; }
+.metric-detail .row { display:flex; justify-content:space-between; padding:3px 0; }
+.metric-detail .row .k { color:#888; }
+.metric-detail .row .v { color:#ccc; }
+.metric-detail .codes { color:#8bc8ea; word-break:break-all; font-size:10px; margin-top:4px; }
+.toolbar { display:flex; gap:10px; margin-bottom:12px; align-items:center; flex-wrap:wrap; }
+.toolbar input, .toolbar select { background:#0d1117; border:1px solid #2a3040; color:#e0e0e0; padding:6px 10px; border-radius:4px; font-size:12px; font-family:inherit; }
+.toolbar input { width:200px; }
+.toolbar .count { color:#888; font-size:12px; margin-left:auto; }
+table { width:100%; border-collapse:collapse; font-size:12px; }
+th { background:#1a1f2e; color:#aaa; padding:8px 10px; text-align:left; border-bottom:2px solid #2a3040; cursor:pointer; user-select:none; white-space:nowrap; }
+th:hover { color:#f5a623; }
+th .sort-arrow { font-size:10px; margin-left:4px; }
+td { padding:8px 10px; border-bottom:1px solid #1e2433; }
+tr:hover { background:rgba(245,166,35,0.03); }
+.code { color:#8bc8ea; font-weight:bold; }
+.name { color:#fff; cursor:pointer; }
+.name:hover { color:#f5a623; text-decoration:underline; }
+.num-val { text-align:right; font-variant-numeric:tabular-nums; }
+.tag { display:inline-block; padding:1px 6px; border-radius:3px; font-size:10px; }
+.tag-valid { background:rgba(82,196,26,0.15); color:#52c41a; }
+.tag-missing { background:rgba(136,136,136,0.15); color:#888; }
+.tag-invalid { background:rgba(234,102,104,0.15); color:#ea6668; }
+.tag-unknown { background:rgba(250,173,20,0.15); color:#faad14; }
+.btn { background:#1a1f2e; border:1px solid #2a3040; color:#aaa; padding:4px 10px; border-radius:4px; cursor:pointer; font-size:11px; font-family:inherit; transition:all 0.2s; }
+.btn:hover { color:#f5a623; border-color:#f5a623; }
+.stock-detail { display:none; background:#0d1117; border:1px solid #2a3040; border-radius:6px; padding:12px; margin:8px 0; }
+.stock-detail.open { display:block; }
+.stock-detail h4 { color:#f5a623; font-size:13px; margin-bottom:8px; }
+.field-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:8px; }
+.field-item { background:#11151f; border:1px solid #1e2433; border-radius:4px; padding:8px; }
+.field-item .fname { color:#888; font-size:11px; margin-bottom:2px; }
+.field-item .fvalue { color:#fff; font-size:13px; font-weight:bold; }
+.field-item .fmeta { font-size:10px; color:#666; margin-top:4px; line-height:1.4; }
+.field-item .fmeta span { display:inline-block; margin-right:8px; }
+.relation-section { margin-top:12px; padding-top:10px; border-top:1px solid #1e2433; }
+.relation-section h5 { color:#8bc8ea; font-size:12px; margin-bottom:6px; }
+.concept-list { display:flex; flex-wrap:wrap; gap:4px; }
+.concept-tag { background:rgba(139,200,234,0.1); border:1px solid rgba(139,200,234,0.3); color:#8bc8ea; padding:2px 8px; border-radius:3px; font-size:10px; }
+.raw-json { background:#0a0d12; border:1px solid #1e2433; border-radius:4px; padding:10px; margin-top:10px; max-height:300px; overflow:auto; font-size:10px; color:#888; white-space:pre-wrap; word-break:break-all; }
+.compare-table { font-size:11px; }
+.compare-table th { font-size:11px; padding:6px 8px; }
+.compare-table td { padding:6px 8px; }
+.legacy-note { background:rgba(250,173,20,0.05); border-left:3px solid #faad14; padding:8px 12px; margin-bottom:10px; font-size:11px; color:#faad14; }
+.archive-meta { background:#0d1117; border:1px solid #1e2433; border-radius:4px; padding:10px; margin-bottom:10px; font-size:11px; }
+.archive-meta .row { display:flex; gap:20px; flex-wrap:wrap; }
+.archive-meta .row .item { display:flex; gap:6px; }
+.archive-meta .row .item .k { color:#888; }
+.archive-meta .row .item .v { color:#ccc; }
+.dq-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:10px; margin-bottom:12px; }
+.dq-card { background:#0d1117; border:1px solid #1e2433; border-radius:6px; padding:12px; text-align:center; }
+.dq-card .pct { font-size:20px; font-weight:bold; color:#52c41a; }
+.dq-card .label { font-size:11px; color:#888; margin-top:4px; }
+.dq-card .detail { font-size:10px; color:#666; margin-top:2px; }
+.progress-list { list-style:none; }
+.progress-list li { padding:8px 0; border-bottom:1px solid #1e2433; display:flex; align-items:center; gap:10px; }
+.progress-list .stage { color:#fff; width:180px; font-size:12px; }
+.progress-list .status-tag { padding:2px 8px; border-radius:3px; font-size:10px; min-width:80px; text-align:center; }
+.progress-list .detail { color:#888; font-size:11px; margin-left:auto; }
+.issues-list { list-style:none; counter-reset:issue; }
+.issues-list li { padding:6px 0; border-bottom:1px solid #1e2433; font-size:11px; color:#aaa; counter-increment:issue; padding-left:25px; position:relative; }
+.issues-list li::before { content:counter(issue); position:absolute; left:0; color:#ea6668; font-weight:bold; }
+.deferred-section { margin-top:15px; padding-top:10px; border-top:2px solid #ea6668; }
+.deferred-section h5 { color:#ea6668; font-size:12px; margin-bottom:8px; }
+.error-banner { background:rgba(234,102,104,0.1); border:1px solid rgba(234,102,104,0.3); border-radius:6px; padding:15px; margin-bottom:16px; }
+.error-banner .etype { color:#ea6668; font-size:14px; font-weight:bold; margin-bottom:5px; }
+.error-banner .emsg { color:#ccc; font-size:12px; }
+.empty-state { text-align:center; padding:40px; color:#666; }
+@media (max-width:768px) {
+  .container { padding:10px; }
+  .metrics-grid { grid-template-columns:1fr; }
+  .field-grid { grid-template-columns:1fr; }
+  .toolbar input { width:100%; }
+}
+
+.side-toggle{margin-left:10px;padding:0 10px;height:30px;line-height:28px;border:1px solid #2a3040;border-radius:8px;background:#1a1f2e;color:#e0e0e0;font-size:16px;cursor:pointer;}
+.side-drawer{position:fixed;top:50%;left:0;z-index:95;width:160px;padding:14px 0 16px;background:linear-gradient(180deg,#161c2e,#0f1320);border:1px solid #2a3040;border-left:none;border-radius:0 12px 12px 0;display:flex;flex-direction:column;justify-content:space-evenly;gap:10px;box-sizing:border-box;min-height:300px;max-height:70vh;transform:translate(-100%,-50%);transition:transform .22s ease;overflow-y:auto;box-shadow:6px 0 18px rgba(0,0,0,.4);}
+.side-drawer.open{transform:translate(0,-50%);}
+.side-handle{position:fixed;top:50%;left:0;z-index:96;transform:translateY(-50%);width:22px;height:56px;padding:0;border:1px solid #2a3040;border-left:none;border-radius:0 10px 10px 0;background:linear-gradient(180deg,#2a3550,#1b2234);color:#f5c542;font-size:13px;cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center;transition:left .22s ease;}
+.side-handle.open{left:160px;}
+.side-link{display:flex;align-items:center;justify-content:center;margin:0 8px;padding:9px 6px;border:1px solid #2a3040;border-radius:10px;color:#8b949e;text-decoration:none;font-size:13px;white-space:nowrap;text-align:center;letter-spacing:0;background:rgba(38,48,74,0.85);box-sizing:border-box;min-height:38px;}
+.side-link:hover{color:#fff;border-color:#f5c542;background:rgba(56,70,108,0.9);}
+</style>
+</head>
+<body>
+
+
+
+<div class="container">
+  <div id="content"></div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  var DATA = null;
+
+  // ========== 工具函数 ==========
+  function esc(s) {
+    if (s === null || s === undefined) return '';
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function fmtNum(v, decimals) {
+    if (v === null || v === undefined || v === '') return '—';
+    var n = Number(v);
+    if (isNaN(n)) return String(v);
+    return n.toLocaleString('zh-CN', {minimumFractionDigits: decimals||0, maximumFractionDigits: decimals||2});
+  }
+
+  function fmtMoney(v) {
+    if (v === null || v === undefined || v === '') return '—';
+    var n = Number(v);
+    if (isNaN(n)) return String(v);
+    if (n >= 100000000) return (n/100000000).toFixed(2) + '亿';
+    if (n >= 10000) return (n/10000).toFixed(2) + '万';
+    return n.toLocaleString('zh-CN');
+  }
+
+  function fmtTime(v) {
+    if (!v) return '—';
+    var s = String(v).replace(/[^0-9]/g,'');
+    if (s.length >= 6) return s.substring(0,2)+':'+s.substring(2,4)+':'+s.substring(4,6);
+    if (s.length >= 4) return s.substring(0,2)+':'+s.substring(2,4);
+    return String(v);
+  }
+
+  function statusTag(status) {
+    var s = String(status||'').toUpperCase();
+    if (s === 'VALID') return '<span class="tag tag-valid">VALID</span>';
+    if (s === 'MISSING') return '<span class="tag tag-missing">MISSING</span>';
+    if (s === 'INVALID' || s === 'ERROR') return '<span class="tag tag-invalid">'+esc(s)+'</span>';
+    if (s === 'UNKNOWN' || s === 'UNVERIFIED_HISTORICAL' || s === 'DATA_PENDING') return '<span class="tag tag-unknown">'+esc(s)+'</span>';
+    return '<span class="tag tag-missing">'+esc(s||'—')+'</span>';
+  }
+
+  // R5: 判断字段是否可用于数值排序
+  function isSortableField(fieldData) {
+    if (!fieldData || typeof fieldData !== 'object') return false;
+    var vs = String(fieldData.status||'').toUpperCase();
+    var asof = String(fieldData.asof_status||'').toUpperCase();
+    // VALID 且 不是 FUTURE/INVALID/CONFLICT/ERROR 才可排序
+    if (vs !== 'VALID') return false;
+    if (asof === 'FUTURE' || asof === 'INVALID' || asof === 'CONFLICT' || asof === 'ERROR') return false;
+    return true;
+  }
+
+  // R5: 获取排序值（不可排序的置尾）
+  function getSortValue(stock, field) {
+    if (field === 'ts_code') return stock.ts_code || '';
+    if (field === 'name') return stock.name || '';
+    var fd = (stock.observed_fields||{})[field];
+    if (!isSortableField(fd)) return null; // 置尾
+    var v = fd.value;
+    if (field === 'first_seal_time' || field === 'last_seal_time') {
+      return String(v||'').replace(/[^0-9]/g,'');
+    }
+    return v;
+  }
+
+  // ========== 加载数据 ==========
+  function loadData() {
+    // R3 C2: 页面日期参数传给API
+    var urlParams = new URLSearchParams(window.location.search);
+    var dateParam = urlParams.get('date');
+    var apiUrl = '/api/validation' + (dateParam ? '?date=' + encodeURIComponent(dateParam) : '');
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', apiUrl, true);
+    xhr.onload = function() {
+      try {
+        DATA = JSON.parse(xhr.responseText);
+        render();
+      } catch(e) {
+        document.getElementById('content').innerHTML =
+          '<div class="error-banner"><div class="etype">API响应解析失败</div><div class="emsg">'+esc(e.message)+'</div></div>';
+      }
+    };
+    xhr.onerror = function() {
+      document.getElementById('content').innerHTML =
+        '<div class="error-banner"><div class="etype">API请求失败</div><div class="emsg">无法连接 /api/validation</div></div>';
+    };
+    xhr.send();
+  }
+
+  // ========== 主渲染 ==========
+  function render() {
+    var html = '';
+
+    // 错误状态
+    if (DATA.error_type) {
+      html += renderError();
+      document.getElementById('content').innerHTML = html;
+      return;
+    }
+
+    // 标题
+    html += '<h1><span class="icon">📊</span>' + esc(DATA.page_title||'数据与验证') + '（只读）</h1>';
+    html += '<div class="subtitle">' + esc(DATA.business_date_label||'') + ' · ' + esc(DATA.page_subtitle||'') + '</div>';
+
+    // 状态栏
+    html += renderStatusBar();
+
+    // 市场概览与指标
+    html += renderMarketSection();
+
+    // 候选股
+    html += renderCandidatesSection();
+
+    // 旧模型vs影子
+    html += renderCompareSection();
+
+    // 数据质量
+    html += renderDataQuality();
+
+    // 项目进度
+    html += renderProgress();
+
+    // 已知问题
+    html += renderIssues();
+
+    document.getElementById('content').innerHTML = html;
+    bindEvents();
+  }
+
+  // ========== 错误渲染 ==========
+  function renderError() {
+    var html = '<h1><span class="icon">⚠️</span>数据与验证（只读）</h1>';
+    html += '<div class="error-banner">';
+    html += '<div class="etype">' + esc(DATA.error_type||'ERROR') + '</div>';
+    html += '<div class="emsg">' + esc(DATA.error_message||DATA.page_subtitle||'') + '</div>';
+    // R3 C2: 显示errors数组（不丢失API的详细错误原因）
+    if (DATA.errors && DATA.errors.length) {
+      html += '<div style="margin-top:10px;padding:8px;background:rgba(234,102,104,0.1);border-radius:4px;">';
+      html += '<div style="font-size:11px;color:#ea6668;margin-bottom:4px;">详细错误:</div>';
+      DATA.errors.forEach(function(e) {
+        html += '<div style="font-size:11px;color:#ccc;margin:2px 0;">• ' + esc(e) + '</div>';
+      });
+      html += '</div>';
+    }
+    if (DATA.snapshot_path) html += '<div class="emsg" style="margin-top:8px;color:#666;">快照路径: ' + esc(DATA.snapshot_path) + '</div>';
+    html += '</div>';
+    html += '<div class="section"><div class="section-title"><span class="num">说明</span></div>';
+    html += '<p style="color:#888;font-size:12px;">页面只读，不会自动创建或覆盖快照文件。请通过显式CLI执行导出：</p>';
+    html += '<pre style="background:#0a0d12;padding:10px;border-radius:4px;margin-top:8px;color:#8bc8ea;font-size:11px;">python web_snapshot_exporter.py</pre>';
+    html += '</div>';
+    return html;
+  }
+
+  // ========== 状态栏 ==========
+  function renderStatusBar() {
+    var html = '<div class="status-bar">';
+
+    // 业务日期
+    html += '<div class="status-badge status-info"><span class="label">业务日期</span><span class="value">' + esc(DATA.trade_date||'—') + '</span></div>';
+
+    // R2: 旧模型重放状态 - 统一显示BLOCKED
+    var lv = DATA.legacy_replay_verification || {};
+    var lvStatus = lv.status || 'UNKNOWN';
+    var lvClass = lvStatus === 'LEGACY_REPLAY_BLOCKED' ? 'status-warn' : (lvStatus === 'SUCCESS' ? 'status-ok' : 'status-error');
+    html += '<div class="status-badge ' + lvClass + '"><span class="label">旧模型独立重放</span><span class="value">' + esc(lvStatus) + '</span></div>';
+
+    // 新策略状态
+    var np = DATA.new_policy_implemented ? '已实现' : '尚未实现';
+    var npClass = DATA.new_policy_implemented ? 'status-ok' : 'status-error';
+    html += '<div class="status-badge ' + npClass + '"><span class="label">新策略</span><span class="value">' + np + '</span></div>';
+
+    // snapshot_id
+    if (DATA.snapshot_id) html += '<div class="status-badge status-info"><span class="label">snapshot_id</span><span class="value" style="font-size:10px;">' + esc(DATA.snapshot_id) + '</span></div>';
+
+    // content_hash
+    if (DATA.content_hash) html += '<div class="status-badge status-info"><span class="label">content_hash</span><span class="value" style="font-size:10px;">' + esc(DATA.content_hash) + '</span></div>';
+
+    html += '</div>';
+    return html;
+  }
+
+  // ========== 市场概览 ==========
+  function renderMarketSection() {
+    var mo = DATA.market_overview || {};
+    var html = '<div class="section">';
+    html += '<div class="section-title"><span class="num">一、</span>市场概览与四个指标';
+    if (mo.calculated_from_raw_pools) html += '<span class="hint">从原始涨停/炸板池计算，非硬编码</span>';
+    html += '</div>';
+
+    if (mo.status === 'MISSING' || mo.status === 'ERROR') {
+      html += '<div class="error-banner" style="margin-bottom:0;"><div class="etype">市场概览数据' + esc(mo.status||'') + '</div><div class="emsg">' + esc(mo.error||'') + '</div></div>';
+    } else {
+      html += '<div class="market-overview">';
+      html += '<div class="overview-card"><div class="num">' + (mo.limit_up_count!=null?mo.limit_up_count:'—') + '</div><div class="label">涨停</div></div>';
+      html += '<div class="overview-card"><div class="num" style="color:#ea6668;">' + (mo.failed_limit_up_count!=null?mo.failed_limit_up_count:'—') + '</div><div class="label">炸板</div></div>';
+      html += '<div class="overview-card"><div class="num" style="color:#8bc8ea;">' + (mo.second_board_count!=null?mo.second_board_count:'—') + '</div><div class="label">二板</div></div>';
+      html += '<div class="overview-card"><div class="num" style="color:#52c41a;">' + (mo.max_board!=null?mo.max_board:'—') + '</div><div class="label">最高板</div></div>';
+      html += '<div class="overview-card" style="grid-column:span 2;"><div class="num" style="font-size:16px;">' + esc(mo.max_board_stock||'—') + '</div><div class="label">最高标</div>';
+      if (mo.board_distribution) {
+        var bd = mo.board_distribution;
+        var parts = [];
+        Object.keys(bd).sort(function(a,b){return a-b;}).forEach(function(k){ parts.push(k+'板×'+bd[k]); });
+        html += '<div class="stock">' + esc(parts.join(' / ')) + '</div>';
+      }
+      html += '</div></div>';
+    }
+
+    // 四个指标
+    html += '<div class="metrics-grid" id="metricsGrid">';
+    (DATA.market_metrics||[]).forEach(function(m, idx) {
+      html += renderMetricCard(m, idx);
+    });
+    html += '</div>';
+    html += '</div>';
+    return html;
+  }
+
+  function renderMetricCard(m, idx) {
+    var statusClass = m.status === 'VALID' ? 'status-valid' : (m.status === 'ERROR' ? 'status-error-s' : 'status-missing');
+    var html = '<div class="metric-card" onclick="toggleMetric(' + idx + ')">';
+    html += '<div class="name">' + esc(m.name||'') + '</div>';
+    html += '<div class="value">' + esc(m.display_value||'—') + '</div>';
+    html += '<div class="ratio">' + (m.numerator!=null?m.numerator:'?') + ' / ' + (m.denominator!=null?m.denominator:'?') + '</div>';
+    html += '<span class="status ' + statusClass + '">' + esc(m.status||'UNKNOWN') + '</span>';
+    if (m.calculation_verified) html += ' <span class="status status-valid" style="margin-left:4px;">已复算</span>';
+    html += '<div style="font-size:10px;color:#666;margin-top:4px;">点击展开分子分母成员</div>';
+
+    // 详情
+    html += '<div class="metric-detail" id="metricDetail' + idx + '">';
+    html += '<div class="row"><span class="k">定义</span><span class="v">' + esc(m.definition||'') + '</span></div>';
+    html += '<div class="row"><span class="k">业务日期</span><span class="v">' + esc(DATA.trade_date||'') + '</span></div>';
+    html += '<div class="row"><span class="k">分子计数</span><span class="v">' + (m.numerator!=null?m.numerator:'—') + '</span></div>';
+    html += '<div class="row"><span class="k">分母计数</span><span class="v">' + (m.denominator!=null?m.denominator:'—') + '</span></div>';
+    html += '<div class="row"><span class="k">计算值</span><span class="v">' + (m.calculated_value!=null?m.calculated_value+'%':'—') + '</span></div>';
+    html += '<div class="row"><span class="k">报告值</span><span class="v">' + (m.reported_value!=null?m.reported_value:'缺失') + '</span></div>';
+    html += '<div class="row"><span class="k">报告值对照</span><span class="v">' + esc(m.report_value_status||'') + '</span></div>';
+    // R3 C3: cohort成员集合对照
+    if (m.cohort_match === true) {
+      html += '<div class="row"><span class="k">来源报告对照</span><span class="v" style="color:#52c41a;">成员集合一致</span></div>';
+    } else if (m.cohort_match === false) {
+      html += '<div class="row"><span class="k" style="color:#ea6668;">来源报告对照</span><span class="v" style="color:#ea6668;">原始计算与来源报告不一致</span></div>';
+      if (m.cohort_mismatch_detail) {
+        var d = m.cohort_mismatch_detail;
+        html += '<div style="margin:4px 0;padding:6px;background:rgba(234,102,104,0.08);border-radius:4px;font-size:10px;color:#ccc;">';
+        html += '计数一致: ' + (d.count_match?'是':'否') + ' | 分子成员一致: ' + (d.numerator_members_match?'是':'否') + ' | 分母成员一致: ' + (d.denominator_members_match?'是':'否');
+        if (d.cohort_numerator && d.calculated_numerator && d.cohort_numerator.join(',') !== d.calculated_numerator.join(',')) {
+          html += '<br>报告分子: ' + esc(d.cohort_numerator.join(', '));
+          html += '<br>计算分子: ' + esc(d.calculated_numerator.join(', '));
+        }
+        html += '</div>';
+      }
+    }
+    html += '<div class="row"><span class="k">计算核验</span><span class="v">' + (m.calculation_verified?'通过':'未通过') + '</span></div>';
+    if (m.validation_error) html += '<div class="row"><span class="k" style="color:#ea6668;">校验错误</span><span class="v" style="color:#ea6668;">' + esc(m.validation_error) + '</span></div>';
+    html += '<div class="row"><span class="k">来源文件</span><span class="v">' + esc(m.source_file||'') + '</span></div>';
+    if (m.note) html += '<div class="row"><span class="k">备注</span><span class="v" style="color:#faad14;">' + esc(m.note) + '</span></div>';
+    if (m.numerator_codes && m.numerator_codes.length) html += '<div style="margin-top:6px;"><span class="k" style="color:#888;">分子成员(' + m.numerator_codes.length + '):</span><div class="codes">' + esc(m.numerator_codes.join(', ')) + '</div></div>';
+    if (m.denominator_codes && m.denominator_codes.length) html += '<div style="margin-top:6px;"><span class="k" style="color:#888;">分母成员(' + m.denominator_codes.length + '):</span><div class="codes">' + esc(m.denominator_codes.join(', ')) + '</div></div>';
+    html += '</div>';
+
+    html += '</div>';
+    return html;
+  }
+
+  window.toggleMetric = function(idx) {
+    var el = document.getElementById('metricDetail' + idx);
+    if (el) el.classList.toggle('open');
+  };
+
+  // ========== 候选股 ==========
+  var currentSort = {field: 'first_seal_time', dir: 'asc'};
+  var currentSearch = '';
+
+  function renderCandidatesSection() {
+    var html = '<div class="section">';
+    html += '<div class="section-title"><span class="num">二、</span>候选股明细（' + (DATA.candidates||[]).length + '只）<span class="hint">点击表头排序，点击股票名称查看详情</span></div>';
+    // R3 C2: 显示候选冲突和错误
+    if (DATA.candidate_conflicts && DATA.candidate_conflicts.length) {
+      html += '<div style="margin:8px 0;padding:8px;background:rgba(250,173,20,0.1);border-left:3px solid #faad14;border-radius:0 4px 4px 0;">';
+      html += '<div style="font-size:11px;color:#faad14;font-weight:600;">候选股冲突（已隔离）:</div>';
+      DATA.candidate_conflicts.forEach(function(cf) {
+        html += '<div style="font-size:10px;color:#ccc;margin:2px 0;">- ' + esc(cf.ts_code||'') + ' (' + esc(cf.trade_date||'') + '): ' + esc(cf.reason||'重复记录') + '</div>';
+      });
+      html += '</div>';
+    }
+    if (DATA.candidate_errors && DATA.candidate_errors.length) {
+      html += '<div style="margin:8px 0;padding:8px;background:rgba(234,102,104,0.1);border-left:3px solid #ea6668;border-radius:0 4px 4px 0;">';
+      html += '<div style="font-size:11px;color:#ea6668;font-weight:600;">候选股日期/格式错误:</div>';
+      DATA.candidate_errors.forEach(function(ce) {
+        html += '<div style="font-size:10px;color:#ccc;margin:2px 0;">- ' + esc(ce) + '</div>';
+      });
+      html += '</div>';
+    }
+
+    html += '<div class="toolbar">';
+    html += '<input type="text" id="searchInput" placeholder="搜索代码或名称..." value="' + esc(currentSearch) + '">';
+    html += '<select id="sortSelect">';
+    html += '<option value="first_seal_time|asc">首封时间升序</option>';
+    html += '<option value="first_seal_time|desc">首封时间降序</option>';
+    html += '<option value="close_seal_amount_cny|desc">封单金额降序</option>';
+    html += '<option value="close_seal_amount_cny|asc">封单金额升序</option>';
+    html += '<option value="amount_cny|desc">成交金额降序</option>';
+    html += '<option value="turnover_pct|desc">换手率降序</option>';
+    html += '<option value="ts_code|asc">代码升序</option>';
+    html += '<option value="name|asc">名称升序</option>';
+    html += '</select>';
+    html += '<span class="count" id="candidateCount"></span>';
+    html += '</div>';
+
+    html += '<div style="overflow-x:auto;"><table id="candidateTable">';
+    html += '<thead><tr>';
+    html += '<th onclick="sortBy(\'ts_code\')">代码 <span class="sort-arrow"></span></th>';
+    html += '<th onclick="sortBy(\'name\')">名称 <span class="sort-arrow"></span></th>';
+    html += '<th onclick="sortBy(\'close\')">收盘价 <span class="sort-arrow"></span></th>';
+    html += '<th onclick="sortBy(\'first_seal_time\')">首封时间 <span class="sort-arrow"></span></th>';
+    html += '<th onclick="sortBy(\'close_seal_amount_cny\')">封单金额 <span class="sort-arrow"></span></th>';
+    html += '<th onclick="sortBy(\'amount_cny\')">成交金额 <span class="sort-arrow"></span></th>';
+    html += '<th onclick="sortBy(\'turnover_pct\')">换手率 <span class="sort-arrow"></span></th>';
+    html += '<th>数据状态</th>';
+    html += '<th>操作</th>';
+    html += '</tr></thead><tbody id="candidateBody"></tbody></table></div>';
+
+    html += '</div>';
+    return html;
+  }
+
+  window.sortBy = function(field) {
+    if (currentSort.field === field) {
+      currentSort.dir = currentSort.dir === 'asc' ? 'desc' : 'asc';
+    } else {
+      currentSort.field = field;
+      currentSort.dir = 'asc';
+    }
+    renderCandidateTable();
+  };
+
+  function renderCandidateTable() {
+    var candidates = (DATA.candidates||[]).slice();
+
+    // 搜索
+    if (currentSearch) {
+      var q = currentSearch.toLowerCase();
+      candidates = candidates.filter(function(c) {
+        return (c.ts_code||'').toLowerCase().indexOf(q) >= 0 || (c.name||'').toLowerCase().indexOf(q) >= 0;
+      });
+    }
+
+    // R5: 排序
+    var field = currentSort.field;
+    var dir = currentSort.dir;
+    candidates.sort(function(a, b) {
+      var va = getSortValue(a, field);
+      var vb = getSortValue(b, field);
+      // null（不可排序）置尾
+      if (va === null && vb === null) return (a.ts_code||'').localeCompare(b.ts_code||'');
+      if (va === null) return 1;
+      if (vb === null) return -1;
+      // 比较
+      var cmp;
+      if (typeof va === 'number' && typeof vb === 'number') cmp = va - vb;
+      else cmp = String(va).localeCompare(String(vb));
+      if (dir === 'desc') cmp = -cmp;
+      // R5: 同值按规范代码稳定排序
+      if (cmp === 0) cmp = (a.ts_code||'').localeCompare(b.ts_code||'');
+      return cmp;
+    });
+
+    document.getElementById('candidateCount').textContent = '显示 ' + candidates.length + ' / ' + (DATA.candidates||[]).length + ' 只';
+
+    var html = '';
+    candidates.forEach(function(c, idx) {
+      var of = c.observed_fields || {};
+      var close = of.close || {};
+      var fst = of.first_seal_time || {};
+      var csa = of.close_seal_amount_cny || {};
+      var amt = of.amount_cny || {};
+      var tr = of.turnover_pct || {};
+
+      // R5: 不可排序字段标记
+      var fstSortable = isSortableField(fst);
+      var csaSortable = isSortableField(csa);
+
+      html += '<tr>';
+      html += '<td class="code">' + esc(c.ts_code||'') + '</td>';
+      html += '<td class="name" onclick="toggleStockDetail(\'' + esc(c.ts_code||'') + '\')">' + esc(c.name||'') + '</td>';
+      html += '<td class="num-val">' + (close.value!=null?fmtNum(close.value,2):'—') + '</td>';
+      html += '<td class="num-val">' + fmtTime(fst.value) + (fstSortable?'':' <span class="tag tag-unknown" title="历史时点待核实">?</span>') + '</td>';
+      html += '<td class="num-val">' + fmtMoney(csa.value) + (csaSortable?'':' <span class="tag tag-unknown">?</span>') + '</td>';
+      html += '<td class="num-val">' + fmtMoney(amt.value) + '</td>';
+      html += '<td class="num-val">' + (tr.value!=null?fmtNum(tr.value,2)+'%':'—') + '</td>';
+      html += '<td>' + statusTag(close.status) + '</td>';
+      html += '<td><button class="btn" onclick="toggleStockDetail(\'' + esc(c.ts_code||'') + '\')">详情</button></td>';
+      html += '</tr>';
+
+      // 详情行
+      html += '<tr><td colspan="9" style="padding:0;border:none;">';
+      html += '<div class="stock-detail" id="stockDetail_' + esc(c.ts_code||'').replace(/\./g,'_') + '">';
+      html += renderStockDetail(c);
+      html += '</div></td></tr>';
+    });
+
+    if (candidates.length === 0) {
+      html = '<tr><td colspan="9"><div class="empty-state">没有匹配的股票</div></td></tr>';
+    }
+
+    document.getElementById('candidateBody').innerHTML = html;
+
+    // 更新排序箭头
+    var ths = document.querySelectorAll('#candidateTable th');
+    ths.forEach(function(th) {
+      var arrow = th.querySelector('.sort-arrow');
+      if (arrow) arrow.textContent = '';
+    });
+  }
+
+  window.toggleStockDetail = function(code) {
+    var el = document.getElementById('stockDetail_' + code.replace(/\./g,'_'));
+    if (el) el.classList.toggle('open');
+  };
+
+  // R3: 个股详情 - 显示asof状态、事件时间、公开时间、排除原因
+  function renderStockDetail(c) {
+    var of = c.observed_fields || {};
+    var html = '<h4>' + esc(c.name||'') + '（' + esc(c.ts_code||'') + '）逐字段证据</h4>';
+
+    html += '<div class="field-grid">';
+    var fieldLabels = {
+      close: '收盘价', pct_chg: '涨跌幅', amount_cny: '成交金额',
+      volume_shares: '成交量', turnover_pct: '换手率', float_market_cap_cny: '流通市值',
+      consecutive_limit_count: '连板数', first_seal_time: '首封时间',
+      last_seal_time: '末封时间', open_break_count: '炸板次数',
+      close_seal_amount_cny: '封单金额', industry: '所属行业',
+      limit_up_reason: '涨停原因', limit_up_stats: '涨停统计'
+    };
+
+    Object.keys(fieldLabels).forEach(function(fn) {
+      var fd = of[fn];
+      if (!fd) return;
+      var val = fd.value;
+      var displayVal = val;
+      if (fn === 'first_seal_time' || fn === 'last_seal_time') displayVal = fmtTime(val);
+      else if (fn === 'amount_cny' || fn === 'float_market_cap_cny' || fn === 'close_seal_amount_cny') displayVal = fmtMoney(val) + (val!=null?' ('+fmtNum(val,0)+'元)':'');
+      else if (fn === 'volume_shares') displayVal = fmtNum(val,0) + '股';
+      else if (fn === 'turnover_pct' || fn === 'pct_chg') displayVal = val!=null?fmtNum(val,2)+'%':'—';
+
+      html += '<div class="field-item">';
+      html += '<div class="fname">' + esc(fieldLabels[fn]) + '</div>';
+      html += '<div class="fvalue">' + esc(String(displayVal)) + '</div>';
+      html += '<div class="fmeta">';
+      html += '<span>值状态:' + statusTag(fd.status) + '</span>';
+      // R3: 显示asof状态
+      html += '<span>时点:' + statusTag(fd.asof_status||'UNKNOWN') + '</span>';
+      if (fd.unit) html += '<span>单位:' + esc(fd.unit) + '</span>';
+      if (fd.provider) html += '<span>来源:' + esc(fd.provider) + '</span>';
+      if (fd.source_field) html += '<span>字段:' + esc(fd.source_field) + '</span>';
+      if (fd.retrieved_at) html += '<span>取得:' + esc(String(fd.retrieved_at).substring(0,19)) + '</span>';
+      // R3: 事件时间/公开时间
+      if (fd.event_time) html += '<span>事件:' + esc(fd.event_time) + '</span>';
+      else html += '<span>事件:未知</span>';
+      // R2 C4: published_at/public_time别名，published_at优先
+      var pubTime = fd.published_at || fd.public_time;
+      if (pubTime) html += '<span>公开:' + esc(pubTime) + '</span>';
+      else html += '<span>公开:未知</span>';
+      if (fd.note) html += '<span style="color:#faad14;">备注:' + esc(fd.note) + '</span>';
+      html += '</div></div>';
+    });
+
+    // R3: 概念 - 正确解析
+    var concepts = of.concepts || {};
+    html += '<div class="field-item" style="grid-column:1/-1;">';
+    html += '<div class="fname">静态概念（F10，历史归属未验证）</div>';
+    if (concepts.count != null && concepts.value) {
+      html += '<div class="fvalue" style="font-size:12px;">' + concepts.count + ' 个概念</div>';
+      html += '<div class="concept-list" style="margin-top:6px;">';
+      concepts.value.forEach(function(cn) {
+        html += '<span class="concept-tag">' + esc(cn) + '</span>';
+      });
+      html += '</div>';
+    } else {
+      html += '<div class="fvalue" style="font-size:12px;color:#888;">' + esc(concepts.note||'概念字段缺失或未知') + '</div>';
+    }
+    html += '<div class="fmeta"><span>值状态:' + statusTag(concepts.status) + '</span><span>时点:' + statusTag(concepts.asof_status||'UNVERIFIED_HISTORICAL') + '</span>';
+    if (concepts.provider) html += '<span>来源:' + esc(concepts.provider) + '</span>';
+    html += '</div></div>';
+
+    html += '</div>';
+
+    // 关系信息
+    html += '<div class="relation-section">';
+    html += '<h5>关系信息（区分行业/静态概念/交易题材）</h5>';
+    var ind = of.industry || {};
+    html += '<div style="font-size:11px;margin-bottom:6px;"><span style="color:#888;">行业（事实）:</span> ' + statusTag(ind.status) + ' ' + esc(ind.value||'—') + '</div>';
+    html += '<div style="font-size:11px;margin-bottom:6px;"><span style="color:#888;">交易题材:</span> <span class="tag tag-unknown">未确认</span> <span style="color:#666;">（缺少0904当天日期化直接证据）</span></div>';
+    var lur = of.limit_up_reason || {};
+    html += '<div style="font-size:11px;"><span style="color:#888;">涨停原因:</span> ' + statusTag(lur.status) + ' <span style="color:#666;">' + esc(lur.note||'来源未提供，不自动编写原因') + '</span></div>';
+    html += '</div>';
+
+    // effective_fields 说明
+    html += '<div class="relation-section">';
+    html += '<h5>有效特征（仅 VALID + VERIFIED_ASOF）</h5>';
+    var ef = c.effective_fields || {};
+    var efKeys = Object.keys(ef);
+    if (efKeys.length > 0) {
+      html += '<div style="font-size:11px;color:#52c41a;">' + efKeys.length + ' 个有效字段: ' + esc(efKeys.join(', ')) + '</div>';
+    } else {
+      html += '<div style="font-size:11px;color:#faad14;">0 个有效字段（所有字段时点状态为UNKNOWN，不进入正式有效特征）</div>';
+    }
+    if (c.effective_features_note) html += '<div style="font-size:10px;color:#666;margin-top:4px;">' + esc(c.effective_features_note) + '</div>';
+    html += '</div>';
+
+    // 原始JSON
+    html += '<div class="relation-section">';
+    html += '<h5>原始记录（raw_record，只读）</h5>';
+    html += '<div class="raw-json">' + esc(JSON.stringify(c.raw_record||{}, null, 2)) + '</div>';
+    html += '</div>';
+
+    return html;
+  }
+
+  // ========== 旧模型vs影子 ==========
+  function renderCompareSection() {
+    // Web02.1-R1 U04: 规范化股票代码，确保605398和605398.SH能对应
+    function normalizeCode(code) {
+      if (!code || typeof code !== 'string') return null;
+      code = code.trim().toUpperCase();
+      if (!code) return null;
+      if (code.indexOf('.') >= 0) {
+        var parts = code.split('.');
+        if (parts.length === 2 && parts[0].length === 6 && /^\d{6}$/.test(parts[0]) && ['SH','SZ','BJ'].indexOf(parts[1]) >= 0) {
+          return code;
+        }
+        return null;
+      }
+      if (/^\d{6}$/.test(code)) {
+        if (code.charAt(0) === '6' || code.charAt(0) === '9') return code + '.SH';
+        if (code.charAt(0) === '0' || code.charAt(0) === '2' || code.charAt(0) === '3') return code + '.SZ';
+        if (code.charAt(0) === '4' || code.charAt(0) === '8') return code + '.BJ';
+      }
+      return null;
+    }
+    var html = '<div class="section">';
+    html += '<div class="section-title"><span class="num">三、</span>旧模型结果与影子状态对照</div>';
+    // R2 B3: 旧归档冲突横幅区分dedup:true与真实冲突
+    if (DATA.legacy_conflicts && DATA.legacy_conflicts.length) {
+      let realConflicts = DATA.legacy_conflicts.filter(function(cf) { return cf.dedup !== true; });
+      let dedupRecords = DATA.legacy_conflicts.filter(function(cf) { return cf.dedup === true; });
+      if (realConflicts.length > 0) {
+        html += '<div style="margin:8px 0;padding:8px;background:rgba(250,173,20,0.1);border-left:3px solid #faad14;border-radius:0 4px 4px 0;">';
+        html += '<div style="font-size:11px;color:#faad14;font-weight:600;">旧归档冲突（已隔离，不展示分数/权限）:</div>';
+        realConflicts.forEach(function(cf) {
+          html += '<div style="font-size:10px;color:#ccc;margin:2px 0;">- ' + esc(cf.ts_code||'') + ': ' + esc(cf.reason||'内容冲突') + '</div>';
+        });
+        html += '</div>';
+      }
+      if (dedupRecords.length > 0) {
+        html += '<div style="margin:8px 0;padding:8px;background:rgba(63,185,80,0.1);border-left:3px solid #3fb950;border-radius:0 4px 4px 0;">';
+        html += '<div style="font-size:11px;color:#3fb950;font-weight:600;">旧归档重复记录（已合并/去重，保留唯一有效记录）:</div>';
+        dedupRecords.forEach(function(cf) {
+          html += '<div style="font-size:10px;color:#8b949e;margin:2px 0;">- ' + esc(cf.ts_code||'') + ': ' + esc(cf.reason||'重复记录已合并') + '</div>';
+        });
+        html += '</div>';
+      }
+    }
+
+    // R2: BLOCKED 说明
+    var lv = DATA.legacy_replay_verification || {};
+    html += '<div class="legacy-note">';
+    html += '⚠️ 旧模型独立重放状态：<strong>' + esc(lv.status||'UNKNOWN') + '</strong> — ' + esc(lv.reason||'');
+    html += '<br>归档文件中的原始运行状态（SUCCESS）仅作为归档元数据保留，不等于本轮独立重放验证通过。旧最终分数0与新分数null不可进行效果比较。';
+    html += '</div>';
+
+    // R2: 归档元数据
+    var am = DATA.legacy_archive_meta || {};
+    if (am.run_id) {
+      html += '<div class="archive-meta">';
+      html += '<div class="row">';
+      html += '<div class="item"><span class="k">归档run_id:</span><span class="v">' + esc(am.run_id) + '</span></div>';
+      html += '<div class="item"><span class="k">归档状态:</span><span class="v">' + esc(am.archive_status||'—') + '</span></div>';
+      html += '<div class="item"><span class="k">模型版本:</span><span class="v">' + esc(am.model_version||'—') + '</span></div>';
+      html += '<div class="item"><span class="k">开始时间:</span><span class="v">' + esc(am.started_at||'未知') + '</span></div>';
+      html += '<div class="item"><span class="k">完成时间:</span><span class="v">' + esc(am.completed_at||'未知') + '</span></div>';
+      html += '<div class="item"><span class="k">结果数:</span><span class="v">' + esc(am.result_count||'—') + '</span></div>';
+      html += '</div>';
+      if (am.archive_status_note) html += '<div style="font-size:10px;color:#666;margin-top:6px;">' + esc(am.archive_status_note) + '</div>';
+      html += '</div>';
+    }
+
+    html += '<div style="overflow-x:auto;"><table class="compare-table">';
+    html += '<thead><tr>';
+    html += '<th rowspan="2">代码</th><th rowspan="2">名称</th>';
+    html += '<th colspan="6" style="text-align:center;border-bottom:1px solid #2a3040;">旧模型（提交结果，归档）</th>';
+    html += '<th colspan="5" style="text-align:center;border-bottom:1px solid #2a3040;">影子状态（新契约）</th>';
+    html += '</tr><tr>';
+    html += '<th>原始分</th><th>最终分</th><th>评级</th><th>一票否决</th><th>旧权限</th><th>否决原因</th>';
+    html += '<th>决策状态</th><th>正式分</th><th>正式评级</th><th>正式权限</th><th>原因</th>';
+    html += '</tr></thead><tbody>';
+
+    // R2 C4: 用trade_date+ts_code建Map，拒绝异日/重复记录
+    var tradeDate = DATA.trade_date || '20260904';
+    var legacyMap = {};
+    var legacyConflicts = {};
+    var legacyConflictKeys = {};
+    // Web02.1-R1 U02/U03 + R1 G4: 先从API返回的legacy_conflicts/shadow_conflicts中标记隔离键
+    // G4: 区分dedup:true（完全相同的重复记录，保留唯一有效记录）和conflict（同键不同内容，整组隔离）
+    var legacyDedupKeys = {};
+    var legacyDedupReasons = {};
+    (DATA.legacy_conflicts||[]).forEach(function(cf) {
+      var k = cf.key || (cf.trade_date && cf.ts_code ? cf.trade_date + '_' + (normalizeCode(cf.ts_code) || cf.ts_code) : null);
+      if (!k) return;
+      if (cf.dedup === true) {
+        legacyDedupKeys[k] = true;
+        legacyDedupReasons[k] = cf.reason || '重复记录已合并';
+      } else {
+        legacyConflictKeys[k] = true;
+      }
+    });
+    var shadowConflictKeys = {};
+    var shadowDedupKeys = {};
+    var shadowDedupReasons = {};
+    (DATA.shadow_conflicts||[]).forEach(function(cf) {
+      var k = cf.key || (cf.trade_date && cf.ts_code ? cf.trade_date + '_' + (normalizeCode(cf.ts_code) || cf.ts_code) : null);
+      if (!k) return;
+      if (cf.dedup === true) {
+        shadowDedupKeys[k] = true;
+        shadowDedupReasons[k] = cf.reason || '重复记录已合并';
+      } else {
+        shadowConflictKeys[k] = true;
+      }
+    });
+    // R02: 第一遍收集所有键，识别冲突组
+    (DATA.legacy_results||[]).forEach(function(l) {
+      var nk = normalizeCode(l.ts_code) || l.ts_code;
+      var key = (l.trade_date || tradeDate) + '_' + nk;
+      if (!legacyConflicts[key]) legacyConflicts[key] = [];
+      legacyConflicts[key].push(l);
+    });
+    // R02: 第二遍：同键不同内容隔离整个冲突组；完全相同去重
+    for (var key in legacyConflicts) {
+      var records = legacyConflicts[key];
+      if (records.length > 1) {
+        var allSame = records.every(function(r) { return JSON.stringify(r) === JSON.stringify(records[0]); });
+        if (allSame) {
+          legacyMap[key] = records[0]; // 完全相同去重
+        } else {
+          legacyConflictKeys[key] = true; // 同键不同内容，隔离
+        }
+      } else {
+        legacyMap[key] = records[0];
+      }
+    }
+    var shadowMap = {};
+    // Web02.1-R1 U03: shadowConflictKeys已在函数开头从DATA.shadow_conflicts初始化，这里不重复声明
+    var shadowAll = {};
+    // R02: 第一遍收集所有键，使用规范化代码
+    (DATA.shadow_results||[]).forEach(function(s) {
+      var nk = normalizeCode(s.ts_code) || s.ts_code;
+      var key = (s.trade_date || tradeDate) + '_' + nk;
+      if (!shadowAll[key]) shadowAll[key] = [];
+      shadowAll[key].push(s);
+    });
+    // R02: 第二遍：同键不同内容隔离
+    for (var key in shadowAll) {
+      var records = shadowAll[key];
+      if (records.length > 1) {
+        var allSame = records.every(function(r) { return JSON.stringify(r) === JSON.stringify(records[0]); });
+        if (allSame) {
+          shadowMap[key] = records[0];
+        } else {
+          shadowConflictKeys[key] = true;
+        }
+      } else {
+        shadowMap[key] = records[0];
+      }
+    }
+
+    (DATA.candidates||[]).forEach(function(c) {
+      var code = c.ts_code;
+      // Web02.1-R1 U04: 用规范化代码构造key，确保无后缀候选能对应有后缀归档
+      var normCode = normalizeCode(code) || code;
+      var key = (c.trade_date || tradeDate) + '_' + normCode;
+      var displayCode = normCode;
+      var l = legacyMap[key];
+      var s = shadowMap[key] || {};
+      var hasLegacy = !!l;
+      var legacyIsolated = !!legacyConflictKeys[key] && !legacyDedupKeys[key];
+      var legacyDedup = !!legacyDedupKeys[key];
+      var shadowIsolated = !!shadowConflictKeys[key] && !shadowDedupKeys[key];
+      var shadowDedup = !!shadowDedupKeys[key];
+      l = l || {};
+
+      // R2 C4: 缺整条旧记录显示"无旧归档记录"；vetoed缺失/null显示未知；只有明确False显示否
+      var vetoedDisplay, vetoedClass;
+      if (legacyIsolated) {
+        vetoedDisplay = '旧归档冲突，已隔离';
+        vetoedClass = 'tag-invalid';
+      } else if (!hasLegacy) {
+        vetoedDisplay = '无旧归档记录';
+        vetoedClass = 'tag-unknown';
+      } else if (l.vetoed_display) {
+        vetoedDisplay = l.vetoed_display;
+        vetoedClass = l.vetoed === true ? 'tag-invalid' : (l.vetoed === false ? 'tag-valid' : 'tag-unknown');
+      } else if (l.vetoed === null || l.vetoed === undefined) {
+        vetoedDisplay = '未知';
+        vetoedClass = 'tag-unknown';
+      } else if (l.vetoed === true) {
+        vetoedDisplay = '是';
+        vetoedClass = 'tag-invalid';
+      } else {
+        vetoedDisplay = '否';
+        vetoedClass = 'tag-valid';
+      }
+
+      // Web02.1-R1 U02: 隔离的旧结果不降低透明度，明确显示隔离状态
+      html += '<tr' + ((hasLegacy || legacyIsolated)?'':' style="opacity:0.6;"') + '>';
+      html += '<td class="code">' + esc(code) + '</td>';
+      html += '<td>' + esc(c.name||'') + '</td>';
+      // G4: dedup时正常显示值，附"重复记录已合并"标签；conflict时显示"冲突已隔离"
+      var legacyRawDisplay = legacyIsolated ? '<span style="color:#ea6668;font-size:10px;">冲突已隔离</span>' : (hasLegacy && l.raw_score!=null ? fmtNum(l.raw_score,1) : '—');
+      var legacyFinalDisplay = legacyIsolated ? '<span style="color:#ea6668;font-size:10px;">冲突已隔离</span>' : (hasLegacy && l.final_score!=null ? fmtNum(l.final_score,1) : '—');
+      var legacyGradeDisplay = legacyIsolated ? '<span style="color:#ea6668;font-size:10px;">冲突已隔离</span>' : (hasLegacy ? esc(l.grade||'—') : '—');
+      if (legacyDedup && hasLegacy) {
+        legacyRawDisplay += ' <span style="color:#3fb950;font-size:9px;" title="' + esc(legacyDedupReasons[key]||'重复记录已合并') + '">已去重</span>';
+        legacyFinalDisplay += ' <span style="color:#3fb950;font-size:9px;" title="' + esc(legacyDedupReasons[key]||'重复记录已合并') + '">已去重</span>';
+      }
+      html += '<td class="num-val">' + legacyRawDisplay + '</td>';
+      html += '<td class="num-val">' + legacyFinalDisplay + '</td>';
+      html += '<td>' + legacyGradeDisplay + '</td>';
+      html += '<td><span class="tag ' + vetoedClass + '">' + esc(vetoedDisplay) + '</span></td>';
+      html += '<td>' + (hasLegacy?esc(l.trade_permission||'—'):'—') + '</td>';
+      html += '<td style="font-size:10px;color:#ea6668;max-width:200px;">' + (hasLegacy?esc((l.veto_reasons||[]).join('; ')||'—'):'—') + '</td>';
+      // Web02.1-R1 U03 + R1 G4: 隔离的影子结果显示冲突原因；dedup时正常显示
+      if (shadowIsolated) {
+        html += '<td><span class="tag tag-invalid" title="影子结果冲突已隔离">冲突已隔离</span></td>';
+      } else if (shadowDedup) {
+        html += '<td><span class="tag tag-unknown" title="' + esc(shadowDedupReasons[key]||'重复记录已合并') + '">' + esc(s.decision_status||'—') + ' <span style="color:#3fb950;">已去重</span></span></td>';
+      } else {
+        html += '<td><span class="tag tag-unknown">' + esc(s.decision_status||'—') + '</span></td>';
+      }
+      html += '<td class="num-val">' + (s.final_score!=null?fmtNum(s.final_score,1):'—') + '</td>';
+      html += '<td>' + esc(s.grade||'—') + '</td>';
+      html += '<td>' + esc(s.permission||'—') + '</td>';
+      // Web02.1-R1 U03: 影子原因显示，隔离时显示冲突原因
+      var shadowReason = '';
+      if (shadowIsolated) {
+        shadowReason = '影子结果冲突，已隔离';
+      } else if (s.missing_critical_fields && s.missing_critical_fields.length) {
+        shadowReason = '缺失: ' + s.missing_critical_fields.slice(0,3).join(',') + (s.missing_critical_fields.length>3?'...':'');
+      } else if (s.score_status) {
+        shadowReason = s.score_status;
+      } else if (s.reason) {
+        shadowReason = s.reason;
+      }
+      if (shadowReason) {
+        html += '<td style="font-size:10px;color:#888;max-width:150px;word-break:break-all;" title="' + esc(shadowReason) + '">' + esc(shadowReason) + '</td>';
+      } else {
+        html += '<td>—</td>';
+      }
+      html += '</tr>';
+    });
+
+    if (legacyConflicts.length) {
+      html += '<tr><td colspan="12" style="font-size:10px;color:#faad14;">⚠️ 旧归档存在重复/异日记录: ' + esc(legacyConflicts.join(', ')) + '</td></tr>';
+    }
+
+    html += '</tbody></table></div>';
+    html += '</div>';
+    return html;
+  }
+
+  // ========== 数据质量 ==========
+  function renderDataQuality() {
+    var dq = DATA.data_quality;
+    var html = '<div class="section">';
+    html += '<div class="section-title"><span class="num">四、</span>数据质量报告（Phase1审计）</div>';
+
+    if (!dq) {
+      html += '<div class="empty-state">数据质量报告缺失</div>';
+    } else {
+      html += '<div class="dq-grid">';
+      // R2 C4: 适配字符串coverage（如"102/108 = 94.4%"），同时兼容对象
+      function parseCoverage(cov) {
+        if (typeof cov === 'string') {
+          // 解析 "102/108 = 94.4%" 或 "102/108"
+          var m = cov.match(/(\d+)\s*\/\s*(\d+)/);
+          if (m) {
+            var pctMatch = cov.match(/([\d.]+)\s*%/);
+            return {
+              valid_items: parseInt(m[1]),
+              total_required_items: parseInt(m[2]),
+              coverage: pctMatch ? parseFloat(pctMatch[1]) : null,
+              raw_string: cov
+            };
+          }
+          return { valid_items: '?', total_required_items: '?', coverage: null, raw_string: cov };
+        }
+        if (typeof cov === 'object' && cov !== null) {
+          return cov;
+        }
+        return null;
+      }
+      var rsc = parseCoverage(dq.required_schema_coverage);
+      if (rsc) {
+        html += '<div class="dq-card"><div class="pct">' + esc(rsc.valid_items||'?') + '/' + esc(rsc.total_required_items||'?') + '</div><div class="label">Phase1必填字段覆盖率</div><div class="detail">' + (rsc.coverage!=null?fmtNum(rsc.coverage,1)+'%':(rsc.raw_string?esc(rsc.raw_string):'')) + '</div></div>';
+      }
+      var scc = parseCoverage(dq.scoring_critical_coverage);
+      if (scc) {
+        html += '<div class="dq-card"><div class="pct">' + esc(scc.valid_items||'?') + '/' + esc(scc.total_required_items||'?') + '</div><div class="label">评分关键字段覆盖率</div><div class="detail">' + (scc.coverage!=null?fmtNum(scc.coverage,1)+'%':(scc.raw_string?esc(scc.raw_string):'')) + '</div></div>';
+      }
+      html += '<div class="dq-card"><div class="pct" style="color:#8bc8ea;">' + esc(dq.market_data_coverage||'—') + '</div><div class="label">行情数据覆盖率</div><div class="detail">0904涨停39只全部来自akshare</div></div>';
+      html += '<div class="dq-card"><div class="pct" style="color:#8bc8ea;">' + esc(dq.seal_quality_coverage||'—') + '</div><div class="label">封板质量覆盖率</div><div class="detail">六只二板首封时间/封板资金全部有效</div></div>';
+      if (dq.theme_evidence_coverage) {
+        html += '<div class="dq-card" style="grid-column:1/-1;"><div class="pct" style="font-size:14px;color:#faad14;">' + esc(dq.theme_evidence_coverage) + '</div><div class="label">题材证据覆盖率</div><div class="detail">INDUSTRY=100% VALID，TRADE_THEME=CANDIDATE(LEVEL_B,缺少日期化直接证据)，STATIC_CONCEPT=97.4% UNVERIFIED_HISTORICAL</div></div>';
+      }
+      html += '</div>';
+
+      if (dq.missing_required_fields && dq.missing_required_fields.length) {
+        html += '<div style="margin-top:10px;font-size:11px;"><span style="color:#ea6668;">缺失必填字段:</span> ' + esc(dq.missing_required_fields.join(', ')) + '</div>';
+      }
+      html += '<div style="margin-top:10px;font-size:10px;color:#faad14;">⚠️ ' + esc(dq.warning||'覆盖率不代表预测准确率、时点通过率或项目完成度') + '</div>';
+      html += '<div style="margin-top:6px;font-size:10px;color:#666;">来源: ' + esc(dq.source_file||'') + ' | 版本: ' + esc(dq.version||'') + ' | 生成时间: ' + esc(String(dq.generated_at||'').substring(0,19)) + '</div>';
+    }
+    html += '</div>';
+    return html;
+  }
+
+  // ========== 项目进度 ==========
+  function renderProgress() {
+    var html = '<div class="section">';
+    html += '<div class="section-title"><span class="num">五、</span>项目进度与状态</div>';
+    html += '<ul class="progress-list">';
+    (DATA.feature_progress||[]).forEach(function(p) {
+      var statusClass = 'tag-valid';
+      if (p.status.indexOf('BLOCKED') >= 0 || p.status.indexOf('未实现') >= 0) statusClass = 'tag-invalid';
+      else if (p.status.indexOf('待核实') >= 0 || p.status.indexOf('待') >= 0) statusClass = 'tag-unknown';
+      else if (p.status.indexOf('已有') >= 0) statusClass = 'tag-unknown';
+      html += '<li><span class="stage">' + esc(p.stage) + '</span><span class="status-tag ' + statusClass + '">' + esc(p.status) + '</span><span class="detail">' + esc(p.detail||'') + '</span></li>';
+    });
+    html += '</ul></div>';
+    return html;
+  }
+
+  // ========== 已知问题 ==========
+  function renderIssues() {
+    var html = '<div class="section">';
+    html += '<div class="section-title"><span class="num">六、</span>已知问题与遗留项</div>';
+    html += '<ol class="issues-list">';
+    (DATA.remaining_issues||[]).forEach(function(issue) {
+      html += '<li>' + esc(issue) + '</li>';
+    });
+    html += '</ol>';
+
+    if (DATA.deferred_before_new_policy && DATA.deferred_before_new_policy.length) {
+      html += '<div class="deferred-section">';
+      html += '<h5>DEFERRED_BEFORE_NEW_POLICY（正式策略前必须关闭）:</h5>';
+      DATA.deferred_before_new_policy.forEach(function(d) {
+        html += '<div style="font-size:11px;color:#ea6668;padding:3px 0;">• ' + esc(d) + '</div>';
+      });
+      html += '</div>';
+    }
+    html += '</div>';
+    return html;
+  }
+
+  // ========== 事件绑定 ==========
+  function bindEvents() {
+    var searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+      searchInput.addEventListener('input', function(e) {
+        currentSearch = e.target.value;
+        renderCandidateTable();
+      });
+    }
+
+    var sortSelect = document.getElementById('sortSelect');
+    if (sortSelect) {
+      sortSelect.addEventListener('change', function(e) {
+        var parts = e.target.value.split('|');
+        currentSort.field = parts[0];
+        currentSort.dir = parts[1];
+        renderCandidateTable();
+      });
+    }
+
+    renderCandidateTable();
+  }
+
+  // 启动
+  loadData();
+})();
+</script>
+
+<button class="side-handle" id="sideHandle" title="展开/收起目录">▶</button>
+<aside class="side-drawer" id="sideDrawer">
+  <a href="/" class="side-link" title="决策舱首页" class="side-link ls5">决策舱首页</a>
+  <a href="/backtest" class="side-link" title="历史回测分析" class="side-link ls4">历史回测</a>
+  <a href="/validation" class="side-link" title="数据与验证只读页面" class="side-link ls5">数据与验证</a>
+  <a href="/research/cycle-theme" class="side-link" title="情绪周期与主线观察研究页" class="side-link ls5">周期与主线</a>
+  <a href="/research/theme-review" class="side-link" title="暂停计算，仅查看既有独立修订">题材复核存档</a>
+</aside>
+<script>
+(function(){
+  var d=document.getElementById('sideDrawer'),h=document.getElementById('sideHandle');
+  function paint(){var o=d.classList.contains('open');h.classList.toggle('open',o);h.textContent=o?'◀':'▶';}
+  function open(){d.classList.add('open');paint();}
+  function close(){d.classList.remove('open');paint();}
+  d.classList.add('open');paint();
+  if(h){h.addEventListener('click',function(){d.classList.contains('open')?close():open();});}
+  window.addEventListener('keydown',function(e){if(e.key==='Escape')close();});
+})();
+</script>
+</body>
+</html>

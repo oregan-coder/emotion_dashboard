@@ -1,0 +1,86 @@
+{
+  "score": 12,
+  "parts": {
+    "lower": 4,
+    "peer": 1,
+    "upper": 2,
+    "structure": 5
+  },
+  "status": "PROPOSAL_CALCULATED",
+  "max": 18,
+  "counts_excluding_candidate": {
+    "n1": 3,
+    "n2": 1,
+    "n3plus": 1
+  },
+  "theme_id": "SYNTHETIC_THEME",
+  "trade_date": "2026-09-10",
+  "counts": {
+    "n1": 3,
+    "n2": 1,
+    "n3plus": 1
+  },
+  "groups": {
+    "n1": [
+      {
+        "code": "910000",
+        "name": "虚构成员",
+        "theme_id": "SYNTHETIC_THEME",
+        "trade_date": "2026-09-10",
+        "board_count": 1,
+        "close_limit_up": true,
+        "selection": "INCLUDED"
+      },
+      {
+        "code": "910001",
+        "name": "虚构成员",
+        "theme_id": "SYNTHETIC_THEME",
+        "trade_date": "2026-09-10",
+        "board_count": 1,
+        "close_limit_up": true,
+        "selection": "INCLUDED"
+      },
+      {
+        "code": "910002",
+        "name": "虚构成员",
+        "theme_id": "SYNTHETIC_THEME",
+        "trade_date": "2026-09-10",
+        "board_count": 1,
+        "close_limit_up": true,
+        "selection": "INCLUDED"
+      }
+    ],
+    "n2": [
+      {
+        "code": "910003",
+        "name": "虚构成员",
+        "theme_id": "SYNTHETIC_THEME",
+        "trade_date": "2026-09-10",
+        "board_count": 2,
+        "close_limit_up": true,
+        "selection": "INCLUDED"
+      }
+    ],
+    "n3plus": [
+      {
+        "code": "910004",
+        "name": "虚构成员",
+        "theme_id": "SYNTHETIC_THEME",
+        "trade_date": "2026-09-10",
+        "board_count": 3,
+        "close_limit_up": true,
+        "selection": "INCLUDED"
+      }
+    ]
+  },
+  "selection_audit": [
+    {
+      "code": "999999",
+      "action": "REMOVE_CANDIDATE_SELF",
+      "row": 5
+    }
+  ],
+  "issues": [],
+  "composition_verified": true,
+  "evidence_scope": "SYNTHETIC"
+}

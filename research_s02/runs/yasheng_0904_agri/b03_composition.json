@@ -1,0 +1,149 @@
+{
+  "score": 6,
+  "parts": {
+    "lower": 6,
+    "peer": 0,
+    "upper": 0,
+    "structure": 0
+  },
+  "status": "PROPOSAL_CALCULATED",
+  "max": 18,
+  "counts_excluding_candidate": {
+    "n1": 10,
+    "n2": 0,
+    "n3plus": 0
+  },
+  "theme_id": "AGRICULTURE_BROAD",
+  "trade_date": "2026-09-04",
+  "counts": {
+    "n1": 10,
+    "n2": 0,
+    "n3plus": 0
+  },
+  "groups": {
+    "n1": [
+      {
+        "code": "001366",
+        "name": "播恩集团",
+        "trade_date": "2026-09-04",
+        "theme_id": "AGRICULTURE_BROAD",
+        "selection": "INCLUDED",
+        "close_limit_up": true,
+        "board_count": 1,
+        "industry": "饲料",
+        "data_status": "VERIFIED"
+      },
+      {
+        "code": "000798",
+        "name": "中水渔业",
+        "trade_date": "2026-09-04",
+        "theme_id": "AGRICULTURE_BROAD",
+        "selection": "INCLUDED",
+        "close_limit_up": true,
+        "board_count": 1,
+        "industry": "渔业",
+        "data_status": "VERIFIED"
+      },
+      {
+        "code": "600354",
+        "name": "敦煌种业",
+        "trade_date": "2026-09-04",
+        "theme_id": "AGRICULTURE_BROAD",
+        "selection": "INCLUDED",
+        "close_limit_up": true,
+        "board_count": 1,
+        "industry": "种植业",
+        "data_status": "VERIFIED"
+      },
+      {
+        "code": "002124",
+        "name": "天邦食品",
+        "trade_date": "2026-09-04",
+        "theme_id": "AGRICULTURE_BROAD",
+        "selection": "INCLUDED",
+        "close_limit_up": true,
+        "board_count": 1,
+        "industry": "养殖业",
+        "data_status": "VERIFIED"
+      },
+      {
+        "code": "603151",
+        "name": "邦基科技",
+        "trade_date": "2026-09-04",
+        "theme_id": "AGRICULTURE_BROAD",
+        "selection": "INCLUDED",
+        "close_limit_up": true,
+        "board_count": 1,
+        "industry": "饲料",
+        "data_status": "VERIFIED"
+      },
+      {
+        "code": "000592",
+        "name": "平潭发展",
+        "trade_date": "2026-09-04",
+        "theme_id": "AGRICULTURE_BROAD",
+        "selection": "INCLUDED",
+        "close_limit_up": true,
+        "board_count": 1,
+        "industry": "林业Ⅱ",
+        "data_status": "VERIFIED"
+      },
+      {
+        "code": "000735",
+        "name": "罗牛山",
+        "trade_date": "2026-09-04",
+        "theme_id": "AGRICULTURE_BROAD",
+        "selection": "INCLUDED",
+        "close_limit_up": true,
+        "board_count": 1,
+        "industry": "养殖业",
+        "data_status": "VERIFIED"
+      },
+      {
+        "code": "000702",
+        "name": "正虹科技",
+        "trade_date": "2026-09-04",
+        "theme_id": "AGRICULTURE_BROAD",
+        "selection": "INCLUDED",
+        "close_limit_up": true,
+        "board_count": 1,
+        "industry": "饲料",
+        "data_status": "VERIFIED"
+      },
+      {
+        "code": "600975",
+        "name": "新五丰",
+        "trade_date": "2026-09-04",
+        "theme_id": "AGRICULTURE_BROAD",
+        "selection": "INCLUDED",
+        "close_limit_up": true,
+        "board_count": 1,
+        "industry": "养殖业",
+        "data_status": "VERIFIED"
+      },
+      {
+        "code": "000876",
+        "name": "新希望",
+        "trade_date": "2026-09-04",
+        "theme_id": "AGRICULTURE_BROAD",
+        "selection": "INCLUDED",
+        "close_limit_up": true,
+        "board_count": 1,
+        "industry": "饲料",
+        "data_status": "VERIFIED"
+      }
+    ],
+    "n2": [],
+    "n3plus": []
+  },
+  "selection_audit": [
+    {
+      "code": "600108",
+      "action": "REMOVE_CANDIDATE_SELF",
+      "row": 0
+    }
+  ],
+  "issues": [],
+  "composition_verified": true,
+  "evidence_scope": "SUPPLIED_LOCAL_EVIDENCE_CONTRACT"
+}

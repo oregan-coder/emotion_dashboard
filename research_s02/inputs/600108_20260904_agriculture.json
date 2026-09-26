@@ -1,0 +1,525 @@
+{
+  "schema": "5535_S02_R1_INPUT_V1",
+  "input_type": "CLOSING_EVIDENCE_SUPPLIED",
+  "candidate": {
+    "code": "600108",
+    "name": "亚盛集团",
+    "eligibility_status": "ELIGIBLE_RESEARCH",
+    "eligibility_reason": "0904收盘二板，非ST，上市超过60交易日，非两日一字板（首封09:36:23非开盘）"
+  },
+  "observation": {
+    "trade_date": "2026-09-04",
+    "previous_trade_date": "2026-09-03",
+    "captured_at": "2026-09-04T15:30:00+08:00",
+    "decision_asof": "2026-09-04T16:00:00+08:00",
+    "source_date_verified": true,
+    "closing_verified": true,
+    "previous_trade_date_verified": true
+  },
+  "item_inputs": {
+    "A01": {
+      "values": {
+        "r_pct": null
+      },
+      "units": {
+        "r_pct": "percent"
+      },
+      "review": {
+        "status": "INPUT_PENDING",
+        "source_dates": [
+          "2026-09-04"
+        ],
+        "units_verified": false,
+        "scope_verified": false,
+        "closing_verified": false,
+        "available_at": null,
+        "evidence_refs": []
+      },
+      "value_refs": {},
+      "source_mode": "LOCAL_APPROVED_EQUAL_WEIGHT_PENDING"
+    },
+    "A02": {
+      "values": {
+        "p23": 0.0
+      },
+      "units": {
+        "p23": "fraction"
+      },
+      "review": {
+        "status": "VERIFIED",
+        "source_dates": [
+          "2026-09-04"
+        ],
+        "units_verified": true,
+        "scope_verified": true,
+        "closing_verified": true,
+        "available_at": "2026-09-04T15:30:00+08:00",
+        "evidence_refs": [
+          {
+            "file": "0904_market_data.json",
+            "sha256": "4e9099ec9bcff41cfbf7085a88970c6d1d6779720eb4bd3e2d265dbcb6e5b311",
+            "pointer": ""
+          }
+        ]
+      },
+      "value_refs": {
+        "p23": {
+          "file": "0904_market_data.json",
+          "sha256": "4e9099ec9bcff41cfbf7085a88970c6d1d6779720eb4bd3e2d265dbcb6e5b311",
+          "pointer": "/A02/p23"
+        }
+      },
+      "count_basis": {
+        "numerator": 0,
+        "denominator": 6
+      }
+    },
+    "A03": {
+      "values": {
+        "fail_high": 0.6666666666666666
+      },
+      "units": {
+        "fail_high": "fraction"
+      },
+      "review": {
+        "status": "VERIFIED",
+        "source_dates": [
+          "2026-09-04"
+        ],
+        "units_verified": true,
+        "scope_verified": true,
+        "closing_verified": true,
+        "available_at": "2026-09-04T15:30:00+08:00",
+        "evidence_refs": [
+          {
+            "file": "0904_market_data.json",
+            "sha256": "4e9099ec9bcff41cfbf7085a88970c6d1d6779720eb4bd3e2d265dbcb6e5b311",
+            "pointer": ""
+          }
+        ]
+      },
+      "value_refs": {
+        "fail_high": {
+          "file": "0904_market_data.json",
+          "sha256": "4e9099ec9bcff41cfbf7085a88970c6d1d6779720eb4bd3e2d265dbcb6e5b311",
+          "pointer": "/A03/fail_high"
+        }
+      },
+      "count_basis": {
+        "numerator": 2,
+        "denominator": 3
+      }
+    },
+    "A04": {
+      "values": {
+        "U": 39,
+        "Z": 48
+      },
+      "units": {
+        "U": "stocks",
+        "Z": "stocks"
+      },
+      "review": {
+        "status": "VERIFIED",
+        "source_dates": [
+          "2026-09-04"
+        ],
+        "units_verified": true,
+        "scope_verified": true,
+        "closing_verified": true,
+        "available_at": "2026-09-04T15:30:00+08:00",
+        "evidence_refs": [
+          {
+            "file": "0904_market_data.json",
+            "sha256": "4e9099ec9bcff41cfbf7085a88970c6d1d6779720eb4bd3e2d265dbcb6e5b311",
+            "pointer": ""
+          }
+        ]
+      },
+      "value_refs": {
+        "U": {
+          "file": "0904_market_data.json",
+          "sha256": "4e9099ec9bcff41cfbf7085a88970c6d1d6779720eb4bd3e2d265dbcb6e5b311",
+          "pointer": "/A04/U"
+        },
+        "Z": {
+          "file": "0904_market_data.json",
+          "sha256": "4e9099ec9bcff41cfbf7085a88970c6d1d6779720eb4bd3e2d265dbcb6e5b311",
+          "pointer": "/A04/Z"
+        }
+      }
+    },
+    "A05": {
+      "values": {
+        "U": 39,
+        "D": null
+      },
+      "units": {
+        "U": "stocks",
+        "D": "stocks"
+      },
+      "review": {
+        "status": "INPUT_PENDING",
+        "source_dates": [
+          "2026-09-04"
+        ],
+        "units_verified": false,
+        "scope_verified": false,
+        "closing_verified": false,
+        "available_at": null,
+        "evidence_refs": []
+      },
+      "value_refs": {}
+    },
+    "B01": {
+      "values": {
+        "breadth": null
+      },
+      "units": {
+        "breadth": "fraction"
+      },
+      "review": {
+        "status": "INPUT_PENDING",
+        "source_dates": [
+          "2026-09-04"
+        ],
+        "units_verified": false,
+        "scope_verified": false,
+        "closing_verified": false,
+        "available_at": null,
+        "evidence_refs": []
+      },
+      "value_refs": {},
+      "count_basis": null
+    },
+    "B02": {
+      "values": {
+        "excess_median_T": null,
+        "excess_median_previous": null
+      },
+      "units": {
+        "excess_median_T": "percentage_points",
+        "excess_median_previous": "percentage_points"
+      },
+      "review": {
+        "status": "INPUT_PENDING",
+        "source_dates": [
+          "2026-09-03",
+          "2026-09-04"
+        ],
+        "units_verified": false,
+        "scope_verified": false,
+        "closing_verified": false,
+        "available_at": null,
+        "evidence_refs": []
+      },
+      "value_refs": {}
+    },
+    "B03": {
+      "values": {
+        "n1": 10,
+        "n2": 0,
+        "n3plus": 0
+      },
+      "units": {
+        "n1": "stocks",
+        "n2": "stocks",
+        "n3plus": "stocks"
+      },
+      "review": {
+        "status": "VERIFIED",
+        "source_dates": [
+          "2026-09-04"
+        ],
+        "units_verified": true,
+        "scope_verified": true,
+        "closing_verified": true,
+        "available_at": "2026-09-04T15:30:00+08:00",
+        "evidence_refs": [
+          {
+            "file": "0904_market_data.json",
+            "sha256": "4e9099ec9bcff41cfbf7085a88970c6d1d6779720eb4bd3e2d265dbcb6e5b311",
+            "pointer": ""
+          }
+        ]
+      },
+      "value_refs": {},
+      "theme_id": "AGRICULTURE_BROAD",
+      "theme_confirmed": true,
+      "membership_complete": true,
+      "members": [
+        {
+          "code": "600108",
+          "name": "亚盛集团",
+          "trade_date": "2026-09-04",
+          "theme_id": "AGRICULTURE_BROAD",
+          "selection": "INCLUDED",
+          "close_limit_up": true,
+          "board_count": 2,
+          "industry": "种植业",
+          "data_status": "VERIFIED"
+        },
+        {
+          "code": "001366",
+          "name": "播恩集团",
+          "trade_date": "2026-09-04",
+          "theme_id": "AGRICULTURE_BROAD",
+          "selection": "INCLUDED",
+          "close_limit_up": true,
+          "board_count": 1,
+          "industry": "饲料",
+          "data_status": "VERIFIED"
+        },
+        {
+          "code": "000798",
+          "name": "中水渔业",
+          "trade_date": "2026-09-04",
+          "theme_id": "AGRICULTURE_BROAD",
+          "selection": "INCLUDED",
+          "close_limit_up": true,
+          "board_count": 1,
+          "industry": "渔业",
+          "data_status": "VERIFIED"
+        },
+        {
+          "code": "600354",
+          "name": "敦煌种业",
+          "trade_date": "2026-09-04",
+          "theme_id": "AGRICULTURE_BROAD",
+          "selection": "INCLUDED",
+          "close_limit_up": true,
+          "board_count": 1,
+          "industry": "种植业",
+          "data_status": "VERIFIED"
+        },
+        {
+          "code": "002124",
+          "name": "天邦食品",
+          "trade_date": "2026-09-04",
+          "theme_id": "AGRICULTURE_BROAD",
+          "selection": "INCLUDED",
+          "close_limit_up": true,
+          "board_count": 1,
+          "industry": "养殖业",
+          "data_status": "VERIFIED"
+        },
+        {
+          "code": "603151",
+          "name": "邦基科技",
+          "trade_date": "2026-09-04",
+          "theme_id": "AGRICULTURE_BROAD",
+          "selection": "INCLUDED",
+          "close_limit_up": true,
+          "board_count": 1,
+          "industry": "饲料",
+          "data_status": "VERIFIED"
+        },
+        {
+          "code": "000592",
+          "name": "平潭发展",
+          "trade_date": "2026-09-04",
+          "theme_id": "AGRICULTURE_BROAD",
+          "selection": "INCLUDED",
+          "close_limit_up": true,
+          "board_count": 1,
+          "industry": "林业Ⅱ",
+          "data_status": "VERIFIED"
+        },
+        {
+          "code": "000735",
+          "name": "罗牛山",
+          "trade_date": "2026-09-04",
+          "theme_id": "AGRICULTURE_BROAD",
+          "selection": "INCLUDED",
+          "close_limit_up": true,
+          "board_count": 1,
+          "industry": "养殖业",
+          "data_status": "VERIFIED"
+        },
+        {
+          "code": "000702",
+          "name": "正虹科技",
+          "trade_date": "2026-09-04",
+          "theme_id": "AGRICULTURE_BROAD",
+          "selection": "INCLUDED",
+          "close_limit_up": true,
+          "board_count": 1,
+          "industry": "饲料",
+          "data_status": "VERIFIED"
+        },
+        {
+          "code": "600975",
+          "name": "新五丰",
+          "trade_date": "2026-09-04",
+          "theme_id": "AGRICULTURE_BROAD",
+          "selection": "INCLUDED",
+          "close_limit_up": true,
+          "board_count": 1,
+          "industry": "养殖业",
+          "data_status": "VERIFIED"
+        },
+        {
+          "code": "000876",
+          "name": "新希望",
+          "trade_date": "2026-09-04",
+          "theme_id": "AGRICULTURE_BROAD",
+          "selection": "INCLUDED",
+          "close_limit_up": true,
+          "board_count": 1,
+          "industry": "饲料",
+          "data_status": "VERIFIED"
+        }
+      ],
+      "members_ref": {
+        "file": "0904_agri_theme_members.json",
+        "sha256": "f0bda0d7d18ee2ce04ecd84e5f87ddf374ca3e2f43e968fdb3190b65c9644368",
+        "pointer": ""
+      }
+    },
+    "C02": {
+      "values": {
+        "n": null,
+        "rank": null
+      },
+      "units": {
+        "n": "stocks",
+        "rank": "average_rank"
+      },
+      "review": {
+        "status": "INPUT_PENDING",
+        "source_dates": [
+          "2026-09-03"
+        ],
+        "units_verified": false,
+        "scope_verified": false,
+        "closing_verified": false,
+        "available_at": null,
+        "evidence_refs": []
+      },
+      "value_refs": {},
+      "theme_id": "AGRICULTURE_BROAD",
+      "theme_confirmed": true,
+      "membership_complete": false,
+      "members": [],
+      "members_ref": null
+    },
+    "D01": {
+      "values": {
+        "remaining_session_minutes": null
+      },
+      "units": {
+        "remaining_session_minutes": "minutes"
+      },
+      "review": {
+        "status": "INPUT_PENDING",
+        "source_dates": [
+          "2026-09-04"
+        ],
+        "units_verified": false,
+        "scope_verified": false,
+        "closing_verified": false,
+        "available_at": null,
+        "evidence_refs": []
+      },
+      "value_refs": {},
+      "last_seal_time": "09:37:50"
+    },
+    "D02": {
+      "values": {
+        "open_break_count": 1
+      },
+      "units": {
+        "open_break_count": "times"
+      },
+      "review": {
+        "status": "VERIFIED",
+        "source_dates": [
+          "2026-09-04"
+        ],
+        "units_verified": true,
+        "scope_verified": true,
+        "closing_verified": true,
+        "available_at": "2026-09-04T15:30:00+08:00",
+        "evidence_refs": [
+          {
+            "file": "0904_market_data.json",
+            "sha256": "4e9099ec9bcff41cfbf7085a88970c6d1d6779720eb4bd3e2d265dbcb6e5b311",
+            "pointer": ""
+          }
+        ]
+      },
+      "value_refs": {
+        "open_break_count": {
+          "file": "600108_0904_stock_data.json",
+          "sha256": "5ba7bb3e3c947e17c6f15d813c4d04dd1653abf84e3a9ddf32e6736166acedeb",
+          "pointer": "/open_break_count"
+        }
+      }
+    },
+    "D03": {
+      "values": {
+        "seal_amount": 157784414,
+        "circulating_market_cap": null
+      },
+      "units": {
+        "seal_amount": "CNY",
+        "circulating_market_cap": "CNY"
+      },
+      "review": {
+        "status": "INPUT_PENDING",
+        "source_dates": [
+          "2026-09-04"
+        ],
+        "units_verified": false,
+        "scope_verified": false,
+        "closing_verified": false,
+        "available_at": null,
+        "evidence_refs": []
+      },
+      "value_refs": {}
+    }
+  },
+  "observations_only": {
+    "C01": {
+      "theme": "农业（广义）",
+      "industry": "种植业",
+      "static_concepts": [
+        "农业",
+        "种植业",
+        "粮食",
+        "乡村振兴",
+        "央国企改革",
+        "甘肃"
+      ],
+      "note": "行业为种植业，用户确认交易题材为农业；静态概念仅作参考"
+    },
+    "C03": {
+      "note": "连板前相对强度待20日历史数据"
+    },
+    "D04": {
+      "turnover_pct": null,
+      "note": "换手率及20日中位基准待确认"
+    }
+  },
+  "mainline_five_steps": {
+    "event_date_t0": null,
+    "step1_message_level": "UNKNOWN",
+    "step2_first_day_movement": "PARTIAL（0904农业11只涨停）",
+    "step3_capacity_leader": "UNKNOWN",
+    "step4_old_dragon_movement": "UNKNOWN",
+    "step5_status": "INPUT_PENDING",
+    "explanation": "农业题材异动日t0待确认；0904农业11只涨停显示群体异动，但容量中军和老龙异动待确认"
+  },
+  "formula_demonstrations_not_scores": [
+    {
+      "item": "D01",
+      "description": "最后封板09:37:50，按提案时钟约定剩余分钟约322分钟（09:37:50到11:30=112.17分钟+13:00-15:00=120分钟=232.17分钟？需重新计算）",
+      "note": "仅演示，不计入有效得分"
+    },
+    {
+      "item": "D03",
+      "description": "封板资金157,784,414元，流通市值待确认；若流通市值约50亿，封单比约0.32%",
+      "note": "仅演示，不计入有效得分"
+    }
+  ]
+}

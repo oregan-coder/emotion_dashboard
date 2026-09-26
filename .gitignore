@@ -1,0 +1,31 @@
+# 数据库和大文件
+data/
+.migration_shadow/
+phase2_shadow/
+*.sqlite3
+*.db
+
+# 运行时缓存
+_5535_runtime/
+_5535_addons/
+__pycache__/
+*.pyc
+
+# 日志文件
+*.log
+*.err
+
+# 备份和临时文件
+*.bak
+*.before_*
+_archive/
+deliverables/
+*.zip
+
+# 本地配置
+local_daily_auto_start.*
+web_app.*.log
+
+# IDE文件
+.idea/
+.vscode/

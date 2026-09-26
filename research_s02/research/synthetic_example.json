@@ -1,0 +1,269 @@
+{
+  "data_kind": "SYNTHETIC_ONLY_NOT_MARKET_DATA",
+  "approval_status": "PENDING_USER_REVIEW",
+  "B03_cases": [
+    {
+      "counts_excluding_candidate": {
+        "n1": 0,
+        "n2": 0,
+        "n3plus": 0
+      },
+      "result": {
+        "score": 0,
+        "parts": {
+          "lower": 0,
+          "peer": 0,
+          "upper": 0,
+          "structure": 0
+        },
+        "status": "PROPOSAL_CALCULATED",
+        "max": 18,
+        "counts_excluding_candidate": {
+          "n1": 0,
+          "n2": 0,
+          "n3plus": 0
+        }
+      }
+    },
+    {
+      "counts_excluding_candidate": {
+        "n1": 1,
+        "n2": 0,
+        "n3plus": 1
+      },
+      "result": {
+        "score": 7,
+        "parts": {
+          "lower": 2,
+          "peer": 0,
+          "upper": 2,
+          "structure": 3
+        },
+        "status": "PROPOSAL_CALCULATED",
+        "max": 18,
+        "counts_excluding_candidate": {
+          "n1": 1,
+          "n2": 0,
+          "n3plus": 1
+        }
+      }
+    },
+    {
+      "counts_excluding_candidate": {
+        "n1": 5,
+        "n2": 0,
+        "n3plus": 3
+      },
+      "result": {
+        "score": 13,
+        "parts": {
+          "lower": 6,
+          "peer": 0,
+          "upper": 4,
+          "structure": 3
+        },
+        "status": "PROPOSAL_CALCULATED",
+        "max": 18,
+        "counts_excluding_candidate": {
+          "n1": 5,
+          "n2": 0,
+          "n3plus": 3
+        }
+      }
+    },
+    {
+      "counts_excluding_candidate": {
+        "n1": 3,
+        "n2": 1,
+        "n3plus": 1
+      },
+      "result": {
+        "score": 12,
+        "parts": {
+          "lower": 4,
+          "peer": 1,
+          "upper": 2,
+          "structure": 5
+        },
+        "status": "PROPOSAL_CALCULATED",
+        "max": 18,
+        "counts_excluding_candidate": {
+          "n1": 3,
+          "n2": 1,
+          "n3plus": 1
+        }
+      }
+    },
+    {
+      "counts_excluding_candidate": {
+        "n1": 5,
+        "n2": 3,
+        "n3plus": 3
+      },
+      "result": {
+        "score": 18,
+        "parts": {
+          "lower": 6,
+          "peer": 3,
+          "upper": 4,
+          "structure": 5
+        },
+        "status": "PROPOSAL_CALCULATED",
+        "max": 18,
+        "counts_excluding_candidate": {
+          "n1": 5,
+          "n2": 3,
+          "n3plus": 3
+        }
+      }
+    },
+    {
+      "counts_excluding_candidate": {
+        "n1": 5,
+        "n2": 0,
+        "n3plus": 0
+      },
+      "result": {
+        "score": 6,
+        "parts": {
+          "lower": 6,
+          "peer": 0,
+          "upper": 0,
+          "structure": 0
+        },
+        "status": "PROPOSAL_CALCULATED",
+        "max": 18,
+        "counts_excluding_candidate": {
+          "n1": 5,
+          "n2": 0,
+          "n3plus": 0
+        }
+      }
+    },
+    {
+      "counts_excluding_candidate": {
+        "n1": 5,
+        "n2": 3,
+        "n3plus": 0
+      },
+      "result": {
+        "score": 11,
+        "parts": {
+          "lower": 6,
+          "peer": 3,
+          "upper": 0,
+          "structure": 2
+        },
+        "status": "PROPOSAL_CALCULATED",
+        "max": 18,
+        "counts_excluding_candidate": {
+          "n1": 5,
+          "n2": 3,
+          "n3plus": 0
+        }
+      }
+    },
+    {
+      "counts_excluding_candidate": {
+        "n1": 0,
+        "n2": 3,
+        "n3plus": 3
+      },
+      "result": {
+        "score": 8,
+        "parts": {
+          "lower": 0,
+          "peer": 3,
+          "upper": 4,
+          "structure": 1
+        },
+        "status": "PROPOSAL_CALCULATED",
+        "max": 18,
+        "counts_excluding_candidate": {
+          "n1": 0,
+          "n2": 3,
+          "n3plus": 3
+        }
+      }
+    },
+    {
+      "counts_excluding_candidate": {
+        "n1": 20,
+        "n2": 0,
+        "n3plus": 1
+      },
+      "result": {
+        "score": 11,
+        "parts": {
+          "lower": 6,
+          "peer": 0,
+          "upper": 2,
+          "structure": 3
+        },
+        "status": "PROPOSAL_CALCULATED",
+        "max": 18,
+        "counts_excluding_candidate": {
+          "n1": 20,
+          "n2": 0,
+          "n3plus": 1
+        }
+      }
+    }
+  ],
+  "whole_score_example": {
+    "inputs": {
+      "r_pct": 2.0,
+      "p23": 0.3,
+      "fail_high": 0.25,
+      "U": 90,
+      "Z": 30,
+      "D": 10,
+      "breadth": 0.7,
+      "excess_median_T": 1.2,
+      "excess_median_previous": 0.5,
+      "n1": 3,
+      "n2": 1,
+      "n3plus": 1,
+      "n": 6,
+      "rank": 2,
+      "remaining_session_minutes": 180,
+      "open_break_count": 1,
+      "seal_amount": 60000000,
+      "circulating_market_cap": 10000000000
+    },
+    "inputs_unit_note": "p23/fail_high/breadth是0—1；r_pct及相对中位数差是百分点；金额同为元；收盘信息为合成假设。",
+    "result": {
+      "version": "S02_WEIGHT_PROPOSAL_R1",
+      "enabled": false,
+      "approval_status": "PENDING_USER_REVIEW",
+      "strategy_status": "NOT_ENABLED",
+      "item_scores": {
+        "A01": 5.0,
+        "A02": 4.8,
+        "A03": 5.25,
+        "A04": 3.0,
+        "A05": 2.7,
+        "B01": 7.0,
+        "B02": 12,
+        "B03": 12,
+        "C02": 6.4,
+        "D01": 7.5,
+        "D02": 3.0,
+        "D03": 3.5999999999999996
+      },
+      "known_subtotal": 72.25,
+      "research_score_proposal": 72.25,
+      "missing_or_invalid": {},
+      "modules": {
+        "A": 20.75,
+        "B": 31.0,
+        "C": 6.4,
+        "D": 14.1
+      },
+      "final_score": null,
+      "grade": null,
+      "permission": null,
+      "note": "Only formula arithmetic. Does not verify source dates, approved cohort construction, theme identity, trade eligibility or predictive performance."
+    }
+  }
+}

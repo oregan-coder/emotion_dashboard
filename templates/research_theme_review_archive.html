@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>题材复核存档 · 已暂停</title>
+<link rel="stylesheet" href="/static/style.css">
+<link rel="stylesheet" href="/static/review_panel.css">
+<style>
+body{margin:0;background:#141927;color:#dce5f4;font-family:system-ui,"Microsoft YaHei",sans-serif}
+.archive-wrap{max-width:1260px;margin:24px auto;padding:0 20px;line-height:1.65}
+.archive-controls{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin:18px 0}
+.archive-controls input,.archive-controls button{font:inherit;padding:8px 12px;border:1px solid #38475f;border-radius:6px;background:#1c2639;color:#edf4ff;min-height:42px}
+.archive-controls button{cursor:pointer}.archive-controls button:focus-visible,a:focus-visible{outline:2px solid #64dce5;outline-offset:3px}
+.archive-wrap a{color:#8fd5ee}.archive-note{border-left:3px solid #e6b55b;padding:12px 16px;background:#1b2435}
+.archive-status{min-height:2em;overflow-wrap:anywhere}
+</style>
+</head><body><main class="archive-wrap">
+<h1>题材复核存档 <small>· 已暂停</small></h1>
+<p class="archive-note">本模块已暂停参与主预案计算。既有名单、修订和保存记录保持原样，仅供独立查看；打开此页不会计算、保存或更新行情。</p>
+<div class="archive-controls"><label for="archiveDate">研究日期 <input id="archiveDate" type="date"></label><button id="archiveRead" type="button">查看已保存记录</button></div>
+<p id="archiveStatus" class="archive-status" role="status" aria-live="polite">请选择日期后查看。页面尚未读取数据库。</p>
+<div id="themeReviewArchivePanel"></div>
+</main><script src="/static/js/review_panel.js"></script><script src="/static/js/review_archive_page.js"></script>
+<button class="side-handle" id="sideHandle" title="展开/收起目录">▶</button>
+<aside class="side-drawer" id="sideDrawer">
+  <a href="/" class="side-link" title="决策舱首页" class="side-link ls5">决策舱首页</a>
+  <a href="/backtest" class="side-link" title="历史回测分析" class="side-link ls4">历史回测</a>
+  <a href="/validation" class="side-link" title="数据与验证只读页面" class="side-link ls5">数据与验证</a>
+  <a href="/research/cycle-theme" class="side-link" title="情绪周期与主线观察研究页" class="side-link ls5">周期与主线</a>
+  <a href="/research/theme-review" class="side-link" title="暂停计算，仅查看既有独立修订">题材复核存档</a>
+</aside>
+<script>
+(function(){
+  var d=document.getElementById('sideDrawer'),h=document.getElementById('sideHandle');
+  function paint(){var o=d.classList.contains('open');h.classList.toggle('open',o);h.textContent=o?'◀':'▶';}
+  function open(){d.classList.add('open');paint();}
+  function close(){d.classList.remove('open');paint();}
+  d.classList.add('open');paint();
+  if(h){h.addEventListener('click',function(){d.classList.contains('open')?close():open();});}
+  window.addEventListener('keydown',function(e){if(e.key==='Escape')close();});
+})();
+</script>
+</body></html>

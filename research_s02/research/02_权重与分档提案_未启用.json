@@ -1,0 +1,409 @@
+{
+  "version": "5535_S02_WEIGHT_PROPOSAL_R1",
+  "document_kind": "PROPOSED_RESEARCH_SCORING_NOT_PRODUCTION",
+  "enabled": false,
+  "approval_status": "PENDING_USER_REVIEW",
+  "strategy_status": "NOT_ENABLED",
+  "formal_outputs": {
+    "final_score": null,
+    "grade": null,
+    "permission": null
+  },
+  "target": "T日收盘合格二板候选，T+1收盘是否成为三板；分数不是概率或盈利承诺",
+  "weights": {
+    "A": 30,
+    "B": 40,
+    "C": 8,
+    "D": 22
+  },
+  "maximum": 100,
+  "method": "透明预算分配+粗粒度分档；未使用样本优化、未宣称行业标准",
+  "budget_reallocation": {
+    "retained_reference": {
+      "A": 25,
+      "B": 25,
+      "C": 6,
+      "D": 22
+    },
+    "proposed_increment": {
+      "A": 5,
+      "B": 15,
+      "C": 2,
+      "D": 0
+    },
+    "sum_increment": 22,
+    "normalized_78_to_100": false
+  },
+  "items": [
+    {
+      "rule_id": "A01",
+      "module": "A",
+      "name": "昨日涨停表现",
+      "proposed_weight": 8,
+      "previous_draft_weight": 7,
+      "formula": "8*clip01((r_pct+3)/8)",
+      "inputs": [
+        "r_pct"
+      ],
+      "data_definition": "883900有效数据优先；否则已批准本地有效昨日样本今日涨幅等权平均。",
+      "rationale": "昨日强势群体是否得到正反馈；不额外加入另一项赚钱效应固定分。",
+      "enabled": false,
+      "approval_status": "PENDING_USER_REVIEW"
+    },
+    {
+      "rule_id": "A02",
+      "module": "A",
+      "name": "已发生二进三承接",
+      "proposed_weight": 8,
+      "previous_draft_weight": 6,
+      "formula": "8*clip01(p23/0.50)",
+      "inputs": [
+        "p23"
+      ],
+      "data_definition": "T-1收盘二板有效母体中T日收盘三板的比例。",
+      "rationale": "与目标相似但使用已发生的接力结果，不引用T+1标签。",
+      "enabled": false,
+      "approval_status": "PENDING_USER_REVIEW"
+    },
+    {
+      "rule_id": "A03",
+      "module": "A",
+      "name": "高位续板保有",
+      "proposed_weight": 7,
+      "previous_draft_weight": 6,
+      "formula": "7*(1-fail_high)",
+      "inputs": [
+        "fail_high"
+      ],
+      "data_definition": "昨日≥4板有效母体今日未续板占比；扣除停牌及必要缺数的规则沿用批准稿。",
+      "rationale": "将高位群体与全市场炸板统计分开。",
+      "enabled": false,
+      "approval_status": "PENDING_USER_REVIEW"
+    },
+    {
+      "rule_id": "A04",
+      "module": "A",
+      "name": "市场封板稳定",
+      "proposed_weight": 4,
+      "previous_draft_weight": 3,
+      "formula": "4*U/(U+Z)",
+      "inputs": [
+        "U",
+        "Z"
+      ],
+      "data_definition": "U=同范围收盘涨停数；Z=触板后收盘未封数；两者集合互斥。",
+      "rationale": "衡量最后封住而非只触板；不混用高位失败率。",
+      "enabled": false,
+      "approval_status": "PENDING_USER_REVIEW"
+    },
+    {
+      "rule_id": "A05",
+      "module": "A",
+      "name": "涨跌停两端力量",
+      "proposed_weight": 3,
+      "previous_draft_weight": 3,
+      "formula": "3*U/(U+D)",
+      "inputs": [
+        "U",
+        "D"
+      ],
+      "data_definition": "U/D=批准范围普通总涨停/总跌停，非真实涨跌停替换。",
+      "rationale": "尾部强弱只给低预算，避免与前四项重复放大。",
+      "enabled": false,
+      "approval_status": "PENDING_USER_REVIEW"
+    },
+    {
+      "rule_id": "B01",
+      "module": "B",
+      "name": "题材有效成员上涨广度",
+      "proposed_weight": 10,
+      "previous_draft_weight": 8,
+      "formula": "10*breadth",
+      "inputs": [
+        "breadth"
+      ],
+      "data_definition": "剔除当前候选后，同日已确认题材有效成员上涨占比，平盘/下跌保留。",
+      "rationale": "观察广泛参与，不只看涨停股票。",
+      "enabled": false,
+      "approval_status": "PENDING_USER_REVIEW"
+    },
+    {
+      "rule_id": "B02",
+      "module": "B",
+      "name": "题材两日相对强度",
+      "proposed_weight": 12,
+      "previous_draft_weight": 9,
+      "formula": "6*I(excess_median_T>0)+6*I(excess_median_previous>0)",
+      "inputs": [
+        "excess_median_T",
+        "excess_median_previous"
+      ],
+      "data_definition": "各日题材有效成员中位涨幅减各日同范围市场有效成员中位涨幅。",
+      "rationale": "当日和前日均有相对表现才满档；不是五日周期。",
+      "enabled": false,
+      "approval_status": "PENDING_USER_REVIEW"
+    },
+    {
+      "rule_id": "B03",
+      "module": "B",
+      "name": "题材梯队规模与层次",
+      "proposed_weight": 18,
+      "previous_draft_weight": 8,
+      "formula": "lower_points(n1)+peer_points(n2)+upper_points(n3plus)+structure_points(n1,n2,n3plus)",
+      "inputs": [
+        "n1",
+        "n2",
+        "n3plus"
+      ],
+      "data_definition": "T日收盘、同一日期化具体交易题材，剔除当前候选后的互斥首板/二板/≥3板有效人数。",
+      "rationale": "分别观察新增首板、同高度共同出现、上层支持和多层共存；本项是结构强度，不是主线或龙头认定。",
+      "enabled": false,
+      "approval_status": "PENDING_USER_REVIEW"
+    },
+    {
+      "rule_id": "C02",
+      "module": "C",
+      "name": "首板阶段相对先手",
+      "proposed_weight": 8,
+      "previous_draft_weight": 6,
+      "formula": "8*(n-rank)/(n-1) if n>=2 else null",
+      "inputs": [
+        "n",
+        "rank"
+      ],
+      "data_definition": "T-1同题材全部合格首板的首封时间排名，含当前候选及后来未晋级者；并列平均名次。",
+      "rationale": "限制唯一时序指标预算，不拿先封替代业务关联、主线或核心判断。",
+      "enabled": false,
+      "approval_status": "PENDING_USER_REVIEW"
+    },
+    {
+      "rule_id": "D01",
+      "module": "D",
+      "name": "最后封板后持续时间",
+      "proposed_weight": 10,
+      "previous_draft_weight": 10,
+      "formula": "10*remaining_session_minutes/240",
+      "inputs": [
+        "remaining_session_minutes"
+      ],
+      "data_definition": "T日收盘已确认，最后封板至收盘在09:30-11:30、13:00-15:00计量窗内剩余分钟；09:25映射09:30。",
+      "rationale": "表示最终封住后的持续时长；不是预测下午不会开板。",
+      "enabled": false,
+      "approval_status": "PENDING_USER_REVIEW"
+    },
+    {
+      "rule_id": "D02",
+      "module": "D",
+      "name": "当日开板次数",
+      "proposed_weight": 6,
+      "previous_draft_weight": 6,
+      "formula": "6/(1+open_break_count)",
+      "inputs": [
+        "open_break_count"
+      ],
+      "data_definition": "同一T日完整交易时段的非负整数次数。",
+      "rationale": "与D01构成合计16分的稳定组，不再在其他模块按同一开板事实扣分。",
+      "enabled": false,
+      "approval_status": "PENDING_USER_REVIEW"
+    },
+    {
+      "rule_id": "D03",
+      "module": "D",
+      "name": "收盘封单相对规模",
+      "proposed_weight": 6,
+      "previous_draft_weight": 6,
+      "formula": "6*clip01(seal_amount/circulating_market_cap/0.01)",
+      "inputs": [
+        "seal_amount",
+        "circulating_market_cap"
+      ],
+      "data_definition": "同收盘时点、同币种单位的封板资金与流通市值。",
+      "rationale": "仅为静态委托规模的代理，不称为订单流、主力净流入或成交保证。",
+      "enabled": false,
+      "approval_status": "PENDING_USER_REVIEW"
+    }
+  ],
+  "observers": {
+    "C01": "业务/题材关联：说明和依赖证据，无独立得分，无新增硬否决",
+    "C03": "连板前相对强度：仅观察，无独立得分",
+    "D04": "换手/历史倍数：仅观察，无倒U计分，无隐性替代扣分"
+  },
+  "B03": {
+    "max": 18,
+    "date": "T_CLOSE",
+    "candidate_excluded": true,
+    "theme": "具体日期化交易题材，归属及分配须先于本分数决定；不取多个概念最大分",
+    "groups": {
+      "n1": "其余当日首板人数",
+      "n2": "其余当日二板人数",
+      "n3plus": "其余当日≥3板人数；这不是市场高位≥4定义"
+    },
+    "lower_points": [
+      {
+        "n_min": 0,
+        "n_max": 0,
+        "points": 0
+      },
+      {
+        "n_min": 1,
+        "n_max": 1,
+        "points": 2
+      },
+      {
+        "n_min": 2,
+        "n_max": 2,
+        "points": 3
+      },
+      {
+        "n_min": 3,
+        "n_max": 4,
+        "points": 4
+      },
+      {
+        "n_min": 5,
+        "n_max": null,
+        "points": 6
+      }
+    ],
+    "peer_points": "min(n2,3)",
+    "upper_points": [
+      {
+        "n_min": 0,
+        "n_max": 0,
+        "points": 0
+      },
+      {
+        "n_min": 1,
+        "n_max": 1,
+        "points": 2
+      },
+      {
+        "n_min": 2,
+        "n_max": 2,
+        "points": 3
+      },
+      {
+        "n_min": 3,
+        "n_max": null,
+        "points": 4
+      }
+    ],
+    "structure_points": {
+      "111": 5,
+      "101": 3,
+      "110": 2,
+      "011": 1,
+      "100": 0,
+      "010": 0,
+      "001": 0,
+      "000": 0
+    },
+    "structure_note": "位顺序为n1,n2,n3plus是否>0；只取一个互斥档，不能把档位累加。它是显式交互奖励，不宣称与人数独立。",
+    "display_bands": [
+      {
+        "min": 0,
+        "max": 0,
+        "label": "无外部梯队支持"
+      },
+      {
+        "min": 1,
+        "max": 5,
+        "label": "零散支持"
+      },
+      {
+        "min": 6,
+        "max": 9,
+        "label": "初步成形"
+      },
+      {
+        "min": 10,
+        "max": 13,
+        "label": "多层形成"
+      },
+      {
+        "min": 14,
+        "max": 16,
+        "label": "较强梯队"
+      },
+      {
+        "min": 17,
+        "max": 18,
+        "label": "规模与层次齐备"
+      }
+    ],
+    "not_allowed": [
+      "候选自身加人数",
+      "不同题材合并",
+      "数量未知填0",
+      "同时落入两个板数桶",
+      "单只10板因绝对高度重复加分",
+      "将本项标签当主线/情绪阶段/股票评级",
+      "排名已知子集变成完整排名"
+    ]
+  },
+  "missing_policy": {
+    "unknown_item": null,
+    "full_score_if_any_required_item_unknown": null,
+    "partial_known_points": "可独立显示，不归一化，不输出完整评级",
+    "zero_denominator": null,
+    "singleton_C02": "NOT_COMPARABLE; null",
+    "count_basis": "已批准的停牌/必要字段缺失处理照常形成有效集合，记录剔除与覆盖；整个母体或日期未知不伪装零。"
+  },
+  "sources": [
+    {
+      "id": "R1",
+      "title": "Do Industries Explain Momentum?",
+      "authors": "Tobias J. Moskowitz; Mark Grinblatt",
+      "publisher": "AQR作者研究页 / Journal of Finance",
+      "year": 1999,
+      "url": "https://www.aqr.com/Insights/Research/Journal-Article/Do-Industries-Explain-Momentum",
+      "use": "行业共同表现具有研究意义；本文主要6—12个月，不证明中国二进三两日题材信号。"
+    },
+    {
+      "id": "R2",
+      "title": "Daily Price Limits and Destructive Market Behavior",
+      "authors": "Ting Chen; Zhenyu Gao; Jibao He; Wenxi Jiang; Wei Xiong",
+      "publisher": "作者在Princeton公开的论文",
+      "year": null,
+      "url": "https://www.princeton.edu/~wxiong/papers/PriceLimit.pdf",
+      "use": "2012—2015年深市样本展示次日（主要开盘）延续与长期反转/部分大投资者次日卖出；不是封住三板或可成交胜率。历史ST/涨跌幅规则不当作当前规则。"
+    },
+    {
+      "id": "R3",
+      "title": "The Price Impact of Order Book Events",
+      "authors": "Rama Cont; Arseniy Kukanov; Sasha Stoikov",
+      "publisher": "作者预印本arXiv 1011.6402",
+      "year": 2010,
+      "url": "https://arxiv.org/abs/1011.6402",
+      "use": "50只美股的短间隔订单流不平衡与市场深度研究；静态封单快照不是完整订单流。"
+    },
+    {
+      "id": "R4",
+      "title": "Handbook on Constructing Composite Indicators: Methodology and User Guide",
+      "authors": "OECD / European Union / EC-JRC",
+      "publisher": "OECD",
+      "year": 2008,
+      "url": "https://www.oecd.org/en/publications/handbook-on-constructing-composite-indicators-methodology-and-user-guide_9789264043466-en.html",
+      "pdf": "https://www.oecd.org/content/dam/oecd/en/publications/reports/2008/08/handbook-on-constructing-composite-indicators-methodology-and-user-guide_g1gh9301/9789264043466-en.pdf",
+      "use": "加权和、权重价值判断、相关指标重复权重、敏感性；不是交易策略论文。参见印刷页31—33与117—118。"
+    },
+    {
+      "id": "R5",
+      "title": "The Probability of Backtest Overfitting",
+      "authors": "David H. Bailey; Jonathan Borwein; Marcos Lopez de Prado; Qiji Jim Zhu",
+      "publisher": "WMU作者机构存储 / Journal of Computational Finance",
+      "year": 2017,
+      "url": "https://scholarworks.wmich.edu/math_pubs/42/",
+      "use": "重复搜索和回测选择过拟合；本文的验证建议借鉴其问题意识，未声称已执行CSCV。"
+    },
+    {
+      "id": "R6",
+      "title": "AKShare股票数据官方文档",
+      "authors": "AKShare维护者",
+      "publisher": "AKShare",
+      "year": null,
+      "url": "https://akshare.akfamily.xyz/data/stock/stock.html",
+      "use": "涨停池/昨日池列与概念成员当前时点接口；接口存在不证明本项目实时值、历史成员或完整市场覆盖。"
+    }
+  ]
+}

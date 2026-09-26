@@ -1,0 +1,10 @@
+{
+  "schema": "5535_AUTOMATION_CONFIG_V1",
+  "enabled": true,
+  "automation_home": "F:\\PythonProject\\5535_WINDOWS_AUTO_DB_R1",
+  "project_root": "F:\\PythonProject\\emotion_dashboard",
+  "database": "F:\\PythonProject\\emotion_dashboard\\data\\.migration_shadow\\market_store_5535.next.sqlite3",
+  "work_root": "F:\\PythonProject\\emotion_dashboard\\data\\automation_runs",
+  "python_executable": "F:\\Python3.13\\python.exe",
+  "timeout_seconds": 900
+}

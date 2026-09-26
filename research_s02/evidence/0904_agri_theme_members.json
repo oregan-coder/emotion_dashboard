@@ -1,0 +1,68 @@
+[
+  {
+    "code": "600108",
+    "name": "亚盛集团",
+    "board_count": 2,
+    "industry": "种植业"
+  },
+  {
+    "code": "001366",
+    "name": "播恩集团",
+    "board_count": 1,
+    "industry": "饲料"
+  },
+  {
+    "code": "000798",
+    "name": "中水渔业",
+    "board_count": 1,
+    "industry": "渔业"
+  },
+  {
+    "code": "600354",
+    "name": "敦煌种业",
+    "board_count": 1,
+    "industry": "种植业"
+  },
+  {
+    "code": "002124",
+    "name": "天邦食品",
+    "board_count": 1,
+    "industry": "养殖业"
+  },
+  {
+    "code": "603151",
+    "name": "邦基科技",
+    "board_count": 1,
+    "industry": "饲料"
+  },
+  {
+    "code": "000592",
+    "name": "平潭发展",
+    "board_count": 1,
+    "industry": "林业Ⅱ"
+  },
+  {
+    "code": "000735",
+    "name": "罗牛山",
+    "board_count": 1,
+    "industry": "养殖业"
+  },
+  {
+    "code": "000702",
+    "name": "正虹科技",
+    "board_count": 1,
+    "industry": "饲料"
+  },
+  {
+    "code": "600975",
+    "name": "新五丰",
+    "board_count": 1,
+    "industry": "养殖业"
+  },
+  {
+    "code": "000876",
+    "name": "新希望",
+    "board_count": 1,
+    "industry": "饲料"
+  }
+]

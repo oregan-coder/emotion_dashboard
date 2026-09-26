@@ -1,0 +1,828 @@
+{
+  "schema": "5535_S02_R1_RESEARCH_RESULT_V1",
+  "version": "S02_WEIGHT_PROPOSAL_R1",
+  "implementation_version": "S02_R1_INPUT_ADAPTER_FIX1",
+  "input_type": "CAPTURED_UNVERIFIED",
+  "candidate": {
+    "code": "002040",
+    "name": "南 京 港",
+    "eligibility_status": "UNKNOWN",
+    "eligibility_reason": "仅捕获一板至二板线索；源日期、两日开盘/涨停价与T收盘未核准，不按09:25单独剔除"
+  },
+  "observation": {
+    "trade_date": "2026-09-10",
+    "previous_trade_date": "2026-09-09",
+    "captured_at": "2026-09-10 11:53:40",
+    "source_date_verified": false,
+    "closing_verified": false,
+    "previous_trade_date_verified": false,
+    "decision_asof": null,
+    "date_meaning": "snapshot/request declaration only, not verified quote date"
+  },
+  "enabled": false,
+  "approval_status": "PENDING_USER_REVIEW",
+  "strategy_status": "NOT_ENABLED",
+  "item_scores": {
+    "A01": null,
+    "A02": null,
+    "A03": null,
+    "A04": null,
+    "A05": null,
+    "B01": null,
+    "B02": null,
+    "B03": null,
+    "C02": null,
+    "D01": null,
+    "D02": null,
+    "D03": null
+  },
+  "items": {
+    "A01": {
+      "name": "昨日涨停表现",
+      "proposed_weight": 8,
+      "rule_status": "PENDING_USER_REVIEW",
+      "input_values": {
+        "r_pct": null
+      },
+      "input_units": {
+        "r_pct": "percent"
+      },
+      "expected_units": {
+        "r_pct": "percent"
+      },
+      "score_unit": "proposal_points",
+      "count_basis": null,
+      "source_mode": null,
+      "source_review": {
+        "status": "INPUT_PENDING",
+        "source_dates": [],
+        "units_verified": false,
+        "scope_verified": false,
+        "closing_verified": false,
+        "available_at": null,
+        "evidence_refs": [
+          {
+            "file": "../reference/07_candidates_frozen_reference.json",
+            "sha256": "ba260abca3edea29570bcc939a733026d4ab7be095ff74970bc730123fc47a31",
+            "pointer": "/records/0"
+          }
+        ]
+      },
+      "source_value_refs": {},
+      "formula": "8*clip01((r_pct+3)/8)",
+      "rationale": "昨日强势群体是否得到正反馈；不额外加入另一项赚钱效应固定分。",
+      "score": null,
+      "data_status": "INPUT_PENDING",
+      "issues": [
+        "SOURCE_DATE_VERIFIED_MISSING",
+        "CLOSING_VERIFIED_MISSING",
+        "PREVIOUS_TRADE_DATE_VERIFIED_MISSING",
+        "DECISION_CUTOFF_INVALID",
+        "ITEM_EVIDENCE_NOT_VERIFIED",
+        "UNITS_VERIFIED_MISSING",
+        "SCOPE_VERIFIED_MISSING",
+        "ITEM_SOURCE_DATES_MISMATCH_OR_MISSING",
+        "EVIDENCE_AVAILABILITY_TIME_UNKNOWN",
+        "A01_APPROVED_SOURCE_MODE_UNSPECIFIED",
+        "INPUT_MISSING:r_pct",
+        "VALUE_REF_MISSING:r_pct"
+      ]
+    },
+    "A02": {
+      "name": "已发生二进三承接",
+      "proposed_weight": 8,
+      "rule_status": "PENDING_USER_REVIEW",
+      "input_values": {
+        "p23": null
+      },
+      "input_units": {
+        "p23": "fraction"
+      },
+      "expected_units": {
+        "p23": "fraction"
+      },
+      "score_unit": "proposal_points",
+      "count_basis": null,
+      "source_mode": null,
+      "source_review": {
+        "status": "INPUT_PENDING",
+        "source_dates": [],
+        "units_verified": false,
+        "scope_verified": false,
+        "closing_verified": false,
+        "available_at": null,
+        "evidence_refs": [
+          {
+            "file": "../reference/07_candidates_frozen_reference.json",
+            "sha256": "ba260abca3edea29570bcc939a733026d4ab7be095ff74970bc730123fc47a31",
+            "pointer": "/records/0"
+          }
+        ]
+      },
+      "source_value_refs": {},
+      "formula": "8*clip01(p23/0.50)",
+      "rationale": "与目标相似但使用已发生的接力结果，不引用T+1标签。",
+      "score": null,
+      "data_status": "INPUT_PENDING",
+      "issues": [
+        "SOURCE_DATE_VERIFIED_MISSING",
+        "CLOSING_VERIFIED_MISSING",
+        "PREVIOUS_TRADE_DATE_VERIFIED_MISSING",
+        "DECISION_CUTOFF_INVALID",
+        "ITEM_EVIDENCE_NOT_VERIFIED",
+        "UNITS_VERIFIED_MISSING",
+        "SCOPE_VERIFIED_MISSING",
+        "ITEM_SOURCE_DATES_MISMATCH_OR_MISSING",
+        "EVIDENCE_AVAILABILITY_TIME_UNKNOWN",
+        "NUMERATOR_DENOMINATOR_REQUIRED",
+        "INPUT_MISSING:p23",
+        "VALUE_REF_MISSING:p23"
+      ]
+    },
+    "A03": {
+      "name": "高位续板保有",
+      "proposed_weight": 7,
+      "rule_status": "PENDING_USER_REVIEW",
+      "input_values": {
+        "fail_high": null
+      },
+      "input_units": {
+        "fail_high": "fraction"
+      },
+      "expected_units": {
+        "fail_high": "fraction"
+      },
+      "score_unit": "proposal_points",
+      "count_basis": null,
+      "source_mode": null,
+      "source_review": {
+        "status": "INPUT_PENDING",
+        "source_dates": [],
+        "units_verified": false,
+        "scope_verified": false,
+        "closing_verified": false,
+        "available_at": null,
+        "evidence_refs": [
+          {
+            "file": "../reference/07_candidates_frozen_reference.json",
+            "sha256": "ba260abca3edea29570bcc939a733026d4ab7be095ff74970bc730123fc47a31",
+            "pointer": "/records/0"
+          }
+        ]
+      },
+      "source_value_refs": {},
+      "formula": "7*(1-fail_high)",
+      "rationale": "将高位群体与全市场炸板统计分开。",
+      "score": null,
+      "data_status": "INPUT_PENDING",
+      "issues": [
+        "SOURCE_DATE_VERIFIED_MISSING",
+        "CLOSING_VERIFIED_MISSING",
+        "PREVIOUS_TRADE_DATE_VERIFIED_MISSING",
+        "DECISION_CUTOFF_INVALID",
+        "ITEM_EVIDENCE_NOT_VERIFIED",
+        "UNITS_VERIFIED_MISSING",
+        "SCOPE_VERIFIED_MISSING",
+        "ITEM_SOURCE_DATES_MISMATCH_OR_MISSING",
+        "EVIDENCE_AVAILABILITY_TIME_UNKNOWN",
+        "NUMERATOR_DENOMINATOR_REQUIRED",
+        "INPUT_MISSING:fail_high",
+        "VALUE_REF_MISSING:fail_high"
+      ]
+    },
+    "A04": {
+      "name": "市场封板稳定",
+      "proposed_weight": 4,
+      "rule_status": "PENDING_USER_REVIEW",
+      "input_values": {
+        "U": null,
+        "Z": null
+      },
+      "input_units": {
+        "U": "stocks",
+        "Z": "stocks"
+      },
+      "expected_units": {
+        "U": "stocks",
+        "Z": "stocks"
+      },
+      "score_unit": "proposal_points",
+      "count_basis": null,
+      "source_mode": null,
+      "source_review": {
+        "status": "INPUT_PENDING",
+        "source_dates": [],
+        "units_verified": false,
+        "scope_verified": false,
+        "closing_verified": false,
+        "available_at": null,
+        "evidence_refs": [
+          {
+            "file": "../reference/07_candidates_frozen_reference.json",
+            "sha256": "ba260abca3edea29570bcc939a733026d4ab7be095ff74970bc730123fc47a31",
+            "pointer": "/records/0"
+          }
+        ]
+      },
+      "source_value_refs": {},
+      "formula": "4*U/(U+Z)",
+      "rationale": "衡量最后封住而非只触板；不混用高位失败率。",
+      "score": null,
+      "data_status": "INPUT_PENDING",
+      "issues": [
+        "SOURCE_DATE_VERIFIED_MISSING",
+        "CLOSING_VERIFIED_MISSING",
+        "PREVIOUS_TRADE_DATE_VERIFIED_MISSING",
+        "DECISION_CUTOFF_INVALID",
+        "ITEM_EVIDENCE_NOT_VERIFIED",
+        "UNITS_VERIFIED_MISSING",
+        "SCOPE_VERIFIED_MISSING",
+        "ITEM_SOURCE_DATES_MISMATCH_OR_MISSING",
+        "EVIDENCE_AVAILABILITY_TIME_UNKNOWN",
+        "INPUT_MISSING:U",
+        "INPUT_MISSING:Z",
+        "VALUE_REF_MISSING:U",
+        "VALUE_REF_MISSING:Z"
+      ]
+    },
+    "A05": {
+      "name": "涨跌停两端力量",
+      "proposed_weight": 3,
+      "rule_status": "PENDING_USER_REVIEW",
+      "input_values": {
+        "U": null,
+        "D": null
+      },
+      "input_units": {
+        "U": "stocks",
+        "D": "stocks"
+      },
+      "expected_units": {
+        "U": "stocks",
+        "D": "stocks"
+      },
+      "score_unit": "proposal_points",
+      "count_basis": null,
+      "source_mode": null,
+      "source_review": {
+        "status": "INPUT_PENDING",
+        "source_dates": [],
+        "units_verified": false,
+        "scope_verified": false,
+        "closing_verified": false,
+        "available_at": null,
+        "evidence_refs": [
+          {
+            "file": "../reference/07_candidates_frozen_reference.json",
+            "sha256": "ba260abca3edea29570bcc939a733026d4ab7be095ff74970bc730123fc47a31",
+            "pointer": "/records/0"
+          }
+        ]
+      },
+      "source_value_refs": {},
+      "formula": "3*U/(U+D)",
+      "rationale": "尾部强弱只给低预算，避免与前四项重复放大。",
+      "score": null,
+      "data_status": "INPUT_PENDING",
+      "issues": [
+        "SOURCE_DATE_VERIFIED_MISSING",
+        "CLOSING_VERIFIED_MISSING",
+        "PREVIOUS_TRADE_DATE_VERIFIED_MISSING",
+        "DECISION_CUTOFF_INVALID",
+        "ITEM_EVIDENCE_NOT_VERIFIED",
+        "UNITS_VERIFIED_MISSING",
+        "SCOPE_VERIFIED_MISSING",
+        "ITEM_SOURCE_DATES_MISMATCH_OR_MISSING",
+        "EVIDENCE_AVAILABILITY_TIME_UNKNOWN",
+        "INPUT_MISSING:U",
+        "INPUT_MISSING:D",
+        "VALUE_REF_MISSING:U",
+        "VALUE_REF_MISSING:D"
+      ]
+    },
+    "B01": {
+      "name": "题材有效成员上涨广度",
+      "proposed_weight": 10,
+      "rule_status": "PENDING_USER_REVIEW",
+      "input_values": {
+        "breadth": null
+      },
+      "input_units": {
+        "breadth": "fraction"
+      },
+      "expected_units": {
+        "breadth": "fraction"
+      },
+      "score_unit": "proposal_points",
+      "count_basis": null,
+      "source_mode": null,
+      "source_review": {
+        "status": "INPUT_PENDING",
+        "source_dates": [],
+        "units_verified": false,
+        "scope_verified": false,
+        "closing_verified": false,
+        "available_at": null,
+        "evidence_refs": [
+          {
+            "file": "../reference/07_candidates_frozen_reference.json",
+            "sha256": "ba260abca3edea29570bcc939a733026d4ab7be095ff74970bc730123fc47a31",
+            "pointer": "/records/0"
+          }
+        ]
+      },
+      "source_value_refs": {},
+      "formula": "10*breadth",
+      "rationale": "观察广泛参与，不只看涨停股票。",
+      "score": null,
+      "data_status": "INPUT_PENDING",
+      "issues": [
+        "SOURCE_DATE_VERIFIED_MISSING",
+        "CLOSING_VERIFIED_MISSING",
+        "PREVIOUS_TRADE_DATE_VERIFIED_MISSING",
+        "DECISION_CUTOFF_INVALID",
+        "ITEM_EVIDENCE_NOT_VERIFIED",
+        "UNITS_VERIFIED_MISSING",
+        "SCOPE_VERIFIED_MISSING",
+        "ITEM_SOURCE_DATES_MISMATCH_OR_MISSING",
+        "EVIDENCE_AVAILABILITY_TIME_UNKNOWN",
+        "NUMERATOR_DENOMINATOR_REQUIRED",
+        "INPUT_MISSING:breadth",
+        "VALUE_REF_MISSING:breadth"
+      ]
+    },
+    "B02": {
+      "name": "题材两日相对强度",
+      "proposed_weight": 12,
+      "rule_status": "PENDING_USER_REVIEW",
+      "input_values": {
+        "excess_median_T": null,
+        "excess_median_previous": null
+      },
+      "input_units": {
+        "excess_median_T": "percentage_points",
+        "excess_median_previous": "percentage_points"
+      },
+      "expected_units": {
+        "excess_median_T": "percentage_points",
+        "excess_median_previous": "percentage_points"
+      },
+      "score_unit": "proposal_points",
+      "count_basis": null,
+      "source_mode": null,
+      "source_review": {
+        "status": "INPUT_PENDING",
+        "source_dates": [],
+        "units_verified": false,
+        "scope_verified": false,
+        "closing_verified": false,
+        "available_at": null,
+        "evidence_refs": [
+          {
+            "file": "../reference/07_candidates_frozen_reference.json",
+            "sha256": "ba260abca3edea29570bcc939a733026d4ab7be095ff74970bc730123fc47a31",
+            "pointer": "/records/0"
+          }
+        ]
+      },
+      "source_value_refs": {},
+      "formula": "6*I(excess_median_T>0)+6*I(excess_median_previous>0)",
+      "rationale": "当日和前日均有相对表现才满档；不是五日周期。",
+      "score": null,
+      "data_status": "INPUT_PENDING",
+      "issues": [
+        "SOURCE_DATE_VERIFIED_MISSING",
+        "CLOSING_VERIFIED_MISSING",
+        "PREVIOUS_TRADE_DATE_VERIFIED_MISSING",
+        "DECISION_CUTOFF_INVALID",
+        "ITEM_EVIDENCE_NOT_VERIFIED",
+        "UNITS_VERIFIED_MISSING",
+        "SCOPE_VERIFIED_MISSING",
+        "ITEM_SOURCE_DATES_MISMATCH_OR_MISSING",
+        "EVIDENCE_AVAILABILITY_TIME_UNKNOWN",
+        "INPUT_MISSING:excess_median_T",
+        "INPUT_MISSING:excess_median_previous",
+        "VALUE_REF_MISSING:excess_median_T",
+        "VALUE_REF_MISSING:excess_median_previous"
+      ]
+    },
+    "B03": {
+      "name": "题材梯队规模与层次",
+      "proposed_weight": 18,
+      "rule_status": "PENDING_USER_REVIEW",
+      "input_values": {},
+      "input_units": {
+        "n1": "stocks",
+        "n2": "stocks",
+        "n3plus": "stocks"
+      },
+      "expected_units": {
+        "n1": "stocks",
+        "n2": "stocks",
+        "n3plus": "stocks"
+      },
+      "score_unit": "proposal_points",
+      "count_basis": null,
+      "source_mode": null,
+      "source_review": {
+        "status": "INPUT_PENDING",
+        "source_dates": [],
+        "units_verified": false,
+        "scope_verified": false,
+        "closing_verified": false,
+        "available_at": null,
+        "evidence_refs": [
+          {
+            "file": "../reference/07_candidates_frozen_reference.json",
+            "sha256": "ba260abca3edea29570bcc939a733026d4ab7be095ff74970bc730123fc47a31",
+            "pointer": "/records/0"
+          }
+        ]
+      },
+      "source_value_refs": {},
+      "formula": "lower_points(n1)+peer_points(n2)+upper_points(n3plus)+structure_points(n1,n2,n3plus)",
+      "rationale": "分别观察新增首板、同高度共同出现、上层支持和多层共存；本项是结构强度，不是主线或龙头认定。",
+      "score": null,
+      "data_status": "INPUT_PENDING",
+      "issues": [
+        "SOURCE_DATE_VERIFIED_MISSING",
+        "CLOSING_VERIFIED_MISSING",
+        "PREVIOUS_TRADE_DATE_VERIFIED_MISSING",
+        "DECISION_CUTOFF_INVALID",
+        "ITEM_EVIDENCE_NOT_VERIFIED",
+        "UNITS_VERIFIED_MISSING",
+        "SCOPE_VERIFIED_MISSING",
+        "ITEM_SOURCE_DATES_MISMATCH_OR_MISSING",
+        "EVIDENCE_AVAILABILITY_TIME_UNKNOWN",
+        "DATED_THEME_NOT_SELECTED",
+        "MEMBERSHIP_COMPLETE_MISSING",
+        "THEME_CONFIRMED_MISSING",
+        "MEMBERS_LIST_MISSING",
+        "INPUT_MISSING:n1",
+        "INPUT_MISSING:n2",
+        "INPUT_MISSING:n3plus",
+        "MEMBER_LIST_REF_MISSING_OR_INVALID:'file'"
+      ]
+    },
+    "C02": {
+      "name": "首板阶段相对先手",
+      "proposed_weight": 8,
+      "rule_status": "PENDING_USER_REVIEW",
+      "input_values": {
+        "n": null,
+        "rank": null
+      },
+      "input_units": {
+        "n": "stocks",
+        "rank": "average_rank"
+      },
+      "expected_units": {
+        "n": "stocks",
+        "rank": "average_rank"
+      },
+      "score_unit": "proposal_points",
+      "count_basis": null,
+      "source_mode": null,
+      "source_review": {
+        "status": "INPUT_PENDING",
+        "source_dates": [],
+        "units_verified": false,
+        "scope_verified": false,
+        "closing_verified": false,
+        "available_at": null,
+        "evidence_refs": [
+          {
+            "file": "../reference/07_candidates_frozen_reference.json",
+            "sha256": "ba260abca3edea29570bcc939a733026d4ab7be095ff74970bc730123fc47a31",
+            "pointer": "/records/0"
+          }
+        ]
+      },
+      "source_value_refs": {},
+      "formula": "8*(n-rank)/(n-1) if n>=2 else null",
+      "rationale": "限制唯一时序指标预算，不拿先封替代业务关联、主线或核心判断。",
+      "score": null,
+      "data_status": "INPUT_PENDING",
+      "issues": [
+        "PREVIOUS_TRADE_DATE_VERIFIED_MISSING",
+        "DECISION_CUTOFF_INVALID",
+        "ITEM_EVIDENCE_NOT_VERIFIED",
+        "UNITS_VERIFIED_MISSING",
+        "SCOPE_VERIFIED_MISSING",
+        "CLOSING_VERIFIED_MISSING",
+        "ITEM_SOURCE_DATES_MISMATCH_OR_MISSING",
+        "EVIDENCE_AVAILABILITY_TIME_UNKNOWN",
+        "DATED_THEME_NOT_SELECTED",
+        "MEMBERSHIP_COMPLETE_MISSING",
+        "THEME_CONFIRMED_MISSING",
+        "MEMBERS_LIST_MISSING",
+        "CANDIDATE_NOT_IN_COMPLETE_PRIOR_FIRST_BOARD_SET",
+        "NOT_COMPARABLE_SINGLETON",
+        "INPUT_MISSING:n",
+        "INPUT_MISSING:rank",
+        "MEMBER_LIST_REF_MISSING_OR_INVALID:'file'"
+      ]
+    },
+    "D01": {
+      "name": "最后封板后持续时间",
+      "proposed_weight": 10,
+      "rule_status": "PENDING_USER_REVIEW",
+      "input_values": {
+        "remaining_session_minutes": null
+      },
+      "input_units": {
+        "remaining_session_minutes": "minutes"
+      },
+      "expected_units": {
+        "remaining_session_minutes": "minutes"
+      },
+      "score_unit": "proposal_points",
+      "count_basis": null,
+      "source_mode": null,
+      "source_review": {
+        "status": "INPUT_PENDING",
+        "source_dates": [],
+        "units_verified": false,
+        "scope_verified": false,
+        "closing_verified": false,
+        "available_at": null,
+        "evidence_refs": [
+          {
+            "file": "../reference/07_candidates_frozen_reference.json",
+            "sha256": "ba260abca3edea29570bcc939a733026d4ab7be095ff74970bc730123fc47a31",
+            "pointer": "/records/0"
+          }
+        ]
+      },
+      "source_value_refs": {},
+      "formula": "10*remaining_session_minutes/240",
+      "rationale": "表示最终封住后的持续时长；不是预测下午不会开板。",
+      "score": null,
+      "data_status": "INPUT_PENDING",
+      "issues": [
+        "SOURCE_DATE_VERIFIED_MISSING",
+        "CLOSING_VERIFIED_MISSING",
+        "PREVIOUS_TRADE_DATE_VERIFIED_MISSING",
+        "DECISION_CUTOFF_INVALID",
+        "ITEM_EVIDENCE_NOT_VERIFIED",
+        "UNITS_VERIFIED_MISSING",
+        "SCOPE_VERIFIED_MISSING",
+        "ITEM_SOURCE_DATES_MISMATCH_OR_MISSING",
+        "EVIDENCE_AVAILABILITY_TIME_UNKNOWN",
+        "INPUT_MISSING:remaining_session_minutes",
+        "VALUE_REF_MISSING:remaining_session_minutes"
+      ]
+    },
+    "D02": {
+      "name": "当日开板次数",
+      "proposed_weight": 6,
+      "rule_status": "PENDING_USER_REVIEW",
+      "input_values": {
+        "open_break_count": 4
+      },
+      "input_units": {
+        "open_break_count": "times"
+      },
+      "expected_units": {
+        "open_break_count": "times"
+      },
+      "score_unit": "proposal_points",
+      "count_basis": null,
+      "source_mode": null,
+      "source_review": {
+        "status": "INPUT_PENDING",
+        "source_dates": [],
+        "units_verified": false,
+        "scope_verified": false,
+        "closing_verified": false,
+        "available_at": null,
+        "evidence_refs": [
+          {
+            "file": "../reference/07_candidates_frozen_reference.json",
+            "sha256": "ba260abca3edea29570bcc939a733026d4ab7be095ff74970bc730123fc47a31",
+            "pointer": "/records/0"
+          }
+        ]
+      },
+      "source_value_refs": {
+        "open_break_count": {
+          "file": "../reference/07_candidates_frozen_reference.json",
+          "sha256": "ba260abca3edea29570bcc939a733026d4ab7be095ff74970bc730123fc47a31",
+          "pointer": "/records/0/frame_records/limit_up/0/record/炸板次数"
+        }
+      },
+      "formula": "6/(1+open_break_count)",
+      "rationale": "与D01构成合计16分的稳定组，不再在其他模块按同一开板事实扣分。",
+      "score": null,
+      "data_status": "INPUT_PENDING",
+      "issues": [
+        "SOURCE_DATE_VERIFIED_MISSING",
+        "CLOSING_VERIFIED_MISSING",
+        "PREVIOUS_TRADE_DATE_VERIFIED_MISSING",
+        "DECISION_CUTOFF_INVALID",
+        "ITEM_EVIDENCE_NOT_VERIFIED",
+        "UNITS_VERIFIED_MISSING",
+        "SCOPE_VERIFIED_MISSING",
+        "ITEM_SOURCE_DATES_MISMATCH_OR_MISSING",
+        "EVIDENCE_AVAILABILITY_TIME_UNKNOWN"
+      ]
+    },
+    "D03": {
+      "name": "收盘封单相对规模",
+      "proposed_weight": 6,
+      "rule_status": "PENDING_USER_REVIEW",
+      "input_values": {
+        "seal_amount": 27908327,
+        "circulating_market_cap": 5337108386.1
+      },
+      "input_units": {
+        "seal_amount": "CNY",
+        "circulating_market_cap": "CNY"
+      },
+      "expected_units": {
+        "seal_amount": "CNY",
+        "circulating_market_cap": "CNY"
+      },
+      "score_unit": "proposal_points",
+      "count_basis": null,
+      "source_mode": null,
+      "source_review": {
+        "status": "INPUT_PENDING",
+        "source_dates": [],
+        "units_verified": false,
+        "scope_verified": false,
+        "closing_verified": false,
+        "available_at": null,
+        "evidence_refs": [
+          {
+            "file": "../reference/07_candidates_frozen_reference.json",
+            "sha256": "ba260abca3edea29570bcc939a733026d4ab7be095ff74970bc730123fc47a31",
+            "pointer": "/records/0"
+          }
+        ]
+      },
+      "source_value_refs": {
+        "seal_amount": {
+          "file": "../reference/07_candidates_frozen_reference.json",
+          "sha256": "ba260abca3edea29570bcc939a733026d4ab7be095ff74970bc730123fc47a31",
+          "pointer": "/records/0/frame_records/limit_up/0/record/封板资金"
+        },
+        "circulating_market_cap": {
+          "file": "../reference/07_candidates_frozen_reference.json",
+          "sha256": "ba260abca3edea29570bcc939a733026d4ab7be095ff74970bc730123fc47a31",
+          "pointer": "/records/0/frame_records/limit_up/0/record/流通市值"
+        }
+      },
+      "formula": "6*clip01(seal_amount/circulating_market_cap/0.01)",
+      "rationale": "仅为静态委托规模的代理，不称为订单流、主力净流入或成交保证。",
+      "score": null,
+      "data_status": "INPUT_PENDING",
+      "issues": [
+        "SOURCE_DATE_VERIFIED_MISSING",
+        "CLOSING_VERIFIED_MISSING",
+        "PREVIOUS_TRADE_DATE_VERIFIED_MISSING",
+        "DECISION_CUTOFF_INVALID",
+        "ITEM_EVIDENCE_NOT_VERIFIED",
+        "UNITS_VERIFIED_MISSING",
+        "SCOPE_VERIFIED_MISSING",
+        "ITEM_SOURCE_DATES_MISMATCH_OR_MISSING",
+        "EVIDENCE_AVAILABILITY_TIME_UNKNOWN"
+      ]
+    }
+  },
+  "b03_composition": {
+    "score": null,
+    "parts": null,
+    "status": "INPUT_PENDING",
+    "max": 18,
+    "theme_id": null,
+    "trade_date": "2026-09-10",
+    "counts": null,
+    "groups": {
+      "n1": [],
+      "n2": [],
+      "n3plus": []
+    },
+    "selection_audit": [],
+    "issues": [
+      "DATED_THEME_NOT_SELECTED",
+      "MEMBERSHIP_COMPLETE_MISSING",
+      "THEME_CONFIRMED_MISSING",
+      "MEMBERS_LIST_MISSING"
+    ],
+    "composition_verified": false,
+    "evidence_scope": "SUPPLIED_LOCAL_EVIDENCE_CONTRACT"
+  },
+  "c02_ranking": {
+    "n": null,
+    "rank": null,
+    "members": [],
+    "selection_audit": [],
+    "issues": [
+      "DATED_THEME_NOT_SELECTED",
+      "MEMBERSHIP_COMPLETE_MISSING",
+      "THEME_CONFIRMED_MISSING",
+      "MEMBERS_LIST_MISSING",
+      "CANDIDATE_NOT_IN_COMPLETE_PRIOR_FIRST_BOARD_SET",
+      "NOT_COMPARABLE_SINGLETON"
+    ],
+    "rule": "previous-day all eligible first boards; later failures retained; average tie ranks"
+  },
+  "known_subtotal": null,
+  "known_scored_item_count": 0,
+  "research_score_proposal": null,
+  "modules": {
+    "A": null,
+    "B": null,
+    "C": null,
+    "D": null
+  },
+  "observations_only": {
+    "C01": {
+      "score": null,
+      "role": "OBSERVATION_ONLY",
+      "details": {
+        "static_concepts_not_dated_theme": [
+          "交通运输",
+          "一带一路",
+          "央国企改革"
+        ],
+        "status": "INPUT_PENDING",
+        "reference": {
+          "file": "../reference/07_candidates_frozen_reference.json",
+          "sha256": "ba260abca3edea29570bcc939a733026d4ab7be095ff74970bc730123fc47a31",
+          "pointer": "/records/0/static_concepts_not_dated_theme"
+        }
+      }
+    },
+    "C03": {
+      "score": null,
+      "role": "OBSERVATION_ONLY",
+      "details": {
+        "status": "INPUT_PENDING",
+        "reason": "20-day history/benchmark not supplied"
+      }
+    },
+    "D04": {
+      "score": null,
+      "role": "OBSERVATION_ONLY",
+      "details": {
+        "turnover_pct": 10.788958549499512,
+        "history_median": null,
+        "status": "INTRADAY_UNVERIFIED",
+        "reference": {
+          "file": "../reference/07_candidates_frozen_reference.json",
+          "sha256": "ba260abca3edea29570bcc939a733026d4ab7be095ff74970bc730123fc47a31",
+          "pointer": "/records/0/frame_records/limit_up/0/record/换手率"
+        }
+      }
+    }
+  },
+  "mainline_five_steps": {
+    "event_date_t0": null,
+    "step5_status": "INPUT_PENDING",
+    "explanation": "先确定题材异动日t0；已发生且不晚于T的次日反馈可用；晚于T不能进入T评分。"
+  },
+  "issues": [
+    "SOURCE_DATE_VERIFIED_MISSING",
+    "CLOSING_VERIFIED_MISSING",
+    "PREVIOUS_TRADE_DATE_VERIFIED_MISSING",
+    "DECISION_CUTOFF_INVALID",
+    "CANDIDATE_ELIGIBILITY_UNKNOWN"
+  ],
+  "formula_demonstrations_not_scores": [
+    {
+      "input_type": "ARITHMETIC_FROM_UNVERIFIED_SUBMITTED_LITERALS",
+      "item_id": "D02",
+      "submitted_value": 4,
+      "arithmetic_value": 1.2,
+      "counts_toward_known_subtotal": false,
+      "note": "作者盘中公式演示保留，不是已验证分项分数"
+    },
+    {
+      "input_type": "ARITHMETIC_FROM_UNVERIFIED_SUBMITTED_LITERALS",
+      "item_id": "D03",
+      "submitted_seal_amount": 27908327,
+      "submitted_rounded_cap": 5337110000,
+      "arithmetic_value": 3.1374650700472726,
+      "counts_toward_known_subtotal": false,
+      "note": "保留作者四舍五入字面量的算术；下列输入另引原捕获值，不为校准回填"
+    }
+  ],
+  "final_score": null,
+  "grade": null,
+  "permission": null,
+  "note": "Independent proposal only. No production writes. Source hashes prove local file identity, not market truth. No future label input, no normalization, no probabilities, no approval inferred.",
+  "provenance": {
+    "input_file": "F:\\PythonProject\\emotion_dashboard\\research_s02\\inputs\\nanjing_port_intraday.json",
+    "input_sha256": "078c716c8cb8b103656c44c8ed6ea4a797b7d296c97e679785c9d2f7a7e0bab9",
+    "proposal_sha256": "18ee5db8acba317fcbdac60f62b0a71ed98b2b087f10922f67fa3c5a4638ce6e",
+    "implementation_sha256": {
+      "reference_calculator.py": "d69461032216966e10579cf609bf4ea355e98e86478656ff5d39c3904840e3b8",
+      "research_adapter.py": "a3ef6bfa100b5c87235caa46800a1b756ce47f0e1193b8b3db767b186efcba4f",
+      "run_research.py": "19b5ba9b75ac1b7f47128b0c45aaa8ab090930c8ed0d26a4be7ed4b7179b3edc"
+    },
+    "built_at_utc": "2026-09-10T06:01:58.241788+00:00",
+    "observation_dates_not_inferred_from_run_time": true
+  }
+}

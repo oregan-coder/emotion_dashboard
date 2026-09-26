@@ -1,0 +1,23 @@
+{
+  "score": null,
+  "parts": null,
+  "status": "INPUT_PENDING",
+  "max": 18,
+  "theme_id": null,
+  "trade_date": "2026-09-10",
+  "counts": null,
+  "groups": {
+    "n1": [],
+    "n2": [],
+    "n3plus": []
+  },
+  "selection_audit": [],
+  "issues": [
+    "DATED_THEME_NOT_SELECTED",
+    "MEMBERSHIP_COMPLETE_MISSING",
+    "THEME_CONFIRMED_MISSING",
+    "MEMBERS_LIST_MISSING"
+  ],
+  "composition_verified": false,
+  "evidence_scope": "SUPPLIED_LOCAL_EVIDENCE_CONTRACT"
+}

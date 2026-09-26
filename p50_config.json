@@ -1,0 +1,58 @@
+{
+  "automation_config": "5535_automation.json",
+  "database": "F:\\PythonProject\\emotion_dashboard\\data\\.migration_shadow\\market_store_5535.next.sqlite3",
+  "automation_home": "F:\\PythonProject\\5535_WINDOWS_AUTO_DB_R1",
+  "start": "20260701",
+  "end": null,
+  "calendar_start": "20260101",
+  "calendar_providers": [
+    "baostock",
+    "ak_sina"
+  ],
+  "bar_providers": [
+    "baostock",
+    "ak_em",
+    "ak_tx",
+    "ak_sina"
+  ],
+  "pool_providers": [
+    "tushare",
+    "ak_em"
+  ],
+  "cohort_adapter": "p50fix.adapters:provider_pool_adapter",
+  "scope_adapter": "p50_project_bindings:existing_scope_policy",
+  "pool_date_proof_adapter": "p50_project_bindings:pool_date_proof",
+  "host_recompute": "p50_project_bindings:recompute_original_engines",
+  "route_builder": "p50_project_bindings:build_other_api_views",
+  "legacy_sql_mappings": [],
+  "timeout_seconds": 75,
+  "retries": 1,
+  "min_interval": 0.4,
+  "refresh_pending_requests": true,
+  "cross_check_all": false,
+  "official_limits": true,
+  "em_recent_probe_days": 5,
+  "free_market_rebuild": true,
+  "required_exchanges": [
+    "SH",
+    "SZ"
+  ],
+  "eod_classifier": "p50_project_bindings:classify_dated_eod_with_original_rules",
+  "universe_provider": "baostock",
+  "rebuild_bar_providers": [
+    "baostock",
+    "ak_em",
+    "ak_tx"
+  ],
+  "refresh_sources": "p50_project_bindings:refresh_source_records_to_db",
+  "host_smoke_paths": [
+    "/api/dashboard?date=20260909",
+    "/api/dashboard?date=20260904",
+    "/api/history",
+    "/api/validation?date=20260915",
+    "/api/research/cycle-theme",
+    "/api/research/evidence-ledger?date=20260904",
+    "/api/research/theme-review?date=20260914"
+  ],
+  "original_engine_adapter": "p50_host_adapter:host_engine_adapter"
+}

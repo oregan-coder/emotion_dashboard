@@ -1,0 +1,274 @@
+{
+  "schema": "5535_S02_R1_INPUT_V1",
+  "input_type": "CLOSING_EVIDENCE_SUPPLIED",
+  "candidate": {
+    "code": "000000",
+    "name": "待填写，不是真实样本",
+    "eligibility_status": "UNKNOWN",
+    "eligibility_reason": "填入后需引用已批准筛选结果"
+  },
+  "observation": {
+    "trade_date": null,
+    "previous_trade_date": null,
+    "captured_at": null,
+    "decision_asof": null,
+    "source_date_verified": false,
+    "closing_verified": false,
+    "previous_trade_date_verified": false
+  },
+  "item_inputs": {
+    "A01": {
+      "values": {
+        "r_pct": null
+      },
+      "units": {
+        "r_pct": "percent"
+      },
+      "review": {
+        "status": "INPUT_PENDING",
+        "source_dates": [],
+        "units_verified": false,
+        "scope_verified": false,
+        "closing_verified": false,
+        "available_at": null,
+        "evidence_refs": []
+      },
+      "value_refs": {},
+      "source_mode": null
+    },
+    "A02": {
+      "values": {
+        "p23": null
+      },
+      "units": {
+        "p23": "fraction"
+      },
+      "review": {
+        "status": "INPUT_PENDING",
+        "source_dates": [],
+        "units_verified": false,
+        "scope_verified": false,
+        "closing_verified": false,
+        "available_at": null,
+        "evidence_refs": []
+      },
+      "value_refs": {},
+      "count_basis": null
+    },
+    "A03": {
+      "values": {
+        "fail_high": null
+      },
+      "units": {
+        "fail_high": "fraction"
+      },
+      "review": {
+        "status": "INPUT_PENDING",
+        "source_dates": [],
+        "units_verified": false,
+        "scope_verified": false,
+        "closing_verified": false,
+        "available_at": null,
+        "evidence_refs": []
+      },
+      "value_refs": {},
+      "count_basis": null
+    },
+    "A04": {
+      "values": {
+        "U": null,
+        "Z": null
+      },
+      "units": {
+        "U": "stocks",
+        "Z": "stocks"
+      },
+      "review": {
+        "status": "INPUT_PENDING",
+        "source_dates": [],
+        "units_verified": false,
+        "scope_verified": false,
+        "closing_verified": false,
+        "available_at": null,
+        "evidence_refs": []
+      },
+      "value_refs": {}
+    },
+    "A05": {
+      "values": {
+        "U": null,
+        "D": null
+      },
+      "units": {
+        "U": "stocks",
+        "D": "stocks"
+      },
+      "review": {
+        "status": "INPUT_PENDING",
+        "source_dates": [],
+        "units_verified": false,
+        "scope_verified": false,
+        "closing_verified": false,
+        "available_at": null,
+        "evidence_refs": []
+      },
+      "value_refs": {}
+    },
+    "B01": {
+      "values": {
+        "breadth": null
+      },
+      "units": {
+        "breadth": "fraction"
+      },
+      "review": {
+        "status": "INPUT_PENDING",
+        "source_dates": [],
+        "units_verified": false,
+        "scope_verified": false,
+        "closing_verified": false,
+        "available_at": null,
+        "evidence_refs": []
+      },
+      "value_refs": {},
+      "count_basis": null
+    },
+    "B02": {
+      "values": {
+        "excess_median_T": null,
+        "excess_median_previous": null
+      },
+      "units": {
+        "excess_median_T": "percentage_points",
+        "excess_median_previous": "percentage_points"
+      },
+      "review": {
+        "status": "INPUT_PENDING",
+        "source_dates": [],
+        "units_verified": false,
+        "scope_verified": false,
+        "closing_verified": false,
+        "available_at": null,
+        "evidence_refs": []
+      },
+      "value_refs": {}
+    },
+    "B03": {
+      "values": {
+        "n1": null,
+        "n2": null,
+        "n3plus": null
+      },
+      "units": {
+        "n1": "stocks",
+        "n2": "stocks",
+        "n3plus": "stocks"
+      },
+      "review": {
+        "status": "INPUT_PENDING",
+        "source_dates": [],
+        "units_verified": false,
+        "scope_verified": false,
+        "closing_verified": false,
+        "available_at": null,
+        "evidence_refs": []
+      },
+      "value_refs": {},
+      "theme_id": null,
+      "membership_complete": false,
+      "theme_confirmed": false,
+      "members": null
+    },
+    "C02": {
+      "values": {
+        "n": null,
+        "rank": null
+      },
+      "units": {
+        "n": "stocks",
+        "rank": "average_rank"
+      },
+      "review": {
+        "status": "INPUT_PENDING",
+        "source_dates": [],
+        "units_verified": false,
+        "scope_verified": false,
+        "closing_verified": false,
+        "available_at": null,
+        "evidence_refs": []
+      },
+      "value_refs": {},
+      "theme_id": null,
+      "membership_complete": false,
+      "theme_confirmed": false,
+      "members": null
+    },
+    "D01": {
+      "values": {
+        "remaining_session_minutes": null
+      },
+      "units": {
+        "remaining_session_minutes": "minutes"
+      },
+      "review": {
+        "status": "INPUT_PENDING",
+        "source_dates": [],
+        "units_verified": false,
+        "scope_verified": false,
+        "closing_verified": false,
+        "available_at": null,
+        "evidence_refs": []
+      },
+      "value_refs": {}
+    },
+    "D02": {
+      "values": {
+        "open_break_count": null
+      },
+      "units": {
+        "open_break_count": "times"
+      },
+      "review": {
+        "status": "INPUT_PENDING",
+        "source_dates": [],
+        "units_verified": false,
+        "scope_verified": false,
+        "closing_verified": false,
+        "available_at": null,
+        "evidence_refs": []
+      },
+      "value_refs": {}
+    },
+    "D03": {
+      "values": {
+        "seal_amount": null,
+        "circulating_market_cap": null
+      },
+      "units": {
+        "seal_amount": "CNY",
+        "circulating_market_cap": "CNY"
+      },
+      "review": {
+        "status": "INPUT_PENDING",
+        "source_dates": [],
+        "units_verified": false,
+        "scope_verified": false,
+        "closing_verified": false,
+        "available_at": null,
+        "evidence_refs": []
+      },
+      "value_refs": {}
+    }
+  },
+  "observations_only": {
+    "C01": null,
+    "C03": null,
+    "D04": null
+  },
+  "mainline_five_steps": {
+    "event_date_t0": null,
+    "step5_status": "INPUT_PENDING",
+    "explanation": "先确定题材异动日t0；已发生且不晚于T的次日反馈可用；晚于T不能进入T评分。"
+  },
+  "formula_demonstrations_not_scores": []
+}

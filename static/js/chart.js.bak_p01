@@ -1,0 +1,1219 @@
+/* ============================================================
+   A股打板情绪仪表盘 V3.1.1
+   前端渲染脚本
+   ============================================================ */
+
+(function () {
+
+  'use strict';
+
+  // ---------- A股配色 ----------
+  var C = {
+    up: '#f6465d',
+    down: '#2ebd85',
+    gold: '#f0b90b',
+    blue: '#3b82f6',
+    text: '#e6e9f0',
+    muted: '#8b93a7',
+    line: '#232c40',
+    grid: '#1c2333',
+    panel: '#131826',
+    gray: '#6b7280'
+  };
+
+  var charts = [];
+
+  function $(id) { return document.getElementById(id); }
+
+  function fmtDate(d) {
+    if (!d) return '--';
+    var s = String(d).replace(/\D/g, '');
+    if (s.length !== 8) return d;
+    return s.slice(0, 4) + '-' + s.slice(4, 6) + '-' + s.slice(6, 8);
+  }
+
+  function fmtShort(d) {
+    var s = String(d).replace(/\D/g, '');
+    if (s.length !== 8) return d;
+    return s.slice(4, 6) + '-' + s.slice(6, 8);
+  }
+
+  function fmtNum(v) {
+    var n = Number(v);
+    if (isNaN(n)) return '0';
+    return String(Math.round(n));
+  }
+
+  function fmtPct(v) {
+    var n = Number(v);
+    if (isNaN(n)) return '0.00%';
+    return n.toFixed(2) + '%';
+  }
+
+  function initChart(id) {
+    var el = $(id);
+    if (!el) return null;
+    var chart = echarts.init(el);
+    charts.push(chart);
+    return chart;
+  }
+
+  function stageClass(stage) {
+    var s = String(stage || '');
+    if (/高潮|活跃|加速/.test(s)) return 'hot';
+    if (/冰点|退潮/.test(s)) return 'cold';
+    if (/修复|震荡|扩张/.test(s)) return 'gold';
+    return '';
+  }
+
+  // ============================================================
+  // 今日情绪总览
+  // ============================================================
+
+  function renderEmotionScore(emotion) {
+    var score = Number(emotion.score) || 0;
+    var el = $('emotionScore');
+    if (el) el.textContent = score.toFixed(0);
+  }
+
+  // ============================================================
+  // 市场广度
+  // ============================================================
+
+  function renderMarket(market) {
+    var chart = initChart('marketChart');
+    if (!chart) return;
+
+    var data = [
+      { value: Number(market.up) || 0, name: '上涨', itemStyle: { color: C.up } },
+      { value: Number(market.down) || 0, name: '下跌', itemStyle: { color: C.down } },
+      { value: Number(market.flat) || 0, name: '平盘', itemStyle: { color: C.gray } }
+    ].filter(function (d) { return d.value > 0; });
+
+    chart.setOption({
+      tooltip: { trigger: 'item', formatter: '{b}: {c} 家 ({d}%)' },
+      legend: { bottom: 0, icon: 'circle', textStyle: { color: C.muted, fontSize: 12 } },
+      series: [{
+        type: 'pie',
+        radius: ['52%', '76%'],
+        center: ['50%', '42%'],
+        itemStyle: { borderColor: C.panel, borderWidth: 2 },
+        label: { show: true, formatter: '{b}\n{c}', color: C.text, fontSize: 12, lineHeight: 16 },
+        labelLine: { length: 8, length2: 6, lineStyle: { color: C.line } },
+        data: data
+      }]
+    });
+
+    $('marketStats').innerHTML =
+      '上涨 <b class="up">' + fmtNum(market.up) + '</b>' +
+      '　下跌 <b class="down">' + fmtNum(market.down) + '</b>' +
+      '　平盘 <b>' + fmtNum(market.flat) + '</b>';
+  }
+
+  // ============================================================
+  // 涨停生态
+  // ============================================================
+
+  function renderLimit(limit, smash) {
+    var prevUp = Number(limit.prev_up) || 0;
+    var prevDown = Number(limit.prev_down) || 0;
+    var sealRate = Number(limit.seal_rate) || 0;
+
+    var tiles = [
+      { num: fmtNum(limit.up) + (prevUp > 0 ? ' / ' + fmtNum(prevUp) : ''), cls: 'up', label: '涨停(今/昨)' },
+      { num: fmtNum(limit.down) + (prevDown > 0 ? ' / ' + fmtNum(prevDown) : ''), cls: 'down', label: '跌停(今/昨)' },
+      { num: fmtPct(sealRate), cls: 'gold', label: '封板率' },
+      { num: fmtPct(smash.break_rate), cls: 'muted', label: '高位晋级失败率' }
+    ];
+    $('limitTiles').innerHTML = tiles.map(function (t) {
+      return '<div class="tile"><div class="t-num ' + t.cls + '">' + t.num +
+        '</div><div class="t-label">' + t.label + '</div></div>';
+    }).join('');
+  }
+
+  // ============================================================
+  // 连板梯队
+  // ============================================================
+
+  function renderLadder(ladder, smash) {
+    var chart = initChart('ladderChart');
+    if (!chart) return;
+
+    // 固定1-8板，为更高板预留空间
+    var MAX_BOARD = 8;
+    var countMap = {};
+    (ladder || []).forEach(function (x) {
+      countMap[Number(x.board)] = Number(x.count) || 0;
+    });
+
+    var rates = (smash && smash.rates) || {};
+    // 晋级率放在目标板数标签下：1进2→2板，2进3→3板，...
+    var rateMap = {
+      2: rates.rate12,
+      3: rates.rate23,
+      4: rates.rate34,
+      5: rates.rate45,
+      6: rates.rate56,
+      7: rates.rate67,
+      8: rates.rate78
+    };
+
+    var labels = [];
+    var counts = [];
+    for (var b = 1; b <= MAX_BOARD; b++) {
+      labels.push(b + '板');
+      counts.push(countMap[b] || 0);
+    }
+
+    chart.setOption({
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: { type: 'shadow' },
+        formatter: function (ps) {
+          var p = ps[0];
+          var idx = p.dataIndex;
+          var board = idx + 1;
+          var rate = rateMap[board];
+          var rateTxt = (!isNaN(Number(rate)) && Number(rate) > 0) ? '（晋级率 ' + Number(rate).toFixed(2) + '%）' : '';
+          return p.name + ': ' + p.value + ' 只' + rateTxt;
+        }
+      },
+      grid: { left: 42, right: 18, top: 22, bottom: 32 },
+      xAxis: {
+        type: 'category',
+        data: labels,
+        axisLine: { lineStyle: { color: C.line } },
+        axisTick: { show: false },
+        axisLabel: {
+          color: C.muted,
+          fontSize: 11,
+          formatter: function (val, idx) {
+            var board = idx + 1;
+            var rate = rateMap[board];
+            if (!isNaN(Number(rate)) && Number(rate) > 0) {
+              return val + '\n(' + Number(rate).toFixed(1) + '%)';
+            }
+            return val;
+          }
+        }
+      },
+      yAxis: {
+        type: 'value',
+        minInterval: 1,
+        splitLine: { lineStyle: { color: C.grid } },
+        axisLabel: { color: C.muted }
+      },
+      series: [{
+        type: 'bar',
+        barWidth: '30%',
+        itemStyle: {
+          borderRadius: [5, 5, 0, 0],
+          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+            { offset: 0, color: C.up },
+            { offset: 1, color: '#7c1d2e' }
+          ])
+        },
+        label: { show: true, position: 'top', color: C.text, fontSize: 12, fontWeight: 600 },
+        data: counts
+      }]
+    });
+
+    var hb = Number(smash.highest_board) || 0;
+    $('leaderLine').innerHTML = hb > 0
+      ? '最高板 ' + hb + '板 · 龙头：' + (smash.leader || '暂无')
+      : '暂无最高板数据';
+  }
+
+  // ============================================================
+  // 砸盘情绪
+  // ============================================================
+
+  function rateColor(v) {
+    if (v >= 50) return C.up;
+    if (v >= 30) return '#ff8a5c';
+    if (v >= 15) return C.gold;
+    return C.blue;
+  }
+
+  function renderSmashTrend(smash, smashHistory) {
+    var chart = initChart('smashTrend');
+    if (!chart) return;
+
+    // 使用全部历史数据，dataZoom 控制显示范围
+    var rows = smashHistory || [];
+    var dates = rows.map(function (x) { return fmtShort(x.date); });
+    var scores = rows.map(function (x) { return Number(x.smash_score) || 0; });
+    var boards = rows.map(function (x) { return Number(x.highest_board) || 0; });
+
+    if (!dates.length) {
+      chart.setOption({
+        graphic: {
+          type: 'text',
+          left: 'center',
+          top: 'middle',
+          style: { text: '暂无砸盘历史，运行 start.py 后自动积累', fill: C.muted, fontSize: 14 }
+        }
+      });
+      return;
+    }
+
+    // 默认显示最近20个数据点
+    var total = dates.length;
+    var windowSize = 20;
+    var zoomStart = total > windowSize ? ((total - windowSize) / total * 100) : 0;
+    var zoomEnd = 100;
+
+    chart.setOption({
+      tooltip: {
+        trigger: 'axis',
+        formatter: function (ps) {
+          var idx = ps[0].dataIndex;
+          var row = rows[idx] || {};
+          var lines = ps.map(function (p) {
+            var v = Number(p.value);
+            var txt = p.seriesName === '砸盘分数' ? v.toFixed(2) + ' 分' : v + '板';
+            return p.marker + p.seriesName + '：' + txt;
+          }).join('<br>');
+          var stock = row.highest_stock
+            ? String(row.highest_stock).replace(/\|/g, '、')
+            : '暂无';
+          return dates[idx] + '<br>' + lines +
+            '<br><span style="color:#f0b90b">最高板股票：' + stock + '</span>';
+        }
+      },
+      legend: { top: 0, right: 6, icon: 'roundRect', textStyle: { color: C.muted, fontSize: 12 }, itemWidth: 14, itemGap: 16 },
+      grid: { left: 44, right: 42, top: 36, bottom: 52 },
+      dataZoom: [
+        {
+          type: 'slider',
+          xAxisIndex: 0,
+          start: zoomStart,
+          end: zoomEnd,
+          height: 18,
+          bottom: 4,
+          borderColor: 'transparent',
+          backgroundColor: 'rgba(255,255,255,0.04)',
+          fillerColor: 'rgba(240,185,11,0.12)',
+          handleStyle: { color: '#f0b90b', borderColor: '#f0b90b' },
+          moveHandleStyle: { color: '#f0b90b' },
+          textStyle: { color: '#8899aa', fontSize: 10 },
+          dataBackground: {
+            lineStyle: { color: '#334455' },
+            areaStyle: { color: 'rgba(51,68,85,0.15)' }
+          },
+          selectedDataBackground: {
+            lineStyle: { color: '#f0b90b' },
+            areaStyle: { color: 'rgba(240,185,11,0.1)' }
+          }
+        },
+        {
+          type: 'inside',
+          xAxisIndex: 0,
+          start: zoomStart,
+          end: zoomEnd
+        }
+      ],
+      xAxis: {
+        type: 'category',
+        data: dates,
+        boundaryGap: false,
+        axisLine: { lineStyle: { color: C.line } },
+        axisTick: { show: false },
+        axisLabel: { color: C.muted }
+      },
+      yAxis: [
+        {
+          type: 'value',
+          name: '砸盘分',
+          min: 0,
+          max: 'dataMax',
+          splitLine: { lineStyle: { color: C.grid } },
+          axisLabel: { color: C.muted },
+          nameTextStyle: { color: C.muted }
+        },
+        {
+          type: 'value',
+          min: 0,
+          minInterval: 1,
+          splitLine: { show: false },
+          axisLabel: { color: C.muted }
+        }
+      ],
+      series: [
+        {
+          name: '砸盘分数',
+          type: 'line',
+          smooth: true,
+          symbol: 'circle',
+          symbolSize: 7,
+          data: scores,
+          itemStyle: { color: C.gold },
+          lineStyle: { width: 3, color: C.gold },
+          areaStyle: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              { offset: 0, color: 'rgba(240,185,11,0.28)' },
+              { offset: 1, color: 'rgba(240,185,11,0)' }
+            ])
+          }
+        },
+        {
+          name: '最高板',
+          type: 'line',
+          smooth: true,
+          yAxisIndex: 1,
+          symbol: 'diamond',
+          symbolSize: 9,
+          data: boards,
+          itemStyle: { color: C.blue },
+          lineStyle: { width: 2, type: 'dashed', color: C.blue }
+        }
+      ]
+    });
+  }
+
+  function renderSmash(smash, smashHistory) {
+    renderSmashTrend(smash, smashHistory);
+
+    // 高位反馈显示在砸盘情绪标题右侧
+    var hf = smash.high_feedback || '暂无';
+    var hfEl = $('smashHighFeedback');
+    if (hfEl) {
+      hfEl.innerHTML =
+        '<span class="hf-label">高位反馈</span>' +
+        '<b class="gold">' + hf + '</b>' +
+        '<span class="hf-detail">高位 ' + fmtNum(smash.high_count) + ' 只' +
+        '（晋级 ' + fmtNum(smash.high_continue_count) +
+        ' / 断板 ' + fmtNum(smash.high_break_count) + '）</span>';
+    }
+
+    // 砸盘分数 > 最高连板数时：提示砸盘风险 + 连板情绪高涨
+    var tipEl = $('smashRiskTip');
+    if (tipEl) {
+      var score = Number(smash.score) || 0;
+      var board = Number(smash.highest_board) || 0;
+      if (score > board && board > 0) {
+        tipEl.innerHTML =
+          '<span class="risk-warn">注意砸盘风险</span>' +
+          '<span class="risk-hot">连板情绪高涨</span>' +
+          '<span class="risk-detail">砸盘分 ' + score.toFixed(2) +
+          ' > 最高板 ' + board + '板，晋级率偏高但空间受限，警惕高位兑现</span>';
+        tipEl.style.display = 'flex';
+      } else {
+        tipEl.style.display = 'none';
+      }
+    }
+  }
+
+  // ============================================================
+  // 五日情绪周期
+  // ============================================================
+
+  function renderTrend(history, cycle) {
+    var chart = initChart('trendChart');
+    if (!chart) return;
+
+    var dates = (history || []).map(function (x) { return fmtShort(x.date); });
+    var scores = (history || []).map(function (x) { return Number(x.emotion_score) || 0; });
+    var boards = (history || []).map(function (x) { return Number(x.highest_board) || 0; });
+
+    if (!dates.length) {
+      chart.setOption({
+        graphic: {
+          type: 'text',
+          left: 'center',
+          top: 'middle',
+          style: { text: '暂无历史数据，运行 start.py 后自动积累', fill: C.muted, fontSize: 14 }
+        }
+      });
+    } else {
+      chart.setOption({
+        tooltip: {
+          trigger: 'axis',
+          formatter: function (ps) {
+            var line = ps.map(function (p) {
+              var v = Number(p.value);
+              var txt = p.seriesName === '最高板' ? v + '板' : v.toFixed(2) + '分';
+              return p.marker + p.seriesName + '：' + txt;
+            }).join('<br>');
+            return dates[ps[0].dataIndex] + '<br>' + line;
+          }
+        },
+        legend: { top: 0, right: 6, icon: 'roundRect', textStyle: { color: C.muted, fontSize: 12 }, itemWidth: 14 },
+        grid: { left: 46, right: 44, top: 36, bottom: 26 },
+        xAxis: {
+          type: 'category',
+          data: dates,
+          boundaryGap: false,
+          axisLine: { lineStyle: { color: C.line } },
+          axisTick: { show: false },
+          axisLabel: { color: C.muted }
+        },
+        yAxis: [
+          {
+            type: 'value',
+            name: '情绪分',
+            min: 0,
+            max: 100,
+            splitLine: { lineStyle: { color: C.grid } },
+            axisLabel: { color: C.muted },
+            nameTextStyle: { color: C.muted }
+          },
+          {
+            type: 'value',
+            min: 0,
+            max: 10,
+            minInterval: 1,
+            splitLine: { show: false },
+            axisLabel: { color: C.muted }
+          }
+        ],
+        series: [
+          {
+            name: '情绪分',
+            type: 'line',
+            smooth: true,
+            symbol: 'circle',
+            symbolSize: 7,
+            data: scores,
+            itemStyle: { color: C.up },
+            lineStyle: { width: 3, color: C.up },
+            areaStyle: {
+              color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                { offset: 0, color: 'rgba(246,70,93,0.28)' },
+                { offset: 1, color: 'rgba(246,70,93,0)' }
+              ])
+            }
+          },
+          {
+            name: '最高板',
+            type: 'line',
+            smooth: true,
+            yAxisIndex: 1,
+            symbol: 'diamond',
+            symbolSize: 9,
+            data: boards,
+            itemStyle: { color: C.blue },
+            lineStyle: { width: 2, type: 'dashed', color: C.blue }
+          }
+        ]
+      });
+    }
+
+    $('trendStats').innerHTML =
+      '情绪周期：<b class="gold">' + (cycle.emotion_cycle || '--') + '</b>' +
+      '　空间周期：<b>' + (cycle.height_cycle || '--') + '</b>' +
+      '　趋势：<b class="gold">' + (cycle.trend || '--') + '</b>';
+  }
+
+  // ============================================================
+  // 顶栏 / 标签 / 仓位 / 策略
+  // ============================================================
+
+  function renderHeader(d) {
+    $('tradeDate').textContent = '监测交易日 ' + fmtDate(d.date);
+    $('updateTime').textContent = d.update_time ? ('数据更新 ' + d.update_time) : '数据更新 --';
+  }
+
+  function renderTags(cycle, smash, emotion) {
+    var stage = cycle.comprehensive || cycle.stage || emotion.cycle_stage || '--';
+    var tag = $('cycleStage');
+    tag.textContent = '综合周期：' + stage;
+    tag.className = 'tag ' + stageClass(stage);
+
+    var hTag = $('heightStage');
+    hTag.textContent = '空间周期：' + (cycle.height_cycle || '--');
+    hTag.className = 'tag ' + stageClass(cycle.height_cycle);
+
+    var sTag = $('smashStatus');
+    sTag.textContent = '砸盘情绪：' + (smash.status || '--');
+    var sCls = /火热|高潮|砸盘|退潮/.test(smash.status || '') ? 'hot'
+      : /试错|修复/.test(smash.status || '') ? 'cold' : '';
+    sTag.className = 'tag ' + sCls;
+
+    $('cycleTrend').textContent = '高度趋势：' + (cycle.trend || '--');
+    var concl = $('cycleConclusion');
+    if (concl) concl.textContent = stage === '--' ? '' : '当前处于「' + stage + '」';
+    renderCycleBar(stage);
+  }
+
+  // ============================================================
+  // 阶段横条（全部阶段横排 + 指针标记当前）
+  // ============================================================
+
+  var CYCLE_STAGES = ['冰点阶段', '弱修复阶段', '震荡阶段', '高潮阶段', '退潮阶段'];
+
+  function cycleIndex(stage) {
+    var i = CYCLE_STAGES.indexOf(stage);
+    if (i >= 0) return i;
+    if (/冰点/.test(stage)) return 0;
+    if (/修复/.test(stage)) return 1;
+    if (/高潮/.test(stage)) return 3;
+    if (/退潮/.test(stage)) return 4;
+    return 2;
+  }
+
+  function renderCycleBar(stage) {
+    var box = $('cycleBar');
+    if (!box) return;
+    var idx = cycleIndex(stage || '');
+    var pct = Math.round(idx / (CYCLE_STAGES.length - 1) * 100);
+    var nodes = CYCLE_STAGES.map(function (s, i) {
+      return '<span class="cb-node' + (i === idx ? ' active' : '') + '">' +
+        '<i></i>' + s.replace('阶段', '') + '</span>';
+    }).join('');
+    box.innerHTML =
+      '<div class="cb-label">周期阶段</div>' +
+      '<div class="cb-track">' + nodes + '</div>';
+  }
+
+  function renderPosition(position) {
+    $('posSuggest').textContent = position.suggest || '--';
+
+    // 解析星星数量，生成可视化操作难度组件
+    var riskText = position.risk || '';
+    var filled = (riskText.match(/★/g) || []).length;
+    var level = '低';
+    var levelCls = 'risk-low';
+    var levelTip = '操作轻松，按计划执行';
+    if (filled >= 5) { level = '极高'; levelCls = 'risk-critical'; levelTip = '难度极高，建议观望或极小仓位'; }
+    else if (filled >= 4) { level = '高'; levelCls = 'risk-high'; levelTip = '操作难度高，严格止损，控制仓位'; }
+    else if (filled >= 3) { level = '中'; levelCls = 'risk-mid'; levelTip = '难度适中，谨慎操作，注意节奏'; }
+    else if (filled >= 2) { level = '较低'; levelCls = 'risk-low-mid'; levelTip = '难度较低，可按计划正常操作'; }
+
+    var starsHtml = '';
+    for (var i = 0; i < 5; i++) {
+      var active = i < filled ? ' active ' + levelCls : '';
+      starsHtml += '<span class="risk-star' + active + '" title="' + (i + 1) + '星">★</span>';
+    }
+
+    $('posRisk').innerHTML =
+      '<div class="risk-label">操作难度</div>' +
+      '<div class="risk-stars" title="' + levelTip + '">' + starsHtml + '</div>' +
+      '<div class="risk-level ' + levelCls + '">' + level + ' · ' + levelTip + '</div>';
+  }
+
+  function renderStrategy(position, cycle) {
+    $('strategyText').textContent = position.strategy || '暂无策略建议';
+    $('cycleDesc').textContent = cycle.description || '';
+  }
+
+  // ============================================================
+  // 涨停梯队 / 概念联动 / 明日三板预案
+  // ============================================================
+
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function renderSecondPool(list) {
+    var box = $('secondPool');
+    if (!box) return;
+    if (!list || !list.length) {
+      box.innerHTML = '<div class="pool-empty">暂无2板个股</div>';
+      return;
+    }
+    box.innerHTML = list.map(function (r) {
+      var same = (r.same_concept || []).slice(0, 4).map(function (s) {
+        var cls = s.first_count >= 3 ? 's' : '';
+        var names = (s.first_stocks || []).slice(0, 4).join('、');
+        return '<span class="' + cls + '">' + esc(s.concept) + '(' + s.first_count + ')' +
+          (names ? ' <em class="stk">' + esc(names) + '</em>' : '') + '</span>';
+      }).join(' / ');
+      return '<div class="pool-row">' +
+        '<b>' + esc(r.name) + '</b> <span class="muted">' + (r.seal_time_fmt || '') + ' ' + (r.seal_amount_fmt || '') + '</span>' +
+        '<div class="pool-sub">' + (same || '<span class="muted">无同概念1板</span>') + '</div>' +
+        '</div>';
+    }).join('');
+  }
+
+  function renderFirstPool(list) {
+    var box = $('firstPool');
+    if (!box) return;
+    if (!list || !list.length) {
+      box.innerHTML = '<div class="pool-empty">暂无1板个股</div>';
+      return;
+    }
+    box.innerHTML = list.map(function (r, i) {
+      var mark = i === 0 ? ' <span class="s">最早涨停</span>' : '';
+      var zc = (r.zt_counts || []).slice(0, 4).map(function (z) {
+        var cls = z.total >= 3 ? 's' : '';
+        return '<span class="' + cls + '">' + esc(z.concept) + '(' + z.total + ')</span>';
+      }).join(' ');
+      return '<div class="pool-row">' +
+        '<b>' + esc(r.name) + '</b> <span class="muted">' + (r.seal_time_fmt || '') + '</span>' + mark +
+        '<div class="pool-sub">' + (zc || '<span class="muted">暂无概念</span>') + '</div>' +
+        '</div>';    }).join('');
+  }
+
+  // ============================================================
+  // 明日三板预案 · 顶部长横幅
+  // ============================================================
+
+  function renderBanner(list) {
+    var box = $('bannerCandidates');
+    if (!box) return;
+    if (!list || !list.length) {
+      box.innerHTML = '<div class="banner-empty">今日无2板候选，明日三板预案空缺</div>';
+      return;
+    }
+
+    // 评级颜色
+    function gradeColor(g) {
+      if (g === 'S') return '#ff4d4f';
+      if (g === 'A') return '#fa8c16';
+      if (g === 'B') return '#fadb14';
+      if (g === 'C') return '#52c41a';
+      return '#8c8c8c';
+    }
+
+    box.innerHTML = '<div class="banner-track">' + list.map(function (r, i) {
+      var gc = gradeColor(r.grade);
+      var vetoTag = r.vetoed ? '<div class="bc-veto">⚠ 一票否决</div>' : '<div class="bc-veto-placeholder"></div>';
+      // 卡片显示原始分；一票否决时标注"已否决"而非显示0分
+      var displayScore = r.vetoed ? r.raw_score : r.final_score;
+      var scoreSuffix = r.vetoed ? '<span class="bc-score-note">已否决</span>' : '';
+      return '<div class="bc-card' + (i === 0 ? ' top' : '') + '" data-idx="' + i + '">' +
+        '<div class="bc-header">' +
+          '<div class="bc-rank">' + (i + 1) + '</div>' +
+          '<div class="bc-name">' + esc(r.name) + '<em>2进3</em></div>' +
+          vetoTag +
+        '</div>' +
+        '<div class="bc-meta">' + esc(r.top_concept) + ' · ' + r.market_type + '</div>' +
+        '<div class="bc-score-row">' +
+          '<span class="bc-score" style="color:' + gc + '">' + displayScore + '</span>' +
+          scoreSuffix +
+          '<span class="bc-grade" style="background:' + gc + '">' + r.grade + '</span>' +
+          '<span class="bc-conf">置信' + r.confidence + '</span>' +
+        '</div>' +
+        '<div class="bc-score-detail">原始' + r.raw_score + ' - 风险' + r.risk_deduct +
+          (r.vetoed ? ' = 0(否决)' : ' = ' + r.final_score) + '</div>' +
+        '<div class="bc-seal">' + r.seal_time_fmt + '封板 · 封单' + r.seal_amount_fmt +
+          ' · 换手' + (r.turnover ? r.turnover.toFixed(1) : '0') + '%' +
+          (r.open_count > 0 ? ' · 炸' + r.open_count + '次' : '') + '</div>' +
+        // V2.2：交易权限标签
+        (r.v22 ? '<div class="bc-v22">' +
+          '<span class="bc-perm" style="background:' + r.v22.permission_color + '">' + r.v22.trade_permission + ' ' + r.v22.trade_permission_name + '</span>' +
+          '<span class="bc-pos">仓位' + r.v22.recommended_position + '</span>' +
+          (r.v22.seed_stock ? '<span class="bc-seed">🌱 种子股</span>' : '') +
+        '</div>' : '') +
+        '<div class="bc-hint">ⓘ 点击查看完整评分与理由</div>' +
+        '</div>';
+    }).join('') + '</div>';
+
+    // 横幅级浮层：点击卡片时在该卡片正下方显示完整评分
+    var popup = $('bannerPopup');
+    var activeCard = null;
+    var hideTimer = null;
+
+    function positionPopup(card) {
+      var banner = document.querySelector('.banner');
+      var cardRect = card.getBoundingClientRect();
+      var bannerRect = banner.getBoundingClientRect();
+      var left = cardRect.left - bannerRect.left;
+      var top = cardRect.bottom - bannerRect.top + 6;
+      var popupW = 420;
+      if (left + popupW > bannerRect.width - 8) {
+        left = bannerRect.width - popupW - 8;
+      }
+      if (left < 8) left = 8;
+      popup.style.left = left + 'px';
+      popup.style.top = top + 'px';
+    }
+
+    function cancelHide() {
+      if (hideTimer) {
+        clearTimeout(hideTimer);
+        hideTimer = null;
+      }
+    }
+
+    function scheduleHide() {
+      cancelHide();
+      hideTimer = setTimeout(function () {
+        popup.classList.remove('show');
+        activeCard = null;
+        hideTimer = null;
+      }, 250);
+    }
+
+    function buildPopupHTML(r) {
+      var gc = gradeColor(r.grade);
+      var html = '<div class="bp-title">' +
+        '<span style="color:' + gc + ';font-weight:700">#' + r.rank + ' ' + esc(r.name) + '</span>' +
+        '<span class="bp-grade" style="background:' + gc + '">' + r.grade + '</span>' +
+        '<span class="bp-score">' + r.final_score + '分</span>' +
+        '<span class="bp-conf">置信度' + r.confidence + '(' + r.confidence_pct + '%)</span>' +
+        '</div>';
+
+      if (r.vetoed) {
+        html += '<div class="bp-veto">⚠ ' + esc(r.veto_reason) + '</div>';
+      }
+
+      // V2.2：决策层信息（周期状态 + 交易权限）
+      if (r.v22) {
+        var v = r.v22;
+        html += '<div class="bp-v22">';
+        html += '<div class="bp-v22-title">⚡ V2.2 决策层</div>';
+        html += '<div class="bp-v22-row">';
+        html += '<span class="bp-v22-label">市场周期</span>';
+        html += '<span class="bp-v22-value" style="color:' + v.cycle_state_color + '">' + v.cycle_state + ' ' + v.cycle_state_name + '</span>';
+        html += '</div>';
+        html += '<div class="bp-v22-row">';
+        html += '<span class="bp-v22-label">切换指数</span>';
+        html += '<span class="bp-v22-value" style="color:' + v.cycle_switch_color + '">' + v.cycle_switch_score + '分 · ' + v.cycle_switch_level + '</span>';
+        html += '</div>';
+        html += '<div class="bp-v22-row">';
+        html += '<span class="bp-v22-label">种子股</span>';
+        html += '<span class="bp-v22-value" style="color:' + (v.seed_stock ? '#52c41a' : '#8c8c8c') + '">' + (v.seed_stock ? '✓ 是（' + esc(v.seed_reason) + '）' : '✗ 否') + '</span>';
+        html += '</div>';
+        html += '<div class="bp-v22-row">';
+        html += '<span class="bp-v22-label">交易权限</span>';
+        html += '<span class="bp-v22-value" style="color:' + v.permission_color + ';font-weight:700">' + v.trade_permission + ' ' + v.trade_permission_name + '</span>';
+        html += '</div>';
+        html += '<div class="bp-v22-row">';
+        html += '<span class="bp-v22-label">建议仓位</span>';
+        html += '<span class="bp-v22-value" style="color:' + v.permission_color + ';font-weight:700">' + v.recommended_position + '</span>';
+        html += '</div>';
+        // 权限判定原因
+        if (v.permission_reason && v.permission_reason.length) {
+          html += '<div class="bp-v22-reasons">';
+          v.permission_reason.forEach(function (reason) {
+            html += '<div class="bp-v22-reason">· ' + esc(reason) + '</div>';
+          });
+          html += '</div>';
+        }
+        html += '</div>';
+      }
+
+      // V2.1六大模块评分条
+      html += '<div class="bp-modules">';
+      var modNames = {
+        market: '市场环境', theme: '题材强度', leader: '龙头资格',
+        expectation: '预期差', ladder: '板块梯队', quality_chips: '二板质量与筹码'
+      };
+      for (var key in modNames) {
+        var m = r.modules[key];
+        if (!m) continue;
+        var pct = Math.min(100, (m.total / m.max) * 100);
+        html += '<div class="bp-mod-row">' +
+          '<span class="bp-mod-name">' + modNames[key] + '</span>' +
+          '<div class="bp-mod-bar"><div class="bp-mod-fill" style="width:' + pct + '%"></div></div>' +
+          '<span class="bp-mod-score">' + m.total + '/' + m.max + '</span>' +
+          '</div>';
+      }
+      html += '</div>';
+
+      // 打板理由（V2.1：D/C级显示"个股优势"，B级及以上显示"打板理由"）
+      var buyTitle = (r.grade === 'D' || r.grade === 'C') ? '◎ 个股优势' : '✓ 打板理由';
+      html += '<div class="bp-section"><div class="bp-sec-title">' + buyTitle + '</div><ul class="bp-reason-list">';
+      (r.buy_reasons || []).forEach(function (reason) {
+        html += '<li>' + esc(reason) + '</li>';
+      });
+      html += '</ul></div>';
+
+      // 放弃/风险理由
+      if (r.skip_reasons && r.skip_reasons.length) {
+        html += '<div class="bp-section"><div class="bp-sec-title bp-warn">⚠ 放弃/风险理由</div><ul class="bp-reason-list bp-warn-list">';
+        r.skip_reasons.forEach(function (reason) {
+          html += '<li>' + esc(reason) + '</li>';
+        });
+        html += '</ul></div>';
+      }
+
+      // 明日盘中确认条件
+      html += '<div class="bp-section"><div class="bp-sec-title bp-intraday">◎ 明日盘中确认条件</div><ul class="bp-reason-list bp-intraday-list">';
+      (r.intraday_conditions || []).forEach(function (cond, idx) {
+        html += '<li>' + (idx + 1) + '. ' + esc(cond) + '</li>';
+      });
+      html += '</ul></div>';
+
+      return html;
+    }
+
+    box.querySelectorAll('.bc-card').forEach(function (card) {
+      card.addEventListener('click', function (e) {
+        e.stopPropagation();
+        cancelHide();
+        var idx = parseInt(card.getAttribute('data-idx'), 10);
+        var r = list[idx];
+        if (!r) return;
+        popup.innerHTML = buildPopupHTML(r);
+        positionPopup(card);
+        popup.classList.add('show');
+        activeCard = card;
+      });
+      // 鼠标离开卡片：延迟隐藏（给用户移到浮层的时间）
+      card.addEventListener('mouseleave', function () {
+        scheduleHide();
+      });
+      // 鼠标进入卡片：取消隐藏
+      card.addEventListener('mouseenter', function () {
+        cancelHide();
+      });
+    });
+
+    // 浮层交互：鼠标在浮层上时保持显示
+    popup.addEventListener('mouseenter', function () {
+      cancelHide();
+    });
+    popup.addEventListener('mouseleave', function () {
+      scheduleHide();
+    });
+
+    initBannerPager(list.length);
+  }
+
+  // 三板预案横幅翻页
+  var bannerState = { page: 0, perPage: 4, total: 0 };
+
+  function initBannerPager(total) {
+    var box = $('bannerCandidates');
+    var track = box.querySelector('.banner-track');
+    var prevBtn = $('bannerPrev');
+    var nextBtn = $('bannerNext');
+    var pageInfo = $('bannerPage');
+    if (!box || !track || !prevBtn || !nextBtn || !pageInfo) return;
+
+    bannerState.total = total;
+    bannerState.page = 0;
+    track.style.transform = 'translateX(0)';
+
+    function calcPerPage() {
+      // 固定每页4张卡片
+      bannerState.perPage = 4;
+      return 4;
+    }
+
+    function updateUI() {
+      var perPage = calcPerPage();
+      var totalPages = Math.max(1, Math.ceil(bannerState.total / perPage));
+      if (bannerState.page >= totalPages) bannerState.page = totalPages - 1;
+      pageInfo.textContent = (bannerState.page + 1) + ' / ' + totalPages;
+      prevBtn.disabled = bannerState.page <= 0;
+      nextBtn.disabled = bannerState.page >= totalPages - 1;
+      prevBtn.style.opacity = prevBtn.disabled ? '0.3' : '1';
+      nextBtn.style.opacity = nextBtn.disabled ? '0.3' : '1';
+    }
+
+    function goPage(page) {
+      var perPage = calcPerPage();
+      var totalPages = Math.max(1, Math.ceil(bannerState.total / perPage));
+      if (page < 0) page = 0;
+      if (page >= totalPages) page = totalPages - 1;
+      bannerState.page = page;
+      var offset = page * perPage * 310;
+      track.style.transform = 'translateX(-' + offset + 'px)';
+      updateUI();
+    }
+
+    prevBtn.onclick = function () { goPage(bannerState.page - 1); };
+    nextBtn.onclick = function () { goPage(bannerState.page + 1); };
+
+    updateUI();
+
+    var resizeTimer;
+    window.addEventListener('resize', function () {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(function () {
+        goPage(bannerState.page);
+      }, 200);
+    });
+  }
+
+  function renderPool(pool) {
+    pool = pool || {};
+    renderSecondPool(pool.second_board);
+    renderFirstPool(pool.first_board);
+    renderBanner(pool.tomorrow);
+  }
+
+  // ============================================================
+  // 龙头监控
+  // ============================================================
+
+  function renderLeader(leader) {
+    leader = leader || {};
+    var highest = leader.highest || {};
+    var signals = leader.signals || {};
+    var highBoards = leader.high_boards || [];
+    var highBreak = leader.high_break || [];
+
+    // --- 最高板卡片 ---
+    var hEl = $('lmHighest');
+    if (highest && highest.name) {
+      var statusClass = 'sealed';
+      var statusText = highest.status || '封板';
+      if (highest.status === '回封') statusClass = 'resealed';
+      else if (highest.status === '已炸板') statusClass = 'broken';
+
+      var coLeaders = (highest.co_leaders && highest.co_leaders.length)
+        ? '<span>并列: <span class="lm-val">' + highest.co_leaders.join('、') + '</span></span>'
+        : '';
+
+      hEl.innerHTML =
+        '<div class="lm-label">最高板 / 空间龙头</div>' +
+        '<div class="lm-stock-row">' +
+          '<span class="lm-stock-name">' + highest.name + '</span>' +
+          '<span class="lm-board-badge">' + highest.board + '板</span>' +
+          '<span class="lm-status ' + statusClass + '">' + statusText + '</span>' +
+        '</div>' +
+        '<div class="lm-detail">' +
+          '<span>封板: <span class="lm-val">' + (highest.first_time || '--') + '</span></span>' +
+          '<span>封单: <span class="lm-val">' + (highest.seal_amount || '--') + '</span></span>' +
+          '<span>换手: <span class="lm-val">' + (highest.turnover || '--') + '</span></span>' +
+          '<span>行业: <span class="lm-val">' + (highest.industry || '--') + '</span></span>' +
+          (highest.open_count > 0 ? '<span>炸板: <span class="lm-val" style="color:var(--red)">' + highest.open_count + '次</span></span>' : '') +
+          coLeaders +
+        '</div>';
+    } else {
+      hEl.innerHTML = '<div class="lm-label">最高板 / 空间龙头</div><div style="color:var(--muted);font-size:13px;padding:8px 0;">暂无连板股</div>';
+    }
+
+    // --- 风险信号 ---
+    var rEl = $('lmRisk');
+    var riskLevel = signals.risk_level || '低';
+    var riskClass = riskLevel === '高' ? 'risk-high' : (riskLevel === '中' ? 'risk-mid' : 'risk-low');
+    rEl.className = 'lm-risk ' + riskClass;
+    rEl.innerHTML =
+      '<div class="risk-level">' + riskLevel + '风险</div>' +
+      '<div class="risk-desc">' + (signals.risk_desc || '无异常信号') + '</div>';
+
+    // --- 高标股列表（3板及以上） ---
+    var hbEl = $('lmHighBoards');
+    if (highBoards.length > 0) {
+      var hbHtml = '<span class="lm-hb-label">高标股(' + highBoards.length + '):</span>';
+      highBoards.forEach(function (s) {
+        var stClass = 'sealed';
+        if (s.status === '回封') stClass = 'resealed';
+        else if (s.status === '已炸板') stClass = 'broken';
+        hbHtml +=
+          '<span class="lm-hb-tag">' +
+            '<span class="hb-board">' + s.board + '板</span>' +
+            '<span class="hb-name">' + s.name + '</span>' +
+            '<span class="hb-status ' + stClass + '">' + s.status + '</span>' +
+          '</span>';
+      });
+      hbEl.innerHTML = hbHtml;
+      hbEl.style.display = 'flex';
+    } else {
+      hbEl.innerHTML = '';
+      hbEl.style.display = 'none';
+    }
+
+    // --- 高位炸板股 ---
+    var hbrEl = $('lmHighBreak');
+    if (highBreak.length > 0) {
+      var hbrHtml = '<span class="lm-hbr-label">高位炸板(' + highBreak.length + '):</span>';
+      highBreak.forEach(function (s) {
+        hbrHtml +=
+          '<span class="lm-hbr-tag">' +
+            '<span class="hbr-name">' + s.name + '</span>' +
+            '<span class="hbr-prev-board">昨' + s.yesterday_board + '板</span>' +
+            '<span class="hbr-open-count">炸' + s.open_count + '次</span>' +
+          '</span>';
+      });
+      hbrEl.innerHTML = hbrHtml;
+      hbrEl.style.display = 'flex';
+    } else {
+      hbrEl.innerHTML = '';
+      hbrEl.style.display = 'none';
+    }
+  }
+
+  // ============================================================
+  // 空数据 / 主入口 / 交易日回放
+  // ============================================================
+
+  function showEmpty(msg) {
+    $('emptyTip').classList.remove('hidden');
+    $('emptyTip').innerHTML =
+      '<div class="empty-title">暂无仪表盘数据</div>' +
+      '<div class="empty-desc">' + (msg || '请先运行 <code>python start.py</code> 生成当日数据') +
+      '<br>再刷新本页面查看仪表盘。</div>';
+  }
+
+  var AVAILABLE_DATES = [];
+  var CURRENT_INDEX = 0;
+  var LOADING = false;
+
+  function renderDashboard(d) {
+    renderHeader(d);
+    renderEmotionScore(d.emotion);
+    renderMarket(d.market);
+    renderLimit(d.limit, d.smash);
+    renderLadder(d.ladder, d.smash);
+    renderSmash(d.smash, d.smash_history);
+    renderTrend(d.history, d.cycle);
+    renderTags(d.cycle, d.smash, d.emotion);
+    renderPosition(d.position);
+    renderStrategy(d.position, d.cycle);
+    renderPool(d.pool);
+    renderLeader(d.leader);
+  }
+
+  function syncReplayUI() {
+    var date = AVAILABLE_DATES[CURRENT_INDEX] || '';
+    $('playDate').textContent = date ? fmtDate(date) : '--';
+    var latest = AVAILABLE_DATES[0] || '';
+    $('playState').textContent = date === latest ? '最新' : '回放 ' + fmtDate(date);
+    $('playState').className = 'rp-state' + (date === latest ? ' live' : ' old');
+  }
+
+  function loadDashboard(date) {
+    var url = '/api/dashboard' + (date ? ('?date=' + date) : '');
+    LOADING = true;
+    fetch(url)
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        LOADING = false;
+        if (!d || !d.date) {
+          showEmpty(d && d.error ? d.error : undefined);
+          return;
+        }
+        renderDashboard(d);
+        syncReplayUI();
+      })
+      .catch(function (err) {
+        LOADING = false;
+        showEmpty('接口请求失败：' + err.message + '<br>请确认已运行 <code>python web_app.py</code>');
+      });
+  }
+
+  function goPrev() {
+    if (!AVAILABLE_DATES.length || LOADING) return;
+    if (CURRENT_INDEX < AVAILABLE_DATES.length - 1) {
+      CURRENT_INDEX += 1;
+      loadDashboard(AVAILABLE_DATES[CURRENT_INDEX]);
+    }
+  }
+
+  function goNext() {
+    if (!AVAILABLE_DATES.length || LOADING) return;
+    if (CURRENT_INDEX > 0) {
+      CURRENT_INDEX -= 1;
+      loadDashboard(AVAILABLE_DATES[CURRENT_INDEX]);
+    }
+  }
+
+  function main() {
+    fetch('/api/dates')
+      .then(function (r) { return r.json(); })
+      .then(function (res) {
+        AVAILABLE_DATES = (res && res.dates) || [];
+        if (!AVAILABLE_DATES.length) {
+          // 无快照时退回读取当前 dashboard.json
+          loadDashboard('');
+          return;
+        }
+        CURRENT_INDEX = 0;
+        loadDashboard(AVAILABLE_DATES[0]);
+      })
+      .catch(function () {
+        loadDashboard('');
+      });
+
+    var prevBtn = $('prevDay');
+    var nextBtn = $('nextDay');
+    if (prevBtn) prevBtn.addEventListener('click', goPrev);
+    if (nextBtn) nextBtn.addEventListener('click', goNext);
+
+    // 更新数据按钮
+    var updateBtn = $('updateBtn');
+    var updateOverlay = $('updateOverlay');
+    var updateClose = $('updateClose');
+    var updateProgress = $('updateProgress');
+    var updateResult = $('updateResult');
+    var updateError = $('updateError');
+    var updateTitle = $('updateTitle');
+    var updatePollTimer = null;
+
+    if (updateClose) {
+      updateClose.addEventListener('click', function () {
+        updateOverlay.classList.remove('show');
+      });
+    }
+
+    if (updateBtn) {
+      updateBtn.addEventListener('click', function () {
+        if (updateBtn.classList.contains('running')) return;
+
+        // 确认
+        if (!confirm('确认更新今日数据？\n\n将执行：获取最新行情 → 计算砸盘情绪 → 计算市场情绪 → 保存历史 → 生成快照\n\n预计耗时20-40秒')) return;
+
+        // 重置UI
+        updateBtn.classList.add('running');
+        updateOverlay.classList.add('show');
+        updateTitle.textContent = '数据更新中';
+        updateProgress.textContent = '正在初始化...';
+        updateResult.style.display = 'none';
+        updateError.style.display = 'none';
+
+        // 触发更新
+        fetch('/api/update', { method: 'POST' })
+          .then(function (r) { return r.json(); })
+          .then(function (res) {
+            if (res.status === 'already_running') {
+              updateProgress.textContent = res.progress || '更新正在进行中...';
+            }
+            // 开始轮询进度
+            startUpdatePoll();
+          })
+          .catch(function (err) {
+            updateError.textContent = '请求失败：' + err.message;
+            updateError.style.display = 'block';
+            updateBtn.classList.remove('running');
+          });
+      });
+    }
+
+    function startUpdatePoll() {
+      if (updatePollTimer) clearInterval(updatePollTimer);
+      updatePollTimer = setInterval(function () {
+        fetch('/api/update/status')
+          .then(function (r) { return r.json(); })
+          .then(function (res) {
+            updateProgress.textContent = res.progress || '处理中...';
+
+            if (res.error) {
+              updateError.textContent = '更新失败：' + res.error;
+              updateError.style.display = 'block';
+              updateTitle.textContent = '更新失败';
+              updateBtn.classList.remove('running');
+              clearInterval(updatePollTimer);
+              return;
+            }
+
+            if (!res.running && res.result) {
+              // 更新完成
+              clearInterval(updatePollTimer);
+              updateBtn.classList.remove('running');
+              updateTitle.textContent = '更新完成';
+
+              var r = res.result;
+              var html = '<div>日期：<span class="highlight">' + r.date + '</span></div>'
+                + '<div>情绪分：<span class="highlight">' + r.emotion_score + '</span></div>'
+                + '<div>砸盘分：<span class="highlight">' + r.smash_score + '</span></div>'
+                + '<div>最高板：<span class="highlight">' + r.highest_board + '板（' + r.highest_stock + '）</span></div>'
+                + '<div>涨停：<span class="highlight">' + r.limit_up_count + '</span> 只 / 跌停：' + r.limit_down_count + ' 只</div>'
+                + '<div>周期：<span class="highlight">' + r.cycle_stage + '</span></div>'
+                + '<div>耗时：' + r.duration + ' 秒</div>'
+                + '<div style="margin-top:8px;color:var(--gold);cursor:pointer;" onclick="location.reload()">↻ 点击刷新页面查看最新数据</div>';
+              updateResult.innerHTML = html;
+              updateResult.style.display = 'block';
+            }
+          })
+          .catch(function () {
+            // 轮询失败，忽略
+          });
+      }, 1500);
+    }
+  }
+
+  window.addEventListener('resize', function () {
+    charts.forEach(function (c) { c.resize(); });
+  });
+
+  main();
+
+})();

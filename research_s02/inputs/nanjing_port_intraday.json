@@ -1,0 +1,411 @@
+{
+  "schema": "5535_S02_R1_INPUT_V1",
+  "input_type": "CAPTURED_UNVERIFIED",
+  "candidate": {
+    "code": "002040",
+    "name": "南 京 港",
+    "eligibility_status": "UNKNOWN",
+    "eligibility_reason": "仅捕获一板至二板线索；源日期、两日开盘/涨停价与T收盘未核准，不按09:25单独剔除"
+  },
+  "observation": {
+    "trade_date": "2026-09-10",
+    "previous_trade_date": "2026-09-09",
+    "captured_at": "2026-09-10 11:53:40",
+    "source_date_verified": false,
+    "closing_verified": false,
+    "previous_trade_date_verified": false,
+    "decision_asof": null,
+    "date_meaning": "snapshot/request declaration only, not verified quote date"
+  },
+  "item_inputs": {
+    "A01": {
+      "values": {
+        "r_pct": null
+      },
+      "units": {
+        "r_pct": "percent"
+      },
+      "review": {
+        "status": "INPUT_PENDING",
+        "source_dates": [],
+        "units_verified": false,
+        "scope_verified": false,
+        "closing_verified": false,
+        "available_at": null,
+        "evidence_refs": [
+          {
+            "file": "../reference/07_candidates_frozen_reference.json",
+            "sha256": "ba260abca3edea29570bcc939a733026d4ab7be095ff74970bc730123fc47a31",
+            "pointer": "/records/0"
+          }
+        ]
+      },
+      "value_refs": {},
+      "source_mode": null
+    },
+    "A02": {
+      "values": {
+        "p23": null
+      },
+      "units": {
+        "p23": "fraction"
+      },
+      "review": {
+        "status": "INPUT_PENDING",
+        "source_dates": [],
+        "units_verified": false,
+        "scope_verified": false,
+        "closing_verified": false,
+        "available_at": null,
+        "evidence_refs": [
+          {
+            "file": "../reference/07_candidates_frozen_reference.json",
+            "sha256": "ba260abca3edea29570bcc939a733026d4ab7be095ff74970bc730123fc47a31",
+            "pointer": "/records/0"
+          }
+        ]
+      },
+      "value_refs": {},
+      "count_basis": null
+    },
+    "A03": {
+      "values": {
+        "fail_high": null
+      },
+      "units": {
+        "fail_high": "fraction"
+      },
+      "review": {
+        "status": "INPUT_PENDING",
+        "source_dates": [],
+        "units_verified": false,
+        "scope_verified": false,
+        "closing_verified": false,
+        "available_at": null,
+        "evidence_refs": [
+          {
+            "file": "../reference/07_candidates_frozen_reference.json",
+            "sha256": "ba260abca3edea29570bcc939a733026d4ab7be095ff74970bc730123fc47a31",
+            "pointer": "/records/0"
+          }
+        ]
+      },
+      "value_refs": {},
+      "count_basis": null
+    },
+    "A04": {
+      "values": {
+        "U": null,
+        "Z": null
+      },
+      "units": {
+        "U": "stocks",
+        "Z": "stocks"
+      },
+      "review": {
+        "status": "INPUT_PENDING",
+        "source_dates": [],
+        "units_verified": false,
+        "scope_verified": false,
+        "closing_verified": false,
+        "available_at": null,
+        "evidence_refs": [
+          {
+            "file": "../reference/07_candidates_frozen_reference.json",
+            "sha256": "ba260abca3edea29570bcc939a733026d4ab7be095ff74970bc730123fc47a31",
+            "pointer": "/records/0"
+          }
+        ]
+      },
+      "value_refs": {}
+    },
+    "A05": {
+      "values": {
+        "U": null,
+        "D": null
+      },
+      "units": {
+        "U": "stocks",
+        "D": "stocks"
+      },
+      "review": {
+        "status": "INPUT_PENDING",
+        "source_dates": [],
+        "units_verified": false,
+        "scope_verified": false,
+        "closing_verified": false,
+        "available_at": null,
+        "evidence_refs": [
+          {
+            "file": "../reference/07_candidates_frozen_reference.json",
+            "sha256": "ba260abca3edea29570bcc939a733026d4ab7be095ff74970bc730123fc47a31",
+            "pointer": "/records/0"
+          }
+        ]
+      },
+      "value_refs": {}
+    },
+    "B01": {
+      "values": {
+        "breadth": null
+      },
+      "units": {
+        "breadth": "fraction"
+      },
+      "review": {
+        "status": "INPUT_PENDING",
+        "source_dates": [],
+        "units_verified": false,
+        "scope_verified": false,
+        "closing_verified": false,
+        "available_at": null,
+        "evidence_refs": [
+          {
+            "file": "../reference/07_candidates_frozen_reference.json",
+            "sha256": "ba260abca3edea29570bcc939a733026d4ab7be095ff74970bc730123fc47a31",
+            "pointer": "/records/0"
+          }
+        ]
+      },
+      "value_refs": {},
+      "count_basis": null
+    },
+    "B02": {
+      "values": {
+        "excess_median_T": null,
+        "excess_median_previous": null
+      },
+      "units": {
+        "excess_median_T": "percentage_points",
+        "excess_median_previous": "percentage_points"
+      },
+      "review": {
+        "status": "INPUT_PENDING",
+        "source_dates": [],
+        "units_verified": false,
+        "scope_verified": false,
+        "closing_verified": false,
+        "available_at": null,
+        "evidence_refs": [
+          {
+            "file": "../reference/07_candidates_frozen_reference.json",
+            "sha256": "ba260abca3edea29570bcc939a733026d4ab7be095ff74970bc730123fc47a31",
+            "pointer": "/records/0"
+          }
+        ]
+      },
+      "value_refs": {}
+    },
+    "B03": {
+      "values": {
+        "n1": null,
+        "n2": null,
+        "n3plus": null
+      },
+      "units": {
+        "n1": "stocks",
+        "n2": "stocks",
+        "n3plus": "stocks"
+      },
+      "review": {
+        "status": "INPUT_PENDING",
+        "source_dates": [],
+        "units_verified": false,
+        "scope_verified": false,
+        "closing_verified": false,
+        "available_at": null,
+        "evidence_refs": [
+          {
+            "file": "../reference/07_candidates_frozen_reference.json",
+            "sha256": "ba260abca3edea29570bcc939a733026d4ab7be095ff74970bc730123fc47a31",
+            "pointer": "/records/0"
+          }
+        ]
+      },
+      "value_refs": {},
+      "theme_id": null,
+      "membership_complete": false,
+      "theme_confirmed": false,
+      "members": null
+    },
+    "C02": {
+      "values": {
+        "n": null,
+        "rank": null
+      },
+      "units": {
+        "n": "stocks",
+        "rank": "average_rank"
+      },
+      "review": {
+        "status": "INPUT_PENDING",
+        "source_dates": [],
+        "units_verified": false,
+        "scope_verified": false,
+        "closing_verified": false,
+        "available_at": null,
+        "evidence_refs": [
+          {
+            "file": "../reference/07_candidates_frozen_reference.json",
+            "sha256": "ba260abca3edea29570bcc939a733026d4ab7be095ff74970bc730123fc47a31",
+            "pointer": "/records/0"
+          }
+        ]
+      },
+      "value_refs": {},
+      "theme_id": null,
+      "membership_complete": false,
+      "theme_confirmed": false,
+      "members": null
+    },
+    "D01": {
+      "values": {
+        "remaining_session_minutes": null
+      },
+      "units": {
+        "remaining_session_minutes": "minutes"
+      },
+      "review": {
+        "status": "INPUT_PENDING",
+        "source_dates": [],
+        "units_verified": false,
+        "scope_verified": false,
+        "closing_verified": false,
+        "available_at": null,
+        "evidence_refs": [
+          {
+            "file": "../reference/07_candidates_frozen_reference.json",
+            "sha256": "ba260abca3edea29570bcc939a733026d4ab7be095ff74970bc730123fc47a31",
+            "pointer": "/records/0"
+          }
+        ]
+      },
+      "value_refs": {}
+    },
+    "D02": {
+      "values": {
+        "open_break_count": 4
+      },
+      "units": {
+        "open_break_count": "times"
+      },
+      "review": {
+        "status": "INPUT_PENDING",
+        "source_dates": [],
+        "units_verified": false,
+        "scope_verified": false,
+        "closing_verified": false,
+        "available_at": null,
+        "evidence_refs": [
+          {
+            "file": "../reference/07_candidates_frozen_reference.json",
+            "sha256": "ba260abca3edea29570bcc939a733026d4ab7be095ff74970bc730123fc47a31",
+            "pointer": "/records/0"
+          }
+        ]
+      },
+      "value_refs": {
+        "open_break_count": {
+          "file": "../reference/07_candidates_frozen_reference.json",
+          "sha256": "ba260abca3edea29570bcc939a733026d4ab7be095ff74970bc730123fc47a31",
+          "pointer": "/records/0/frame_records/limit_up/0/record/炸板次数"
+        }
+      }
+    },
+    "D03": {
+      "values": {
+        "seal_amount": 27908327,
+        "circulating_market_cap": 5337108386.1
+      },
+      "units": {
+        "seal_amount": "CNY",
+        "circulating_market_cap": "CNY"
+      },
+      "review": {
+        "status": "INPUT_PENDING",
+        "source_dates": [],
+        "units_verified": false,
+        "scope_verified": false,
+        "closing_verified": false,
+        "available_at": null,
+        "evidence_refs": [
+          {
+            "file": "../reference/07_candidates_frozen_reference.json",
+            "sha256": "ba260abca3edea29570bcc939a733026d4ab7be095ff74970bc730123fc47a31",
+            "pointer": "/records/0"
+          }
+        ]
+      },
+      "value_refs": {
+        "seal_amount": {
+          "file": "../reference/07_candidates_frozen_reference.json",
+          "sha256": "ba260abca3edea29570bcc939a733026d4ab7be095ff74970bc730123fc47a31",
+          "pointer": "/records/0/frame_records/limit_up/0/record/封板资金"
+        },
+        "circulating_market_cap": {
+          "file": "../reference/07_candidates_frozen_reference.json",
+          "sha256": "ba260abca3edea29570bcc939a733026d4ab7be095ff74970bc730123fc47a31",
+          "pointer": "/records/0/frame_records/limit_up/0/record/流通市值"
+        }
+      }
+    }
+  },
+  "observations_only": {
+    "C01": {
+      "static_concepts_not_dated_theme": [
+        "交通运输",
+        "一带一路",
+        "央国企改革"
+      ],
+      "status": "INPUT_PENDING",
+      "reference": {
+        "file": "../reference/07_candidates_frozen_reference.json",
+        "sha256": "ba260abca3edea29570bcc939a733026d4ab7be095ff74970bc730123fc47a31",
+        "pointer": "/records/0/static_concepts_not_dated_theme"
+      }
+    },
+    "C03": {
+      "status": "INPUT_PENDING",
+      "reason": "20-day history/benchmark not supplied"
+    },
+    "D04": {
+      "turnover_pct": 10.788958549499512,
+      "history_median": null,
+      "status": "INTRADAY_UNVERIFIED",
+      "reference": {
+        "file": "../reference/07_candidates_frozen_reference.json",
+        "sha256": "ba260abca3edea29570bcc939a733026d4ab7be095ff74970bc730123fc47a31",
+        "pointer": "/records/0/frame_records/limit_up/0/record/换手率"
+      }
+    }
+  },
+  "mainline_five_steps": {
+    "event_date_t0": null,
+    "step5_status": "INPUT_PENDING",
+    "explanation": "先确定题材异动日t0；已发生且不晚于T的次日反馈可用；晚于T不能进入T评分。"
+  },
+  "raw_capture_reference": {
+    "file": "../reference/07_candidates_frozen_reference.json",
+    "sha256": "ba260abca3edea29570bcc939a733026d4ab7be095ff74970bc730123fc47a31",
+    "pointer": "/records/0"
+  },
+  "formula_demonstrations_not_scores": [
+    {
+      "input_type": "ARITHMETIC_FROM_UNVERIFIED_SUBMITTED_LITERALS",
+      "item_id": "D02",
+      "submitted_value": 4,
+      "arithmetic_value": 1.2,
+      "counts_toward_known_subtotal": false,
+      "note": "作者盘中公式演示保留，不是已验证分项分数"
+    },
+    {
+      "input_type": "ARITHMETIC_FROM_UNVERIFIED_SUBMITTED_LITERALS",
+      "item_id": "D03",
+      "submitted_seal_amount": 27908327,
+      "submitted_rounded_cap": 5337110000,
+      "arithmetic_value": 3.1374650700472726,
+      "counts_toward_known_subtotal": false,
+      "note": "保留作者四舍五入字面量的算术；下列输入另引原捕获值，不为校准回填"
+    }
+  ]
+}

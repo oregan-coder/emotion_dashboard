@@ -1,0 +1,282 @@
+{
+  "schema": "5535_S02_R1_INPUT_V1",
+  "input_type": "SYNTHETIC",
+  "candidate": {
+    "code": "999999",
+    "name": "合成候选，非真实证券",
+    "eligibility_status": "SYNTHETIC_ELIGIBLE",
+    "eligibility_reason": "仅测试字段契约，不代表真实范围核实"
+  },
+  "observation": {
+    "trade_date": "2026-09-10",
+    "previous_trade_date": "2026-09-09",
+    "captured_at": "SYNTHETIC_NOT_MARKET_CAPTURE",
+    "source_date_verified": false,
+    "closing_verified": false,
+    "previous_trade_date_verified": false
+  },
+  "item_inputs": {
+    "A01": {
+      "values": {
+        "r_pct": 2.0
+      },
+      "units": {
+        "r_pct": "percent"
+      },
+      "source_mode": "LOCAL_APPROVED_EQUAL_WEIGHT"
+    },
+    "A02": {
+      "values": {
+        "p23": 0.3
+      },
+      "units": {
+        "p23": "fraction"
+      },
+      "count_basis": {
+        "numerator": 3,
+        "denominator": 10
+      }
+    },
+    "A03": {
+      "values": {
+        "fail_high": 0.25
+      },
+      "units": {
+        "fail_high": "fraction"
+      },
+      "count_basis": {
+        "numerator": 1,
+        "denominator": 4
+      }
+    },
+    "A04": {
+      "values": {
+        "U": 90,
+        "Z": 30
+      },
+      "units": {
+        "U": "stocks",
+        "Z": "stocks"
+      }
+    },
+    "A05": {
+      "values": {
+        "U": 90,
+        "D": 10
+      },
+      "units": {
+        "U": "stocks",
+        "D": "stocks"
+      }
+    },
+    "B01": {
+      "values": {
+        "breadth": 0.7
+      },
+      "units": {
+        "breadth": "fraction"
+      },
+      "count_basis": {
+        "numerator": 7,
+        "denominator": 10
+      }
+    },
+    "B02": {
+      "values": {
+        "excess_median_T": 1.0,
+        "excess_median_previous": 1.0
+      },
+      "units": {
+        "excess_median_T": "percentage_points",
+        "excess_median_previous": "percentage_points"
+      }
+    },
+    "B03": {
+      "values": {
+        "n1": 3,
+        "n2": 1,
+        "n3plus": 1
+      },
+      "units": {
+        "n1": "stocks",
+        "n2": "stocks",
+        "n3plus": "stocks"
+      },
+      "theme_id": "SYNTHETIC_THEME",
+      "membership_complete": true,
+      "theme_confirmed": true,
+      "members": [
+        {
+          "code": "910000",
+          "name": "虚构成员",
+          "theme_id": "SYNTHETIC_THEME",
+          "trade_date": "2026-09-10",
+          "board_count": 1,
+          "close_limit_up": true,
+          "selection": "INCLUDED"
+        },
+        {
+          "code": "910001",
+          "name": "虚构成员",
+          "theme_id": "SYNTHETIC_THEME",
+          "trade_date": "2026-09-10",
+          "board_count": 1,
+          "close_limit_up": true,
+          "selection": "INCLUDED"
+        },
+        {
+          "code": "910002",
+          "name": "虚构成员",
+          "theme_id": "SYNTHETIC_THEME",
+          "trade_date": "2026-09-10",
+          "board_count": 1,
+          "close_limit_up": true,
+          "selection": "INCLUDED"
+        },
+        {
+          "code": "910003",
+          "name": "虚构成员",
+          "theme_id": "SYNTHETIC_THEME",
+          "trade_date": "2026-09-10",
+          "board_count": 2,
+          "close_limit_up": true,
+          "selection": "INCLUDED"
+        },
+        {
+          "code": "910004",
+          "name": "虚构成员",
+          "theme_id": "SYNTHETIC_THEME",
+          "trade_date": "2026-09-10",
+          "board_count": 3,
+          "close_limit_up": true,
+          "selection": "INCLUDED"
+        },
+        {
+          "code": "999999",
+          "name": "虚构成员",
+          "theme_id": "SYNTHETIC_THEME",
+          "trade_date": "2026-09-10",
+          "board_count": 2,
+          "close_limit_up": true,
+          "selection": "INCLUDED"
+        }
+      ]
+    },
+    "C02": {
+      "values": {
+        "n": 6,
+        "rank": 2
+      },
+      "units": {
+        "n": "stocks",
+        "rank": "average_rank"
+      },
+      "theme_id": "SYNTHETIC_THEME",
+      "membership_complete": true,
+      "theme_confirmed": true,
+      "members": [
+        {
+          "code": "920000",
+          "name": "虚构前日首板",
+          "theme_id": "SYNTHETIC_THEME",
+          "trade_date": "2026-09-09",
+          "board_count": 1,
+          "close_limit_up": true,
+          "selection": "INCLUDED",
+          "first_seal_time": "09:35:00",
+          "today_promotion": "UNUSED"
+        },
+        {
+          "code": "999999",
+          "name": "虚构前日首板",
+          "theme_id": "SYNTHETIC_THEME",
+          "trade_date": "2026-09-09",
+          "board_count": 1,
+          "close_limit_up": true,
+          "selection": "INCLUDED",
+          "first_seal_time": "09:40:00",
+          "today_promotion": "UNUSED"
+        },
+        {
+          "code": "920002",
+          "name": "虚构前日首板",
+          "theme_id": "SYNTHETIC_THEME",
+          "trade_date": "2026-09-09",
+          "board_count": 1,
+          "close_limit_up": true,
+          "selection": "INCLUDED",
+          "first_seal_time": "10:00:00",
+          "today_promotion": "UNUSED"
+        },
+        {
+          "code": "920003",
+          "name": "虚构前日首板",
+          "theme_id": "SYNTHETIC_THEME",
+          "trade_date": "2026-09-09",
+          "board_count": 1,
+          "close_limit_up": true,
+          "selection": "INCLUDED",
+          "first_seal_time": "10:15:00",
+          "today_promotion": "UNUSED"
+        },
+        {
+          "code": "920004",
+          "name": "虚构前日首板",
+          "theme_id": "SYNTHETIC_THEME",
+          "trade_date": "2026-09-09",
+          "board_count": 1,
+          "close_limit_up": true,
+          "selection": "INCLUDED",
+          "first_seal_time": "10:30:00",
+          "today_promotion": "UNUSED"
+        },
+        {
+          "code": "920005",
+          "name": "虚构前日首板",
+          "theme_id": "SYNTHETIC_THEME",
+          "trade_date": "2026-09-09",
+          "board_count": 1,
+          "close_limit_up": true,
+          "selection": "INCLUDED",
+          "first_seal_time": "11:00:00",
+          "today_promotion": "UNUSED"
+        }
+      ]
+    },
+    "D01": {
+      "values": {
+        "remaining_session_minutes": 180
+      },
+      "units": {
+        "remaining_session_minutes": "minutes"
+      },
+      "last_seal_time": "10:30:00"
+    },
+    "D02": {
+      "values": {
+        "open_break_count": 1
+      },
+      "units": {
+        "open_break_count": "times"
+      }
+    },
+    "D03": {
+      "values": {
+        "seal_amount": 6000000,
+        "circulating_market_cap": 1000000000
+      },
+      "units": {
+        "seal_amount": "CNY",
+        "circulating_market_cap": "CNY"
+      }
+    }
+  },
+  "observations_only": {
+    "C01": {
+      "status": "SYNTHETIC_OBSERVER",
+      "score": null
+    },
+    "C03": null,
+    "D04": null
+  }
+}

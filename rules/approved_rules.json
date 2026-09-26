@@ -1,0 +1,178 @@
+{
+  "version": "5535_approved_input_rules_20260909_v2",
+  "status": "USER_APPROVED_FOR_SPECIFIED_SCOPE_ONLY",
+  "approval_evidence": "本会话用户逐项回复；本文件仅整合已批准范围，不是评分/实盘授权",
+  "emotion": {
+    "score_domain": [
+      0,
+      100
+    ],
+    "segments": [
+      {
+        "lower": 0,
+        "upper": 10,
+        "lower_inclusive": true,
+        "upper_inclusive": false,
+        "stage": "退潮期"
+      },
+      {
+        "lower": 10,
+        "upper": 25,
+        "lower_inclusive": true,
+        "upper_inclusive": false,
+        "stage": "冰点期"
+      },
+      {
+        "lower": 25,
+        "upper": 35,
+        "lower_inclusive": true,
+        "upper_inclusive": false,
+        "stage": "试错期"
+      },
+      {
+        "lower": 35,
+        "upper": 50,
+        "lower_inclusive": true,
+        "upper_inclusive": false,
+        "stage": "启动期"
+      },
+      {
+        "lower": 50,
+        "upper": 70,
+        "lower_inclusive": true,
+        "upper_inclusive": false,
+        "stage": "主升期"
+      },
+      {
+        "lower": 70,
+        "upper": 90,
+        "lower_inclusive": true,
+        "upper_inclusive": true,
+        "stage": "高潮期"
+      },
+      {
+        "lower": 90,
+        "upper": 100,
+        "lower_inclusive": false,
+        "upper_inclusive": true,
+        "stage": "退潮期"
+      }
+    ],
+    "invalid_result": null,
+    "numeric_zero_is_valid": true,
+    "bool_is_invalid": true,
+    "score_formula_changed": false,
+    "position_mapping_approved": false
+  },
+  "local_universe": {
+    "boards": [
+      "SSE_MAIN_A",
+      "SZSE_MAIN_A",
+      "CHINEXT_A",
+      "STAR_A"
+    ],
+    "exclude_st": true,
+    "exclude_star_st": true,
+    "new_listing_exclusion": {
+      "listing_day_ordinal": 1,
+      "exclude_through_trading_day": 60,
+      "first_potentially_eligible_day": 61,
+      "calendar_basis": "exchange_trading_calendar_not_calendar_days_or_bar_count"
+    },
+    "include_single_one_price_limit_up_in_market_statistics": true,
+    "apply_as_of_sample_date": true,
+    "inherit_to_all_local_market_metrics": true,
+    "do_not_rewrite_frozen_legacy_samples": true
+  },
+  "cohort_missingness": {
+    "policy": "REMOVE_CONFIRMED_SUSPENDED_OR_METRIC_REQUIRED_DATA_MISSING_FROM_EFFECTIVE_COHORT",
+    "original_cohort_preserved": true,
+    "excluded_union_deduplicated_by_code": true,
+    "numerator_and_denominator_same_effective_set": true,
+    "required_fields_are_metric_specific": true,
+    "unrelated_scoring_missingness_does_not_remove_market_member": true,
+    "empty_effective_value": null,
+    "whole_source_failure_is_not_market_zero": true,
+    "minimum_coverage_threshold": null,
+    "unapproved_new_coverage_gate": false
+  },
+  "prior_limitup_continuation": {
+    "selection": "prior_trade_day_close_limit_up_after_local_scope_filter",
+    "formula": "count(effective_prior_cohort intersect today_close_limit_up)/count(effective_prior_cohort)*100",
+    "unit": "percentage_points_0_to_100",
+    "count_intraday_touch_as_close_limit_up": false,
+    "continuous_double_one_price_candidate_filter_changes_market_cohort": false
+  },
+  "yesterday_performance": {
+    "primary_identifier": "883900",
+    "fallback": "LOCAL_EQUAL_WEIGHT_MEAN_ON_EFFECTIVE_PRIOR_CLOSE_LIMITUP_COHORT",
+    "formula": "sum(valid_today_change_pct for effective_members)/effective_count",
+    "fallback_triggers": [
+      "UNAVAILABLE",
+      "EMPTY",
+      "WRONG_IDENTITY",
+      "STALE_OR_DATE_MISMATCH",
+      "INVALID_VALUE"
+    ],
+    "valid_zero_or_negative_triggers_fallback": false,
+    "automatic_other_providers_disallowed": [
+      "BK1050",
+      "883979"
+    ],
+    "pad_if_less_than_three": false,
+    "external_index_scope_assumed_local": false,
+    "source_switch_provenance_required": true
+  },
+  "high_board": {
+    "minimum_prior_consecutive_boards": 4,
+    "threshold_status": "USER_APPROVED",
+    "failure_metric_must_not_alias_whole_market_open_board_rate": true
+  },
+  "highest_board": {
+    "method": "2B_CONDITIONAL_LOCAL_DERIVATION",
+    "requirements": [
+      "same_observation_date",
+      "same_observation_time_or_verified_asof",
+      "same_scope",
+      "complete_pool_evidence",
+      "valid_board_counts"
+    ],
+    "otherwise_market_value": null,
+    "allow_observed_subset_max_as_separate_label": true,
+    "cohort_missingness_waives_completeness": false
+  },
+  "two_to_three_filter": {
+    "continuous_two_open_limit_days_excluded": true,
+    "pattern": "day1_open_at_limit_and_close_at_limit AND day2_open_at_limit_and_close_at_limit",
+    "intraday_open_reseal_cancels_exclusion": false,
+    "day1_intraday_rally_then_day2_one_price_allowed_by_this_rule": true,
+    "only_day2_one_price_is_exclusion": false,
+    "needs_two_day_evidence": true,
+    "unknown_pattern_result": "UNKNOWN",
+    "known_pattern_exclusion": "EXCLUDED",
+    "market_statistics_still_include_if_otherwise_eligible": true,
+    "filter_is_not_grade_or_strategy_enable": true
+  },
+  "five_day_cycle": {
+    "status": "PAUSED_BY_USER",
+    "active_stage": null,
+    "used_for_current_position": false,
+    "retain_historical_facts": true,
+    "theme_five_step_evidence_is_different": true
+  },
+  "research_strategy": {
+    "new_scoring_status": "DRAFT_FOR_REVIEW",
+    "new_scoring_enabled": false,
+    "draft_weights": {
+      "A": 25,
+      "B": 25,
+      "C": 20,
+      "D": 30
+    },
+    "official_final_score": null,
+    "official_grade": null,
+    "official_permission": null,
+    "strategy_status": "NOT_ENABLED",
+    "ledger_status": "PAUSED"
+  }
+}
